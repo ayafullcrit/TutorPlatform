@@ -1,7 +1,7 @@
-﻿namespace TutorPlatform.API.Models.Entities
-{
-    public class Message
+﻿    namespace TutorPlatform.API.Models.Entities
     {
+        public class Message
+        {
   
+        }
     }
-}

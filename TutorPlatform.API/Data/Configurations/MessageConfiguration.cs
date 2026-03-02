@@ -1,6 +1,6 @@
 ﻿namespace TutorPlatform.API.Data.Configurations
 { 
-    public class Message
+    public class MessageConfiguration
     {
   
     }

@@ -1,7 +1,23 @@
-﻿namespace TutorPlatform.API.Data.Configurations
+﻿using Microsoft.EntityFrameworkCore;
+using TutorPlatform.API.Models.Entities;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace TutorPlatform.API.Data.Configurations
 {
-    public class Subject
+    public class SubjectConfiguration : IEntityTypeConfiguration<Subject>
     {
-       
+        public void Configure(EntityTypeBuilder<Subject> builder)
+        {
+            builder.ToTable("Subjects");
+            builder.HasKey(s => s.Id);
+            builder.Property(s => s.Name)
+                .IsRequired()
+                .HasMaxLength(80);
+            builder.Property(s => s.Description)
+                .HasMaxLength(500);
+            builder.Property(s => s.CostPerHour)
+                .IsRequired()
+                .HasColumnType("decimal(18,2)");
+        }
     }
 }

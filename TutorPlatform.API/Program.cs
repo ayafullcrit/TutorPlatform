@@ -1,23 +1,64 @@
+﻿using Microsoft.EntityFrameworkCore;
+using TutorPlatform.API.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ============================================
+// ADD SERVICES TO THE CONTAINER
+// ============================================
 
+// Controllers
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// ============================================
+// DATABASE CONTEXT - QUAN TRỌNG!
+// ============================================
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
+);
+
+// ============================================
+// SWAGGER/OPENAPI
+// ============================================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// ============================================
+// CORS (cho React frontend)
+// ============================================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+// ============================================
+// BUILD APP
+// ============================================
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ============================================
+// CONFIGURE HTTP REQUEST PIPELINE
+// ============================================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
+// CORS
+app.UseCors("AllowReactApp");
+
+app.UseAuthentication(); // Sẽ cần sau khi setup JWT
 app.UseAuthorization();
 
 app.MapControllers();
