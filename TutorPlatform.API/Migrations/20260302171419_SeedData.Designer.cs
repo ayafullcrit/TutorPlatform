@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TutorPlatform.API.Data;
 
@@ -11,9 +12,11 @@ using TutorPlatform.API.Data;
 namespace TutorPlatform.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260302171419_SeedData")]
+    partial class SeedData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,7 +104,7 @@ namespace TutorPlatform.API.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int?>("StudentUserId")
+                    b.Property<int?>("StudentId")
                         .HasColumnType("int");
 
                     b.Property<int>("SubjectId")
@@ -122,7 +125,7 @@ namespace TutorPlatform.API.Migrations
 
                     b.HasIndex("Status");
 
-                    b.HasIndex("StudentUserId");
+                    b.HasIndex("StudentId");
 
                     b.HasIndex("SubjectId");
 
@@ -227,7 +230,7 @@ namespace TutorPlatform.API.Migrations
 
             modelBuilder.Entity("TutorPlatform.API.Models.Entities.Student", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
                         .HasColumnType("int");
 
                     b.Property<string>("Address")
@@ -240,7 +243,10 @@ namespace TutorPlatform.API.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.HasKey("UserId");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
 
                     b.ToTable("Students");
                 });
@@ -358,7 +364,7 @@ namespace TutorPlatform.API.Migrations
 
             modelBuilder.Entity("TutorPlatform.API.Models.Entities.Tutor", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
                         .HasColumnType("int");
 
                     b.Property<decimal>("HourlyRate")
@@ -373,7 +379,10 @@ namespace TutorPlatform.API.Migrations
                     b.Property<int>("TotalReviews")
                         .HasColumnType("int");
 
-                    b.HasKey("UserId");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
 
                     b.ToTable("Tutors");
                 });
@@ -388,19 +397,15 @@ namespace TutorPlatform.API.Migrations
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AvatarUrl")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<decimal>("Balance")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasDefaultValue(0m);
+                    b.Property<double>("Balance")
+                        .HasColumnType("float");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -413,9 +418,7 @@ namespace TutorPlatform.API.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("IsActivated")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasColumnType("bit");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -447,7 +450,7 @@ namespace TutorPlatform.API.Migrations
                             Id = 1,
                             Address = "",
                             AvatarUrl = "/images/avatars/admin.png",
-                            Balance = 0m,
+                            Balance = 0.0,
                             Email = "admin@tutorplatform.com",
                             FullName = "System Administrator",
                             IsActivated = true,
@@ -488,7 +491,7 @@ namespace TutorPlatform.API.Migrations
                 {
                     b.HasOne("TutorPlatform.API.Models.Entities.Student", null)
                         .WithMany("EnrolledClasses")
-                        .HasForeignKey("StudentUserId");
+                        .HasForeignKey("StudentId");
 
                     b.HasOne("TutorPlatform.API.Models.Entities.Subject", "Subject")
                         .WithMany("Classes")
@@ -541,7 +544,7 @@ namespace TutorPlatform.API.Migrations
                 {
                     b.HasOne("TutorPlatform.API.Models.Entities.User", "User")
                         .WithOne("Student")
-                        .HasForeignKey("TutorPlatform.API.Models.Entities.Student", "UserId")
+                        .HasForeignKey("TutorPlatform.API.Models.Entities.Student", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -552,7 +555,7 @@ namespace TutorPlatform.API.Migrations
                 {
                     b.HasOne("TutorPlatform.API.Models.Entities.User", "User")
                         .WithOne("Tutor")
-                        .HasForeignKey("TutorPlatform.API.Models.Entities.Tutor", "UserId")
+                        .HasForeignKey("TutorPlatform.API.Models.Entities.Tutor", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

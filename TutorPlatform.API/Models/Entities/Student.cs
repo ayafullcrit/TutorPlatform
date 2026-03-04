@@ -4,7 +4,7 @@ namespace TutorPlatform.API.Models.Entities
 {
     public class Student
     {
-        public int Id { get; set; } 
+        [Key]
         public int UserId { get; set; }
         public string Address { get; set; } = string.Empty;
         [Range(1,12)]

@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TutorPlatform.API.Models.Entities;
+using TutorPlatform.API.Data.Configurations;
+using TutorPlatform.API.Data.SeedData;
 
 namespace TutorPlatform.API.Data
 {
@@ -25,7 +27,12 @@ namespace TutorPlatform.API.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            //apply cac file configuration
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
+            //seed data
+            SubjectsSeed.SeedSubjects(modelBuilder);
+            AdminUserSeed.SeedAdminUser(modelBuilder);
         }
     }
 }

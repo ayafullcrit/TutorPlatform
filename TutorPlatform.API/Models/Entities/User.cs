@@ -12,7 +12,7 @@ namespace TutorPlatform.API.Models.Entities
         public string FullName { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string AvatarUrl { get; set; } = string.Empty;
-        public double Balance { get; set; }
+        public decimal Balance { get; set; }
 
         public UserRole Role { get; set; }
         public bool IsActivated { get; set; }

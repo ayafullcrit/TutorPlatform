@@ -1,8 +1,10 @@
-﻿namespace TutorPlatform.API.Models.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace TutorPlatform.API.Models.Entities
 {
     public class Tutor
     {
-        public int Id { get; set; }
+        [Key]
         public int UserId { get; set; }
         public double Rating { get; set; }
 
