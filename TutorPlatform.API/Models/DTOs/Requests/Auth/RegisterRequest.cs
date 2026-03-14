@@ -34,7 +34,7 @@ namespace TutorPlatform.API.Models.DTOs.Requests.Auth
 
         [Range(6, 12, ErrorMessage = "Khối lớp phải từ 6-12")]
         public int? Grade { get; set; }
-        //   public string School { get; set; }
+        public string School { get; set; }
         //   public string Bio { get; set; }
         //   public string Education { get; set; }
     }

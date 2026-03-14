@@ -59,7 +59,7 @@ namespace TutorPlatform.API.Services.Implementations
                     PhoneNumber = request.PhoneNumber,
                     Role = request.Role,
                     IsActivated = true,
-                    Balance = 0,
+                    Balance = 0,                    
                 };
                 user.Balance = 0;
                 _context.Users.Add(user);
@@ -75,6 +75,7 @@ namespace TutorPlatform.API.Services.Implementations
                     {
                         UserId = user.Id,  // ✅ UserId = Primary Key
                         GradeLevel = request.Grade ?? 10,
+                        School = request.School,
                     };
 
                     _context.Students.Add(student);

@@ -121,7 +121,8 @@ namespace TutorPlatform.API.Controllers
         }
 
         // ============================================
-        // POST: api/auth/logout (Optional - client-side only)        // ============================================
+        // POST: api/auth/logout (Optional - client-side only)        
+        // ============================================
 
        
         [HttpPost("logout")]

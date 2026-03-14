@@ -16,6 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+
 // ============================================
 // DATABASE CONTEXT
 // ============================================
@@ -34,6 +35,7 @@ builder.Services.AddScoped<JwtHelper>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // ============================================
 // JWT AUTHENTICATION

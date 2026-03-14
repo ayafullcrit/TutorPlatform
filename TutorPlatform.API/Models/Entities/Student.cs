@@ -9,6 +9,7 @@ namespace TutorPlatform.API.Models.Entities
         public string Address { get; set; } = string.Empty;
         [Range(1,12)]
         public int GradeLevel { get; set; }
+        public string School { get; set; }
         public bool IsActive { get; set; }
 
         public User User { get; set; }
