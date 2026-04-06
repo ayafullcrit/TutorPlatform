@@ -14,17 +14,10 @@ function DashboardPage() {
 
   const loadUserData = async () => {
     try {
-      // Lấy user từ localStorage
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       }
-
-      // Hoặc gọi API để lấy user mới nhất
-      // const response = await authApi.getCurrentUser();
-      // if (response.success) {
-      //   setUser(response.data);
-      // }
     } catch (error) {
       console.error("Load user error:", error);
     } finally {
@@ -111,22 +104,28 @@ function DashboardPage() {
         </div>
 
         <div className="features-grid">
+          {/* Tìm gia sư - NOW ACTIVE */}
           <div className="feature-card">
-            <h3>🔍 Tìm gia sư</h3>
-            <p>Tìm kiếm gia sư phù hợp với nhu cầu của bạn</p>
-            <button className="btn-feature" disabled>
-              Sắp ra mắt
+            <h3>🔍 Tìm lớp học</h3>
+            <p>Tìm kiếm lớp học phù hợp với nhu cầu của bạn</p>
+            <button 
+              className="btn-feature" 
+              onClick={() => navigate('/classes')}
+            >
+              Khám phá ngay
             </button>
           </div>
 
+          {/* Lớp học của tôi */}
           <div className="feature-card">
             <h3>📚 Lớp học của tôi</h3>
-            <p>Quản lý các lớp học đã đăng ký</p>
+            <p>Quản lý các lớp học {user.role === 2 ? 'đã tạo' : 'đã đăng ký'}</p>
             <button className="btn-feature" disabled>
               Sắp ra mắt
             </button>
           </div>
 
+          {/* Thanh toán */}
           <div className="feature-card">
             <h3>💳 Thanh toán</h3>
             <p>Xem lịch sử giao dịch và nạp tiền</p>
@@ -135,16 +134,17 @@ function DashboardPage() {
             </button>
           </div>
 
+          {/* Cài đặt */}
           <div className="feature-card">
             <h3>⚙️ Cài đặt</h3>
             <p>Cập nhật thông tin cá nhân</p>
-            <button className="btn-feature" disabled>
-              Sắp ra mắt
+            <button 
+              className="btn-feature"
+              onClick={() => navigate('/profile')}
+            >
+              Cài đặt Profile
             </button>
           </div>
-          <button onClick={() => navigate("/profile")}>
-            ⚙️ Cài đặt Profile
-          </button>
         </div>
       </div>
     </div>

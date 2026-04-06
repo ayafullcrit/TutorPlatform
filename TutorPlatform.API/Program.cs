@@ -36,6 +36,8 @@ builder.Services.AddScoped<JwtHelper>();
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ISubjectService, SubjectService>();  
+builder.Services.AddScoped<IClassService, ClassService>();
 
 // ============================================
 // JWT AUTHENTICATION

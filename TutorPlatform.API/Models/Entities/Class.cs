@@ -11,16 +11,17 @@ namespace TutorPlatform.API.Models.Entities
         
         [ForeignKey("Tutor")]
         public int TutorId { get; set; }
-        
+
         [ForeignKey("Subject")]
         public int SubjectId { get; set; }
+        public int GradeLevel { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        //thoi gian     
+        public string ThumbnailUrl {  get; set; }
         public decimal PricePerSession { get; set; }
         public int DurationInMinutes { get; set; }
         public DateTime StartTime { get; set; }
-        public int TotalSessions { get; set; }
+        public int? TotalSessions { get; set; }
         public int CurrentStudents { get; set; } 
         public int MaxStudents { get; set; }
         public ClassStatus Status { get; set; }

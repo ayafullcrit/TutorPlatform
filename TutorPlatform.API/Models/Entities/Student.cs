@@ -11,9 +11,7 @@ namespace TutorPlatform.API.Models.Entities
         public int GradeLevel { get; set; }
         public string School { get; set; }
         public bool IsActive { get; set; }
-
         public User User { get; set; }
-
         public ICollection<Booking> Bookings { get; set; }
         public ICollection<Review> Reviews { get; set; }
 

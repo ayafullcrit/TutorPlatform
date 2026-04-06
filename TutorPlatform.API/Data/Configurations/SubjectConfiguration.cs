@@ -15,9 +15,11 @@ namespace TutorPlatform.API.Data.Configurations
                 .HasMaxLength(80);
             builder.Property(s => s.Description)
                 .HasMaxLength(500);
-            builder.Property(s => s.CostPerHour)
-                .IsRequired()
-                .HasColumnType("decimal(18,2)");
+            builder.Property(s => s.IsActive)
+                .HasDefaultValue(true);
+
+            //indexing
+            builder.HasIndex(s => s.IsActive);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace TutorPlatform.API.Models.DTOs.Responses
             TotalCount = count;
             CurrentPage = pageNumber;
             PageSize = pageSize;
-            TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+            TotalPages = pageSize > 0 ? (int)Math.Ceiling(count / (double)pageSize) : 0;
             HasPrevious = pageNumber > 1;
             HasNext = pageNumber < TotalPages;
         }

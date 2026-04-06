@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TutorPlatform.API.Data;
 
@@ -11,9 +12,11 @@ using TutorPlatform.API.Data;
 namespace TutorPlatform.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260330101542_SubjectsAndClasses")]
+    partial class SubjectsAndClasses
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -88,13 +91,8 @@ namespace TutorPlatform.API.Migrations
                     b.Property<int>("DurationInMinutes")
                         .HasColumnType("int");
 
-                    b.Property<int>("GradeLevel")
-                        .HasColumnType("int");
-
                     b.Property<int>("MaxStudents")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(10);
+                        .HasColumnType("int");
 
                     b.Property<decimal>("PricePerSession")
                         .HasPrecision(18, 2)
@@ -112,17 +110,12 @@ namespace TutorPlatform.API.Migrations
                     b.Property<int>("SubjectId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ThumbnailUrl")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int?>("TotalSessions")
+                    b.Property<int>("TotalSessions")
                         .HasColumnType("int");
 
                     b.Property<int>("TutorId")
@@ -138,10 +131,7 @@ namespace TutorPlatform.API.Migrations
 
                     b.HasIndex("TutorId");
 
-                    b.ToTable("Classes", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_Class_GradeLevel", "GradeLevel >= 1 AND GradeLevel <= 12");
-                        });
+                    b.ToTable("Classes", (string)null);
                 });
 
             modelBuilder.Entity("TutorPlatform.API.Models.Entities.Payment", b =>
@@ -270,6 +260,9 @@ namespace TutorPlatform.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("CostPerHour")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -295,6 +288,7 @@ namespace TutorPlatform.API.Migrations
                         new
                         {
                             Id = 1,
+                            CostPerHour = 0m,
                             Description = "Đại số, Hình học, Giải tích",
                             IsActive = true,
                             Name = "Toán học"
@@ -302,6 +296,7 @@ namespace TutorPlatform.API.Migrations
                         new
                         {
                             Id = 2,
+                            CostPerHour = 0m,
                             Description = "Cơ học, Điện học, Quang học",
                             IsActive = true,
                             Name = "Vật lý"
@@ -309,6 +304,7 @@ namespace TutorPlatform.API.Migrations
                         new
                         {
                             Id = 3,
+                            CostPerHour = 0m,
                             Description = "Hóa vô cơ, Hóa hữu cơ",
                             IsActive = true,
                             Name = "Hóa học"
@@ -316,6 +312,7 @@ namespace TutorPlatform.API.Migrations
                         new
                         {
                             Id = 4,
+                            CostPerHour = 0m,
                             Description = "Ngữ pháp, Giao tiếp, IELTS, TOEIC",
                             IsActive = true,
                             Name = "Tiếng Anh"
@@ -323,6 +320,7 @@ namespace TutorPlatform.API.Migrations
                         new
                         {
                             Id = 5,
+                            CostPerHour = 0m,
                             Description = "Văn học, Làm văn, Phân tích tác phẩm",
                             IsActive = true,
                             Name = "Ngữ văn"
@@ -330,6 +328,7 @@ namespace TutorPlatform.API.Migrations
                         new
                         {
                             Id = 6,
+                            CostPerHour = 0m,
                             Description = "Lịch sử Việt Nam, Lịch sử thế giới",
                             IsActive = true,
                             Name = "Lịch sử"
@@ -337,6 +336,7 @@ namespace TutorPlatform.API.Migrations
                         new
                         {
                             Id = 7,
+                            CostPerHour = 0m,
                             Description = "Địa lý tự nhiên, Địa lý kinh tế",
                             IsActive = true,
                             Name = "Địa lý"
@@ -344,6 +344,7 @@ namespace TutorPlatform.API.Migrations
                         new
                         {
                             Id = 8,
+                            CostPerHour = 0m,
                             Description = "Lập trình, Office, Tin học văn phòng",
                             IsActive = true,
                             Name = "Tin học"
@@ -351,6 +352,7 @@ namespace TutorPlatform.API.Migrations
                         new
                         {
                             Id = 9,
+                            CostPerHour = 0m,
                             Description = "Sinh học tế bào, Di truyền học",
                             IsActive = true,
                             Name = "Sinh học"
@@ -358,6 +360,7 @@ namespace TutorPlatform.API.Migrations
                         new
                         {
                             Id = 10,
+                            CostPerHour = 0m,
                             Description = "Giáo dục công dân",
                             IsActive = true,
                             Name = "GDCD"

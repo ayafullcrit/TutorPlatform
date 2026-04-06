@@ -62,7 +62,7 @@ namespace TutorPlatform.API.Services.Implementations
                     Balance = 0,                    
                 };
                 user.Balance = 0;
-                _context.Users.Add(user);
+                _context.Users.Add(user); //JOIN
                 await _context.SaveChangesAsync();
                 Console.WriteLine($"User created with ID: {user.Id}");
 
@@ -78,7 +78,7 @@ namespace TutorPlatform.API.Services.Implementations
                         School = request.School,
                     };
 
-                    _context.Students.Add(student);
+                    _context.Students.Add(student); //JOIN
                     await _context.SaveChangesAsync();
 
                     // Reload user with Student
@@ -103,7 +103,7 @@ namespace TutorPlatform.API.Services.Implementations
                     };
 
                     _context.Tutors.Add(tutor);
-                    await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync(); //Lưu
                         
                     // Reload user with Tutor
                     user = await _context.Users

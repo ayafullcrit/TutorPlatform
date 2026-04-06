@@ -10,10 +10,12 @@ namespace TutorPlatform.API.Data.Configurations
         {
             builder.ToTable("Classes");
 
-            // Primary Key
             builder.HasKey(c => c.Id);
 
-            // Properties
+            builder.Property(c => c.GradeLevel)
+                .IsRequired();
+            builder.ToTable(t => t.HasCheckConstraint("CK_Class_GradeLevel", "GradeLevel >= 1 AND GradeLevel <= 12"));
+
             builder.Property(c => c.Title)
                 .IsRequired()
                 .HasMaxLength(200);
@@ -22,18 +24,24 @@ namespace TutorPlatform.API.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(2000);
 
-            // Decimal precision (quan trọng cho tiền!)
             builder.Property(c => c.PricePerSession)
-                .HasPrecision(18, 2); // 18 digits, 2 decimal places
+                .HasPrecision(18, 2); 
 
-            // Enum
             builder.Property(c => c.Status)
                 .HasConversion<int>();
                         
             builder.Property(c => c.CurrentStudents)
                 .HasDefaultValue(0);
 
-            // Indexes
+            builder.Property(c => c.MaxStudents)
+               .HasDefaultValue(10);
+
+            builder.Property(c => c.ThumbnailUrl)
+               .HasMaxLength(500);
+
+            builder.Property(c => c.DurationInMinutes)
+               .IsRequired();
+
             builder.HasIndex(c => c.TutorId);
             builder.HasIndex(c => c.SubjectId);
             builder.HasIndex(c => c.Status);
