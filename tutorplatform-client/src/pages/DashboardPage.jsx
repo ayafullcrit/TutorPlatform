@@ -104,7 +104,7 @@ function DashboardPage() {
         </div>
 
         <div className="features-grid">
-          {/* Tìm gia sư - NOW ACTIVE */}
+          {/* Tìm lớp học - ACTIVE */}
           <div className="feature-card">
             <h3>🔍 Tìm lớp học</h3>
             <p>Tìm kiếm lớp học phù hợp với nhu cầu của bạn</p>
@@ -116,13 +116,22 @@ function DashboardPage() {
             </button>
           </div>
 
-          {/* Lớp học của tôi */}
+          {/* Lớp học của tôi - ACTIVE CHO TUTOR */}
           <div className="feature-card">
             <h3>📚 Lớp học của tôi</h3>
             <p>Quản lý các lớp học {user.role === 2 ? 'đã tạo' : 'đã đăng ký'}</p>
-            <button className="btn-feature" disabled>
-              Sắp ra mắt
-            </button>
+            {user.role === 2 ? (
+              <button 
+                className="btn-feature"
+                onClick={() => navigate('/tutor/classes')}
+              >
+                Quản lý lớp
+              </button>
+            ) : (
+              <button className="btn-feature" disabled>
+                Sắp ra mắt
+              </button>
+            )}
           </div>
 
           {/* Thanh toán */}

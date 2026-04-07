@@ -242,7 +242,7 @@ function ClassListPage() {
                       </div>
                     )}
                     {/* Hiển thị grade thay vì level */}
-                    <div className="class-level-badge">Lớp {classItem.grade}</div>
+                    <div className="class-level-badge">{getGradeText(classItem.grade, classItem.level)}</div>
                   </div>
 
                   {/* Content */}

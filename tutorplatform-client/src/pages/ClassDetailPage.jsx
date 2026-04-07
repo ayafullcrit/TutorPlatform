@@ -26,6 +26,12 @@ function ClassDetailPage() {
     }
   };
 
+  const getLevelText = (level) => {
+    if (!level) return '';
+    const levelNum = typeof level === 'string' ? parseInt(level) : level;
+    return `Lớp ${levelNum}`;
+  };
+
   const handleBooking = () => {
     // TODO: Navigate to booking page
     alert('Tính năng đặt lớp sẽ được phát triển ở module tiếp theo!');
@@ -80,7 +86,7 @@ function ClassDetailPage() {
 
             {/* Grade and other meta - thay level và language */}
             <div className="detail-meta-row">
-              <span className="level-badge">Lớp {classData.grade}</span>
+              <span className="level-badge">{getLevelText(classData.level)}</span>
               <span className="views">👁️ {classData.viewCount || 0} lượt xem</span>
             </div>
 

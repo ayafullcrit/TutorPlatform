@@ -6,6 +6,9 @@ import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
 import ClassListPage from './pages/ClassListPage';
 import ClassDetailPage from './pages/ClassDetailPage';
+import MyClassesPage from './pages/MyClassesPage';
+import CreateClassPage from './pages/CreateClassPage';
+import EditClassPage from './pages/EditClassPage';
 import './App.css';
 
 // Protected Route Component
@@ -46,6 +49,34 @@ function App() {
           element={
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Tutor Routes - Protected */}
+        <Route 
+          path="/tutor/classes" 
+          element={
+            <ProtectedRoute>
+              <MyClassesPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/tutor/classes/create" 
+          element={
+            <ProtectedRoute>
+              <CreateClassPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/tutor/classes/edit/:id" 
+          element={
+            <ProtectedRoute>
+              <EditClassPage />
             </ProtectedRoute>
           } 
         />
