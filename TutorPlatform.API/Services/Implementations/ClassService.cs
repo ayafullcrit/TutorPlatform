@@ -237,6 +237,13 @@ namespace TutorPlatform.API.Services.Implementations
                                                                    //c.Tutor.User.FullName.Contains(request.Keyword)
                         );
                 }
+
+                // Filter by SubjectId
+                if (request.SubjectId.HasValue)
+                {
+                    query = query.Where(c => c.SubjectId == request.SubjectId.Value);
+                }
+
                 if (request.Grade.HasValue)
                 {
                     query = query.Where(c => c.GradeLevel == request.Grade.Value);
