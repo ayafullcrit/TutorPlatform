@@ -117,22 +117,13 @@ function DashboardPage() {
           </div>
 
           {/* Lớp học của tôi - ACTIVE CHO TUTOR */}
-          <div className="feature-card">
-            <h3>📚 Lớp học của tôi</h3>
-            <p>Quản lý các lớp học {user.role === 2 ? 'đã tạo' : 'đã đăng ký'}</p>
-            {user.role === 2 ? (
-              <button 
-                className="btn-feature"
-                onClick={() => navigate('/tutor/classes')}
-              >
-                Quản lý lớp
-              </button>
-            ) : (
-              <button className="btn-feature" disabled>
-                Sắp ra mắt
-              </button>
-            )}
-          </div>
+        <div className="feature-card">
+            <h3>📚 {user.role === 2 ? 'Quản lý đặt lịch' : 'Lịch học của tôi'}</h3>
+            <p>Quản lý các lớp học {user.role === 2 ? 'đã tạo' : 'đã đặt'}</p>
+            <button className="btn-feature" onClick={() => navigate('/my-bookings')}>
+                Xem ngay
+            </button>
+        </div>
 
           {/* Thanh toán */}
           <div className="feature-card">

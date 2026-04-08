@@ -9,6 +9,7 @@ import ClassDetailPage from './pages/ClassDetailPage';
 import MyClassesPage from './pages/MyClassesPage';
 import CreateClassPage from './pages/CreateClassPage';
 import EditClassPage from './pages/EditClassPage';
+import MyBookingsPage from './pages/MyBookingsPage';
 import './App.css';
 
 // Protected Route Component
@@ -79,6 +80,14 @@ function App() {
               <EditClassPage />
             </ProtectedRoute>
           } 
+              />
+        <Route
+            path="/my-bookings"
+            element={
+                <ProtectedRoute>
+                    <MyBookingsPage />
+                </ProtectedRoute>
+            }
         />
         
         {/* Default redirect */}

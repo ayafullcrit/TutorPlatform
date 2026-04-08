@@ -67,11 +67,14 @@ function ClassListPage() {
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters({
+    const newFilters = {
       ...filters,
       [name]: value,
       page: 1,
-    });
+    };
+    setFilters(newFilters);
+    // Tự động search khi filter thay đổi
+    searchClasses(newFilters);
   };
 
   const handleSearch = () => {
@@ -140,7 +143,7 @@ function ClassListPage() {
               <option value="">Tất cả môn</option>
               {subjects.map((subject) => (
                 <option key={subject.id} value={subject.id}>
-                  {subject.icon} {subject.name}
+                  {subject.name}
                 </option>
               ))}
             </select>

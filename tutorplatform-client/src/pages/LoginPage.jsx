@@ -17,6 +17,7 @@ function LoginPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    // Không xóa error khi user nhập - giữ nó cho đến khi submit lại
   };
 
   const handleSubmit = async (e) => {
@@ -32,17 +33,21 @@ function LoginPage() {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
 
+        // Reset form trước khi redirect
+        setFormData({ email: '', password: '' });
+
         // Redirect to dashboard
         navigate('/dashboard');
       } else {
-        setError(response.message || 'Đăng nhập thất bại');
+        setError(response.message || 'Email hoặc mật khẩu không hợp lệ');
+        setLoading(false);
       }
     } catch (err) {
-      setError(
+      const errorMessage = 
         err.response?.data?.message || 
-        'Đã xảy ra lỗi. Vui lòng thử lại.'
-      );
-    } finally {
+        err.response?.data?.error ||
+        'Email hoặc mật khẩu không hợp lệ';
+      setError(errorMessage);
       setLoading(false);
     }
   };
