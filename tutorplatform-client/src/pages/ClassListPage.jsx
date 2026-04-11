@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { classApi } from '../api/classApi';
 import { subjectApi } from '../api/subjectApi';
+import ReviewSection from './ReviewSection';
 import './ClassListPage.css';
 
 function ClassListPage() {

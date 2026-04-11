@@ -527,3 +527,26 @@
         flex-wrap: wrap;
     }
 }
+
+.btn-review {
+    padding: 9px 22px;
+    background: #fff3e0;
+    color: #e65100;
+    border: 1px solid #ffe0b2;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .btn-review:hover {
+        background: #ff9800;
+        color: white;
+    }
+
+.reviewed-badge {
+    padding: 9px 14px;
+    color: #4caf50;
+    font-size: 13px;
+    font-weight: 600;
+}

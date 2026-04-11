@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { bookingApi } from '../api/bookingApi';
+import { reviewApi } from '../api/reviewApi';
 import './MyBookingsPage.css';
+import WriteReviewModal from './WriteReviewModal';
 
 const STATUS_TABS = [
     { key: 'all', label: 'Tất cả' },
@@ -18,6 +20,8 @@ function MyBookingsPage() {
     const [activeTab, setActiveTab] = useState('all');
     const [message, setMessage] = useState({ text: '', type: '' });
     const [cancelModal, setCancelModal] = useState({ open: false, bookingId: null });
+    const [reviewModal, setReviewModal] = useState({ open: false, booking: null });
+    const [reviewedIds, setReviewedIds] = useState(new Set());
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const isTutor = user.role === 2;
@@ -35,12 +39,32 @@ function MyBookingsPage() {
 
             if (response.success) {
                 setBookings(response.data);
+                // For student only: check which completed bookings have been reviewed
+                if (!isTutor) {
+                    await loadReviewedStatuses(response.data);
+                }
             }
         } catch (error) {
             showMessage('Không thể tải danh sách booking', 'error');
         } finally {
             setLoading(false);
         }
+    };
+
+    const loadReviewedStatuses = async (bookingsList) => {
+        const completedBookings = bookingsList.filter(b => b.status === 3);
+        if (completedBookings.length === 0) return;
+
+        // Check each completed booking to see if the student has already reviewed the tutor
+        const results = await Promise.allSettled(
+            completedBookings.map(booking =>
+                reviewApi.getMyReviewForTutor(booking.tutorUserId)
+                    .then(response => response.success ? booking.id : null)
+                    .catch(() => null)
+            )
+        );
+        const reviewed = new Set(results.map(r => r.value).filter(Boolean));
+        setReviewedIds(reviewed);
     };
 
     const handleCancel = async () => {
@@ -193,9 +217,11 @@ function MyBookingsPage() {
                             key={booking.id}
                             booking={booking}
                             isTutor={isTutor}
+                            reviewedIds={reviewedIds}
                             onConfirm={handleConfirm}
                             onComplete={handleComplete}
                             onCancel={(id) => setCancelModal({ open: true, bookingId: id })}
+                            onOpenReviewModal={(booking) => setReviewModal({ open: true, booking })}
                             formatDate={formatDate}
                             formatCurrency={formatCurrency}
                         />
@@ -225,11 +251,29 @@ function MyBookingsPage() {
                     </div>
                 </div>
             )}
+
+            {/* Review Modal */}
+            {reviewModal.open && (
+                <WriteReviewModal
+                    booking={reviewModal.booking}
+                    onClose={() => setReviewModal({ open: false, booking: null })}
+                    onSuccess={() => {
+                        // After successful review, mark this booking as reviewed
+                        if (reviewModal.booking) {
+                            setReviewedIds(prev => new Set([...prev, reviewModal.booking.id]));
+                        }
+                        setReviewModal({ open: false, booking: null });
+                        showMessage('⭐ Cảm ơn bạn đã đánh giá!', 'success');
+                        // Reload bookings to update any UI changes
+                        loadBookings();
+                    }}
+                />
+            )}
         </div>
     );
 }
 
-function BookingCard({ booking, isTutor, onConfirm, onComplete, onCancel, formatDate, formatCurrency }) {
+function BookingCard({ booking, isTutor, reviewedIds, onConfirm, onComplete, onCancel, onOpenReviewModal, formatDate, formatCurrency }) {
     const statusClass = {
         1: 'status-pending',
         2: 'status-confirmed',
@@ -312,6 +356,18 @@ function BookingCard({ booking, isTutor, onConfirm, onComplete, onCancel, format
                     <button className="btn-cancel-booking" onClick={() => onCancel(booking.id)}>
                         ❌ Hủy booking
                     </button>
+                )}
+
+                {/* Student review button for completed bookings */}
+                {!isTutor && booking.status === 3 && (
+                    reviewedIds.has(booking.id)
+                        ? <span className="reviewed-badge">✓ Đã đánh giá</span>
+                        : <button
+                            className="btn-review"
+                            onClick={() => onOpenReviewModal(booking)}
+                          >
+                            ⭐ Viết đánh giá
+                          </button>
                 )}
             </div>
         </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { classApi } from '../api/classApi';
 import './ClassDetailPage.css';
+import ReviewSection from './ReviewSection';
 import BookingModal from './BookingModal';
 
 function ClassDetailPage() {
@@ -194,6 +195,14 @@ function ClassDetailPage() {
                         </ul>
                     </div>
                 </div>
+            </div>
+            <div style={{ maxWidth: '1200px', margin: '24px auto 0' }}>
+                {classData && (
+                    <ReviewSection
+                        tutorId={classData.tutorUserId}
+                        tutorName={classData.tutorName}
+                    />
+                )}
             </div>
             {showBookingModal && classData && (
                 <BookingModal
