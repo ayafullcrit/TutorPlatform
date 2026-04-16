@@ -104,3 +104,22 @@
 .login-link a:hover {
   text-decoration: underline;
 }
+
+.input-hint {
+  font-size: 12px;
+  margin-top: 5px;
+  padding: 5px 8px;
+  border-radius: 3px;
+  display: block;
+}
+
+.input-hint.error {
+  background: #fee;
+  color: #c33;
+  border-left: 3px solid #c33;
+  font-weight: 600;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}

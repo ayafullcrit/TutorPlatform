@@ -116,6 +116,34 @@ function DashboardPage() {
             </button>
           </div>
 
+          {/* Tạo lớp học - CHỈ CHO TUTOR */}
+          {user.role === 2 && (
+            <div className="feature-card">
+              <h3>➕ Tạo lớp học</h3>
+              <p>Tạo một lớp học mới và tìm học viên</p>
+              <button 
+                className="btn-feature" 
+                onClick={() => navigate('/tutor/classes/create')}
+              >
+                Tạo ngay
+              </button>
+            </div>
+          )}
+
+          {/* Danh sách lớp học - CHỈ CHO TUTOR */}
+          {user.role === 2 && (
+            <div className="feature-card">
+              <h3>📋 Danh sách lớp học</h3>
+              <p>Xem tất cả lớp học đã tạo</p>
+              <button 
+                className="btn-feature" 
+                onClick={() => navigate('/tutor/classes')}
+              >
+                Xem danh sách
+              </button>
+            </div>
+          )}
+
           {/* Lớp học của tôi - ACTIVE CHO TUTOR */}
         <div className="feature-card">
             <h3>📚 {user.role === 2 ? 'Quản lý đặt lịch' : 'Lịch học của tôi'}</h3>
