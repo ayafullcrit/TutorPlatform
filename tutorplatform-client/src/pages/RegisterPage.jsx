@@ -47,12 +47,31 @@ function RegisterPage() {
     setLoading(true);
 
     try {
-      const response = await authApi.register(formData);
+
+      const submitData = {
+        ...formData,
+        role: parseInt(formData.role), 
+      };
+
+      console.log('Submitting data:', submitData);
+      const response = await authApi.register(submitData);
 
       if (response.success) {
         // Lưu token và user info
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
+
+        // Reset form trước khi redirect
+        setFormData({
+          email: '',
+          password: '',
+          confirmPassword: '',
+          fullName: '',
+          phoneNumber: '',
+          role: 1,
+          grade: 10,
+          school: '',
+        });
 
         // Redirect to dashboard
         navigate('/dashboard');
@@ -60,12 +79,28 @@ function RegisterPage() {
         setError(response.message || 'Đăng ký thất bại');
       }
     } catch (err) {
-      console.error('Register error:', err);
-      setError(
-        err.response?.data?.message || 
-        err.response?.data?.errors?.[0] ||
-        'Đã xảy ra lỗi. Vui lòng thử lại.'
-      );
+      console.error('Register error details:', {
+        message: err.message,
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        data: err.response?.data,
+      });
+
+      // Extract error message from various response formats
+      let errorMessage = 'Đã xảy ra lỗi. Vui lòng thử lại.';
+
+      if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+        // Format: { errors: ["error1", "error2"] }
+        errorMessage = err.response.data.errors[0] || errorMessage;
+      } else if (err.response?.data?.message) {
+        // Format: { message: "error message" }
+        errorMessage = err.response.data.message;
+      } else if (err.response?.data?.title) {
+        // ASP.NET ProblemDetails format
+        errorMessage = err.response.data.title;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -109,6 +144,9 @@ function RegisterPage() {
               placeholder="••••••••"
               minLength={6}
             />
+            {formData.password && formData.password.length < 6 && (
+              <p className="input-hint error">Mật khẩu phải có ít nhất 6 ký tự</p>
+            )}
           </div>
 
           {/* Confirm Password */}
