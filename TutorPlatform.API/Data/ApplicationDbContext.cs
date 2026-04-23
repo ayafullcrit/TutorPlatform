@@ -21,7 +21,10 @@ namespace TutorPlatform.API.Data
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Payment> Payments { get; set; }
-     
+        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+
+
         //Model configuration
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

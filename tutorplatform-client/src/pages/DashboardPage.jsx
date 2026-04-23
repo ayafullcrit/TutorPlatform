@@ -108,9 +108,9 @@ function DashboardPage() {
           <div className="feature-card">
             <h3>🔍 Tìm lớp học</h3>
             <p>Tìm kiếm lớp học phù hợp với nhu cầu của bạn</p>
-            <button 
-              className="btn-feature" 
-              onClick={() => navigate('/classes')}
+            <button
+              className="btn-feature"
+              onClick={() => navigate("/classes")}
             >
               Khám phá ngay
             </button>
@@ -121,9 +121,9 @@ function DashboardPage() {
             <div className="feature-card">
               <h3>➕ Tạo lớp học</h3>
               <p>Tạo một lớp học mới và tìm học viên</p>
-              <button 
-                className="btn-feature" 
-                onClick={() => navigate('/tutor/classes/create')}
+              <button
+                className="btn-feature"
+                onClick={() => navigate("/tutor/classes/create")}
               >
                 Tạo ngay
               </button>
@@ -135,9 +135,9 @@ function DashboardPage() {
             <div className="feature-card">
               <h3>📋 Danh sách lớp học</h3>
               <p>Xem tất cả lớp học đã tạo</p>
-              <button 
-                className="btn-feature" 
-                onClick={() => navigate('/tutor/classes')}
+              <button
+                className="btn-feature"
+                onClick={() => navigate("/tutor/classes")}
               >
                 Xem danh sách
               </button>
@@ -145,20 +145,25 @@ function DashboardPage() {
           )}
 
           {/* Lớp học của tôi - ACTIVE CHO TUTOR */}
-        <div className="feature-card">
-            <h3>📚 {user.role === 2 ? 'Quản lý đặt lịch' : 'Lịch học của tôi'}</h3>
-            <p>Quản lý các lớp học {user.role === 2 ? 'đã tạo' : 'đã đặt'}</p>
-            <button className="btn-feature" onClick={() => navigate('/my-bookings')}>
-                Xem ngay
+          <div className="feature-card">
+            <h3>
+              📚 {user.role === 2 ? "Quản lý đặt lịch" : "Lịch học của tôi"}
+            </h3>
+            <p>Quản lý các lớp học {user.role === 2 ? "đã tạo" : "đã đặt"}</p>
+            <button
+              className="btn-feature"
+              onClick={() => navigate("/my-bookings")}
+            >
+              Xem ngay
             </button>
-        </div>
+          </div>
 
           {/* Thanh toán */}
           <div className="feature-card">
-            <h3>💳 Thanh toán</h3>
-            <p>Xem lịch sử giao dịch và nạp tiền</p>
-            <button className="btn-feature" disabled>
-              Sắp ra mắt
+            <h3>💳 Ví của tôi</h3>
+            <p>Nạp tiền và xem lịch sử giao dịch</p>
+            <button className="btn-feature" onClick={() => navigate("/wallet")}>
+              Vào ví
             </button>
           </div>
 
@@ -166,9 +171,9 @@ function DashboardPage() {
           <div className="feature-card">
             <h3>⚙️ Cài đặt</h3>
             <p>Cập nhật thông tin cá nhân</p>
-            <button 
+            <button
               className="btn-feature"
-              onClick={() => navigate('/profile')}
+              onClick={() => navigate("/profile")}
             >
               Cài đặt Profile
             </button>

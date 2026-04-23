@@ -26,7 +26,24 @@ namespace TutorPlatform.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                // Extract error messages from ModelState
+                var errors = ModelState
+                    .SelectMany(x => x.Value.Errors)
+                    .Select(x => x.ErrorMessage)
+                    .ToList();
+
+                Console.WriteLine($"=== VALIDATION ERRORS ===");
+                foreach (var error in errors)
+                {
+                    Console.WriteLine($"- {error}");
+                }
+
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Validation failed",
+                    errors = errors
+                });
             }
 
             var result = await _authService.RegisterAsync(request);

@@ -5,6 +5,7 @@ using TutorPlatform.API.Models.DTOs.Responses;
 using TutorPlatform.API.Models.DTOs.Responses.Booking;
 using TutorPlatform.API.Models.Entities;
 using TutorPlatform.API.Models.Enums;
+using TutorPlatform.API.Services.Helpers;
 using TutorPlatform.API.Services.Interfaces;
 
 namespace TutorPlatform.API.Services.Implementations
@@ -12,12 +13,18 @@ namespace TutorPlatform.API.Services.Implementations
     public class BookingService : IBookingService
     {
         private readonly ApplicationDbContext _context;
+        private readonly INotificationService _notificationService;
+        private readonly IPaymentService _paymentService;
 
-        public BookingService(ApplicationDbContext context)
+        public BookingService(ApplicationDbContext context,
+        IPaymentService paymentService,
+        INotificationService notificationService)
         {
             _context = context;
-        }
+            _paymentService = paymentService;
+            _notificationService = notificationService;
 
+        }
         // ============================================
         // STUDENT: Tạo booking mới
         // ============================================
@@ -83,13 +90,30 @@ namespace TutorPlatform.API.Services.Implementations
                 };
 
                 // 7. Trừ tiền student
-                student.User.Balance -= classEntity.PricePerSession;
+                // student.User.Balance -= classEntity.PricePerSession;
+                await _paymentService.RecordTransactionAsync(
+                     studentUserId,
+                     -classEntity.PricePerSession,          // âm = trừ
+                     TransactionType.BookingPay,
+                     $"Thanh toán lớp: {classEntity.Title}",
+                     referenceId: request.ClassId.ToString()
+                 );
 
                 // 8. Tăng CurrentStudents
                 classEntity.CurrentStudents++;
 
                 _context.Bookings.Add(booking);
                 await _context.SaveChangesAsync();
+
+                await BookingNotifications.OnBookingCreated(
+                    _notificationService,
+                    tutorUserId: classEntity.TutorId,
+                    studentUserId: studentUserId,
+                    bookingId: booking.Id,
+                    studentName: student.User.FullName,
+                    classTitle: classEntity.Title
+                );
+
 
                 // 9. Reload để trả về đầy đủ thông tin
                 var createdBooking = await GetBookingEntityAsync(booking.Id);
@@ -159,22 +183,42 @@ namespace TutorPlatform.API.Services.Implementations
                     return new ApiResponse("Booking đã bị hủy trước đó", false);
 
                 // Hoàn tiền nếu chưa confirmed
-                if (booking.Status == BookingStatus.Pending)
-                {
-                    booking.Student.User.Balance += booking.Class.PricePerSession;
-                }
-                // Nếu đã confirmed: hoàn 80% (chính sách phạt 20%)
-                else if (booking.Status == BookingStatus.Confirmed)
-                {
-                    var refundAmount = booking.Class.PricePerSession * 0.8m;
-                    booking.Student.User.Balance += refundAmount;
-                }
+                //if (booking.Status == BookingStatus.Pending)
+                //{
+                //    booking.Student.User.Balance += booking.Class.PricePerSession;
+                //}
+                //// Nếu đã confirmed: hoàn 80% (chính sách phạt 20%)
+                //else if (booking.Status == BookingStatus.Confirmed)
+                //{
+                //    var refundAmount = booking.Class.PricePerSession * 0.8m;
+                //    booking.Student.User.Balance += refundAmount;
+                //}
+                var refundAmount = booking.Status == BookingStatus.Pending
+                    ? booking.Class.PricePerSession
+                    : booking.Class.PricePerSession * 0.8m;
+
+                await _paymentService.RecordTransactionAsync(
+                    booking.StudentId,
+                    refundAmount,
+                    TransactionType.Refund,
+                    $"Hoàn tiền hủy lớp: {booking.Class.Title}",
+                    referenceId: bookingId.ToString()
+                );
 
                 // Giảm CurrentStudents
                 booking.Class.CurrentStudents = Math.Max(0, booking.Class.CurrentStudents - 1);
                 booking.Status = BookingStatus.Cancelled;
 
                 await _context.SaveChangesAsync();
+                await BookingNotifications.OnBookingCancelledByStudent(
+                   _notificationService,
+                   tutorUserId: booking.TutorId,
+                   studentUserId: booking.StudentId,
+                   bookingId: bookingId,
+                   studentName: booking.Student.User.FullName,
+                   classTitle: booking.Class.Title,
+                   refundAmount: refundAmount  
+               );
 
                 return new ApiResponse("Hủy booking thành công", true);
             }
@@ -233,6 +277,14 @@ namespace TutorPlatform.API.Services.Implementations
 
                 booking.Status = BookingStatus.Confirmed;
                 await _context.SaveChangesAsync();
+                await BookingNotifications.OnBookingConfirmed(
+                    _notificationService,
+                    studentUserId: booking.StudentId,
+                    bookingId: bookingId,
+                    tutorName: booking.Tutor.User.FullName,
+                    classTitle: booking.Class.Title
+
+                );
 
                 return new ApiResponse<BookingResponse>(
                     MapToResponse(booking),
@@ -269,10 +321,25 @@ namespace TutorPlatform.API.Services.Implementations
                 var tutorUser = await _context.Users.FindAsync(booking.TutorId);
                 if (tutorUser != null)
                 {
-                    tutorUser.Balance += booking.Class.PricePerSession * 0.9m;
+                    //tutorUser.Balance += booking.Class.PricePerSession * 0.9m;
+                    await _paymentService.RecordTransactionAsync(
+                        booking.TutorId,
+                        booking.Class.PricePerSession * 0.9m,
+                        TransactionType.Earning,
+                        $"Thu nhập từ lớp: {booking.Class.Title}",
+                        referenceId: bookingId.ToString()
+                    );
                 }
 
                 await _context.SaveChangesAsync();
+                await BookingNotifications.OnBookingCompleted(
+                    _notificationService,
+                    studentUserId: booking.StudentId,
+                    tutorUserId: booking.TutorId,
+                    bookingId: bookingId,
+                    classTitle: booking.Class.Title,
+                    tutorEarning: booking.Class.PricePerSession * 0.9m
+                );
 
                 return new ApiResponse<BookingResponse>(
                     MapToResponse(booking),
@@ -313,6 +380,14 @@ namespace TutorPlatform.API.Services.Implementations
                 booking.Status = BookingStatus.Cancelled;
 
                 await _context.SaveChangesAsync();
+                await BookingNotifications.OnBookingCancelledByTutor(
+                    _notificationService,
+                    studentUserId: booking.StudentId,
+                    bookingId: bookingId,
+                    tutorName: booking.Tutor.User.FullName,
+                    classTitle: booking.Class.Title,
+                    refundAmount: booking.Class.PricePerSession
+                );
 
                 return new ApiResponse("Đã hủy và hoàn tiền cho học sinh", true);
             }

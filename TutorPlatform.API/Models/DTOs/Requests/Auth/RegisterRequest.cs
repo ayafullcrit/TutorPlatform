@@ -13,8 +13,6 @@ namespace TutorPlatform.API.Models.DTOs.Requests.Auth
         [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
         [StringLength(100, MinimumLength = 6,
             ErrorMessage = "Mật khẩu phải từ 6-100 ký tự")]
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$",
-            ErrorMessage = "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số")]
         public string Password { get; set; }
 
         [Required(ErrorMessage = "Xác nhận mật khẩu là bắt buộc")]
