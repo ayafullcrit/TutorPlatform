@@ -1,0 +1,38 @@
+export const mockTutorSubjects = [
+  {
+    id: 1,
+    name: "Toán lớp 12",
+    level: "THPT",
+    price: 200000,
+    description: "Ôn thi tốt nghiệp, luyện đề, củng cố kiến thức mất gốc.",
+    status: "active",
+    totalStudents: 8,
+  },
+  {
+    id: 2,
+    name: "IELTS Writing",
+    level: "IELTS",
+    price: 350000,
+    description: "Luyện Task 1, Task 2, sửa bài chi tiết theo band score.",
+    status: "active",
+    totalStudents: 5,
+  },
+  {
+    id: 3,
+    name: "Vật lý 11",
+    level: "THPT",
+    price: 220000,
+    description: "Dạy cơ học, điện học, luyện bài tập theo chương.",
+    status: "hidden",
+    totalStudents: 2,
+  },
+  {
+    id: 4,
+    name: "Lập trình Python cơ bản",
+    level: "Beginner",
+    price: 300000,
+    description: "Dạy nền tảng Python, biến, vòng lặp, hàm và xử lý dữ liệu.",
+    status: "active",
+    totalStudents: 4,
+  },
+];

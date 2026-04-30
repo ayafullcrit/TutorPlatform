@@ -1,0 +1,115 @@
+.tutor-finance__summary {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.tutor-finance__balance {
+  padding: 28px;
+  background: var(--tutor-primary);
+  color: #fff;
+  border-radius: var(--tutor-radius-lg);
+}
+
+.tutor-finance__balance h2 {
+  font-size: 34px;
+  margin: 8px 0 22px;
+}
+
+.tutor-finance__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.tutor-finance__actions button {
+  border: none;
+  background: rgba(255,255,255,.18);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+.tutor-finance__small-card {
+  padding: 28px;
+}
+
+.tutor-finance__small-card h3 {
+  font-size: 28px;
+  margin: 8px 0;
+}
+
+.tutor-finance__grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 28px;
+}
+
+.tutor-transactions {
+  padding: 24px;
+}
+
+.tutor-transaction {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--tutor-border);
+}
+
+.tutor-transaction__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+}
+
+.tutor-transaction__icon--paid {
+  background: var(--tutor-success-bg);
+  color: var(--tutor-success);
+}
+
+.tutor-transaction__icon--pending {
+  background: var(--tutor-pending-bg);
+  color: var(--tutor-pending);
+}
+
+.tutor-transaction__info {
+  flex: 1;
+}
+
+.tutor-transaction__info span {
+  display: block;
+  color: var(--tutor-muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.tutor-transaction__amount {
+  text-align: right;
+}
+
+.tutor-transaction__amount span {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.is-paid {
+  color: var(--tutor-success);
+}
+
+.is-pending {
+  color: var(--tutor-pending);
+}
+
+@media (max-width: 1100px) {
+  .tutor-finance__summary,
+  .tutor-finance__grid {
+    grid-template-columns: 1fr;
+  }
+}
