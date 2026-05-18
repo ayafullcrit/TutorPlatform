@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TutorPlatform.API.Models.Entities;
 
@@ -58,10 +58,11 @@ namespace TutorPlatform.API.Data.Configurations
                 .HasForeignKey(c => c.SubjectId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasMany(c => c.Bookings)
-                .WithOne(b => b.Class)
-                .HasForeignKey(b => b.ClassId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // Relationship defined in BookingConfiguration
+            // builder.HasMany(c => c.Bookings)
+            //     .WithOne(b => b.Class)
+            //     .HasForeignKey(b => b.ClassId)
+            //     .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

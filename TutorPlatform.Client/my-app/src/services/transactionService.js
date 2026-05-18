@@ -1,89 +1,83 @@
 import api from "./api";
 
-// Get all transactions
-export const getTransactions = async (params = {}) => {
+/**
+ * Lấy thông tin ví (số dư, tổng nạp, tổng chi, ...)
+ */
+export const getWallet = async () => {
   try {
-    const response = await api.get("/payments", { params });
+    const response = await api.get("/payments/wallet");
     return response.data;
   } catch (error) {
-    console.error("Error fetching transactions:", error);
+    console.error("Error fetching wallet:", error);
     throw error;
   }
 };
 
-// Get transaction by ID
-export const getTransactionById = async (id) => {
+/**
+ * Lấy lịch sử giao dịch
+ */
+export const getTransactionHistory = async (page = 1, pageSize = 20) => {
   try {
-    const response = await api.get(`/payments/${id}`);
+    const response = await api.get("/payments/history", {
+      params: { page, pageSize }
+    });
     return response.data;
   } catch (error) {
-    console.error(`Error fetching transaction ${id}:`, error);
+    console.error("Error fetching transaction history:", error);
     throw error;
   }
 };
 
-// Get user transactions
-export const getUserTransactions = async (userId, params = {}) => {
+/**
+ * Nạp tiền vào ví (Mock)
+ */
+export const topUpBalance = async (amount, paymentMethod = "Mock") => {
   try {
-    const response = await api.get(`/payments/user/${userId}`, { params });
+    const response = await api.post("/payments/top-up", {
+      amount,
+      paymentMethod
+    });
     return response.data;
   } catch (error) {
-    console.error(`Error fetching transactions for user ${userId}:`, error);
+    console.error("Error topping up:", error);
     throw error;
   }
 };
 
-// Create payment/transaction
-export const createPayment = async (paymentData) => {
-  try {
-    const response = await api.post("/payments", paymentData);
-    return response.data;
-  } catch (error) {
-    console.error("Error creating payment:", error);
-    throw error;
-  }
+// --- Legacy support (if needed by other components) ---
+
+export const getUserTransactions = async () => {
+  const result = await getTransactionHistory();
+  return result;
 };
 
-// Update payment/transaction
-export const updatePayment = async (id, paymentData) => {
-  try {
-    const response = await api.put(`/payments/${id}`, paymentData);
-    return response.data;
-  } catch (error) {
-    console.error(`Error updating payment ${id}:`, error);
-    throw error;
-  }
-};
-
-// Refund payment
-export const refundPayment = async (id) => {
-  try {
-    const response = await api.post(`/payments/${id}/refund`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error refunding payment ${id}:`, error);
-    throw error;
-  }
-};
-
-// Check payment status
-export const checkPaymentStatus = async (id) => {
-  try {
-    const response = await api.post("/payments/check-status", { paymentId: id });
-    return response.data;
-  } catch (error) {
-    console.error(`Error checking payment status for ${id}:`, error);
-    throw error;
-  }
-};
-
-// Get payment history (legacy)
 export const getPaymentHistory = async () => {
+  const result = await getTransactionHistory();
+  return result.success ? result.data : [];
+};
+
+/**
+ * Lấy toàn bộ giao dịch hệ thống (dành cho Admin)
+ */
+export const getTransactions = async () => {
   try {
-    const response = await api.get("/payments/history");
-    return response.data.success ? response.data.data : [];
+    const response = await api.get("/payments/admin/transactions");
+    return response.data;
   } catch (error) {
-    console.error("Error fetching payment history:", error);
-    return [];
+    console.error("Error fetching transactions for admin:", error);
+    throw error;
+  }
+};
+
+/**
+ * Hoàn tiền giao dịch (Mock stub)
+ */
+export const refundPayment = async (transactionId) => {
+  try {
+    const response = await api.post(`/payments/refund/${transactionId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error refunding payment:", error);
+    throw error;
   }
 };

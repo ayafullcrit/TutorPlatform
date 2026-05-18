@@ -104,6 +104,34 @@ namespace TutorPlatform.API.Services.Implementations
                 return Fail<List<TransactionResponse>>("Lỗi: " + ex.Message);
             }
         }
+
+        public async Task<ApiResponse<List<TransactionResponse>>> GetAdminTransactionsAsync()
+        {
+            try
+            {
+                var transactions = await _context.Transactions
+                    .Include(t => t.User)
+                    .OrderByDescending(t => t.CreatedAt)
+                    .ToListAsync();
+
+                var response = transactions.Select(tx => {
+                    var resp = MapToResponse(tx);
+                    resp.TutorName = tx.User?.FullName ?? "N/A";
+                    resp.BankInfo = tx.User != null ? $"Vietcombank - {tx.User.PhoneNumber}" : "N/A";
+                    resp.Status = tx.Type == TransactionType.Withdrawal 
+                        ? (tx.Description.Contains("Đã xử lý") ? "completed" : "pending") 
+                        : "completed";
+                    return resp;
+                }).ToList();
+
+                return new ApiResponse<List<TransactionResponse>>(response, "Lấy danh sách giao dịch hệ thống thành công");
+            }
+            catch (Exception ex)
+            {
+                return Fail<List<TransactionResponse>>("Lỗi: " + ex.Message);
+            }
+        }
+
         public async Task<Transaction> RecordTransactionAsync(
             int userId,
             decimal amount,

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TutorPlatform.API.Data;
 using TutorPlatform.API.Models.DTOs.Responses;
 using TutorPlatform.API.Models.DTOs.Responses.Class;
@@ -12,10 +12,7 @@ namespace TutorPlatform.API.Services.Implementations
         private readonly ApplicationDbContext _context;
         public SubjectService(ApplicationDbContext context)
         {
-            if (_context == null)
-            {
-                _context = context;
-            }
+            _context = context;
         }
         public async Task<ApiResponse<List<SubjectResponse>>> GetAllSubjectAsync()
         {

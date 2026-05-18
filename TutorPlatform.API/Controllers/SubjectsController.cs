@@ -7,10 +7,10 @@ namespace TutorPlatform.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class SubjectController : ControllerBase
+    public class SubjectsController : ControllerBase
     {
         private readonly ISubjectService _subjectService;
-        public SubjectController(ISubjectService subjectService)
+        public SubjectsController(ISubjectService subjectService)
         {
             _subjectService = subjectService;
         }

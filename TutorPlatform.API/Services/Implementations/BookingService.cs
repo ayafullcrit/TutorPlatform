@@ -361,6 +361,8 @@ namespace TutorPlatform.API.Services.Implementations
             {
                 var booking = await _context.Bookings
                     .Include(b => b.Class)
+                    .Include(b => b.Tutor)
+                        .ThenInclude(t => t.User)
                     .Include(b => b.Student)
                         .ThenInclude(s => s.User)
                     .FirstOrDefaultAsync(b => b.Id == bookingId);
@@ -375,7 +377,14 @@ namespace TutorPlatform.API.Services.Implementations
                     return new ApiResponse("Không thể hủy booking ở trạng thái này", false);
 
                 // Hoàn tiền 100% cho student khi tutor hủy
-                booking.Student.User.Balance += booking.Class.PricePerSession;
+                await _paymentService.RecordTransactionAsync(
+                    booking.StudentId,
+                    booking.Class.PricePerSession,
+                    TransactionType.Refund,
+                    $"Hoàn tiền hủy lớp bởi gia sư: {booking.Class.Title}",
+                    referenceId: bookingId.ToString()
+                );
+
                 booking.Class.CurrentStudents = Math.Max(0, booking.Class.CurrentStudents - 1);
                 booking.Status = BookingStatus.Cancelled;
 

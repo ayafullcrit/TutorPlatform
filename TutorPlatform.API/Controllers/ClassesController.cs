@@ -8,10 +8,10 @@ namespace TutorPlatform.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ClassController : ControllerBase
+    public class ClassesController : ControllerBase
     {
         private readonly IClassService _classService;
-        public ClassController(IClassService classService)
+        public ClassesController(IClassService classService)
         {
             _classService = classService;
         }

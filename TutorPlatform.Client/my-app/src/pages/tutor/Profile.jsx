@@ -1,4 +1,34 @@
+import { useState, useEffect } from "react";
+import { getCurrentUser } from "../../services/authService";
+import { getProfile } from "../../services/userService";
+
 export default function Profile() {
+  const [user, setUser] = useState(getCurrentUser());
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      setLoading(true);
+      const result = await getProfile();
+      if (result?.success && result.data) {
+        setUser(result.data);
+        // Sync back to localStorage
+        localStorage.setItem("user", JSON.stringify(result.data));
+      }
+    } catch (error) {
+      console.error("Failed to fetch profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading && !user) return <div style={{ padding: 40 }}>Đang tải...</div>;
+  if (!user) return <div style={{ padding: 40 }}>Vui lòng đăng nhập</div>;
+
   return (
     <div>
       <div className="tutor-page__header">
@@ -24,25 +54,30 @@ export default function Profile() {
             display: "flex",
             alignItems: "center",
             gap: 18,
-            marginTop: -64,
+            marginTop: 38,
           }}
         >
-          <img
-            src="/assets/images/avatar-placeholder.png"
-            alt=""
-            style={{
-              width: 110,
-              height: 110,
-              borderRadius: 26,
-              objectFit: "cover",
-              border: "6px solid #fff",
-            }}
-          />
+          <div style={{
+            width: 110,
+            height: 110,
+            borderRadius: 26,
+            background: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 40,
+            fontWeight: 700,
+            color: "#7C6E27",
+            border: "6px solid #fff",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+          }}>
+            {user.fullName?.[0] || "T"}
+          </div>
 
           <div>
-            <h2 style={{ margin: 0, fontSize: 30 }}>Trần Minh Thắng</h2>
+            <h2 style={{ margin: 0, fontSize: 30 }}>{user.fullName}</h2>
             <p style={{ color: "var(--tutor-primary)", fontWeight: 800 }}>
-              Gia sư Kim Cương · Toán nâng cao
+              Gia sư · {user.email}
             </p>
           </div>
         </div>
@@ -51,16 +86,16 @@ export default function Profile() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
         <div className="tutor-card" style={{ padding: 26 }}>
           <h3>Thông tin liên hệ</h3>
-          <p>Email: thang.tutor@example.com</p>
-          <p>Số điện thoại: +84 901 234 567</p>
-          <p>Địa chỉ: Đà Nẵng, Việt Nam</p>
+          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>Số điện thoại:</strong> {user.phoneNumber || "Chưa cập nhật"}</p>
+          <p><strong>Địa chỉ:</strong> Việt Nam</p>
         </div>
 
         <div className="tutor-card" style={{ padding: 26 }}>
-          <h3>Chuyên môn</h3>
-          <p>Toán nâng cao, Vật lý, Luyện thi THPT Quốc Gia</p>
-          <p>Kinh nghiệm: 5 năm</p>
-          <p>Đánh giá trung bình: 4.9 / 5</p>
+          <h3>Thông tin hệ thống</h3>
+          <p><strong>Mã người dùng:</strong> #{user.id}</p>
+          <p><strong>Vai trò:</strong> Gia sư</p>
+          <p><strong>Trạng thái:</strong> Đang hoạt động</p>
         </div>
       </div>
     </div>

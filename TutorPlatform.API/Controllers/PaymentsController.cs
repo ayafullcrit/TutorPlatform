@@ -60,6 +60,19 @@ namespace TutorPlatform.API.Controllers
             return Ok(result);
         }
 
+        // GET /api/payments/admin/transactions
+        [HttpGet("admin/transactions")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAdminTransactions()
+        {
+            var result = await _paymentService.GetAdminTransactionsAsync();
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
         private int GetCurrentUserId()
         {
             var claim = User.FindFirst(ClaimTypes.NameIdentifier);

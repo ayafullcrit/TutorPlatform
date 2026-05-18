@@ -317,28 +317,44 @@
 
 // export default Home;
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [realStats, setRealStats] = useState(null);
 
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch("http://localhost:5101/api/dashboard/public/stats");
+      const result = await response.json();
+      if (result.success) {
+        setRealStats(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch public stats:", error);
+    }
+  };
   const stats = [
     {
-      number: "850+",
+      number: realStats ? `${realStats.totalTutors}+` : "850+",
       title: "Gia sư được xác thực",
       borderColor: "#5E9C59",
       icon: "🎓",
     },
     {
-      number: "4200+",
+      number: realStats ? `${realStats.totalStudents}+` : "4200+",
       title: "Học viên",
       borderColor: "#4D8AD6",
       icon: "🪪",
     },
     {
-      number: "1500+",
+      number: realStats ? `${realStats.totalClasses}+` : "1500+",
       title: "Lớp nhóm",
       borderColor: "#E39A39",
       icon: "🏫",

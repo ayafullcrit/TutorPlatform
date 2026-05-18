@@ -1,82 +1,303 @@
 import { useState, useEffect } from "react";
-import TutorCard from "../../components/student/TutorCard";
 import TutorCardSkeleton from "../../components/student/TutorCardSkeleton";
 import EmptyState from "../../components/student/EmptyState";
 import ErrorState from "../../components/student/ErrorState";
-import { searchTutors } from "../../services/tutorService";
+import { searchClasses } from "../../services/classService";
+import { getAllSubjects } from "../../services/subjectService";
+import { createBooking } from "../../services/bookingService";
 
 export default function FindTutor() {
-  const [tutors, setTutors] = useState([]);
+  const [classes, setClasses] = useState([]);
+  const [subjects, setSubjects] = useState([]);
   const [status, setStatus] = useState("loading");
   const [filters, setFilters] = useState({
-    subject: "",
-    minRating: 0,
-    searchTerm: "",
+    keyword: "",
+    subjectId: "",
+    grade: "",
+    minPrice: "",
+    maxPrice: "",
+    sortBy: "price",
+    sortOrder: "asc",
+    page: 1,
+    pageSize: 20,
   });
 
+  // State cho Modal đặt lịch
+  const [showModal, setShowModal] = useState(false);
+  const [selectedClass, setSelectedClass] = useState(null);
+  const [bookingForm, setBookingForm] = useState({
+    startTime: "",
+    note: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
-    loadTutors();
+    loadSubjects();
+  }, []);
+
+  useEffect(() => {
+    loadClasses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
-  const loadTutors = async () => {
+  const loadSubjects = async () => {
+    try {
+      const result = await getAllSubjects();
+      if (result?.success && result.data) setSubjects(result.data);
+    } catch {}
+  };
+
+  const loadClasses = async () => {
     setStatus("loading");
     try {
-      const result = await searchTutors(filters);
-      if (result.data) {
-        setTutors(result.data);
-        setStatus(result.data.length === 0 ? "empty" : "success");
+      const params = Object.fromEntries(
+        Object.entries(filters).filter(([, v]) => v !== "" && v !== null && v !== undefined)
+      );
+
+      const result = await searchClasses(params);
+      if (result?.success && result.data) {
+        const items = result.data.items ?? [];
+        setClasses(items);
+        setStatus(items.length === 0 ? "empty" : "success");
       } else {
         setStatus("empty");
       }
     } catch (error) {
-      console.error("Failed to load tutors:", error);
+      console.error("Failed to load classes:", error);
       setStatus("error");
     }
   };
 
-  const handleFilterChange = (newFilters) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
   };
 
-  const handleRetry = () => {
-    loadTutors();
+  const openBookingModal = (cls) => {
+    setSelectedClass(cls);
+    // Set thời gian mặc định là ngày mai
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(9, 0, 0, 0);
+    
+    setBookingForm({
+      startTime: tomorrow.toISOString().slice(0, 16),
+      note: "",
+    });
+    setShowModal(true);
+  };
+
+  const handleBookingSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedClass) return;
+
+    try {
+      setIsSubmitting(true);
+      const result = await createBooking({
+        classId: selectedClass.id,
+        startTime: new Date(bookingForm.startTime).toISOString(),
+        note: bookingForm.note,
+      });
+
+      if (result.success) {
+        alert(result.message || "Đặt lịch thành công!");
+        setShowModal(false);
+        loadClasses(); // Refresh data
+      } else {
+        alert(result.message || "Đã có lỗi xảy ra");
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Lỗi kết nối đến máy chủ");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="student-find-tutor">
       <div className="student-dashboard__hero">
         <div>
-          <h1 className="student-dashboard__heading">Tìm kiếm gia sư phù hợp</h1>
-          <p className="student-dashboard__subtext">
-            Dựa trên mục tiêu học tập của bạn.
-          </p>
+          <h1 className="student-dashboard__heading">Tìm lớp học phù hợp</h1>
+          <p className="student-dashboard__subtext">Dựa trên mục tiêu học tập của bạn.</p>
         </div>
-
-        <button className="student-dashboard__primary-btn">
-          <span className="material-symbols-outlined">filter_alt</span>
-          Lọc theo môn
-        </button>
       </div>
 
+      {/* Bộ lọc */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 24 }}>
+        <input
+          type="text"
+          placeholder="Tìm kiếm theo từ khóa..."
+          value={filters.keyword}
+          onChange={(e) => handleFilterChange("keyword", e.target.value)}
+          style={{ flex: "1 1 200px", padding: "8px 14px", borderRadius: 999, border: "1px solid #d1c9b4", background: "#fafaf2" }}
+        />
+
+        <select
+          value={filters.subjectId}
+          onChange={(e) => handleFilterChange("subjectId", e.target.value)}
+          style={{ padding: "8px 14px", borderRadius: 999, border: "1px solid #d1c9b4", background: "#fafaf2" }}
+        >
+          <option value="">Tất cả môn học</option>
+          {subjects.map((s) => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </select>
+
+        <select
+          value={filters.grade}
+          onChange={(e) => handleFilterChange("grade", e.target.value)}
+          style={{ padding: "8px 14px", borderRadius: 999, border: "1px solid #d1c9b4", background: "#fafaf2" }}
+        >
+          <option value="">Tất cả khối lớp</option>
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(g => (
+            <option key={g} value={g}>Lớp {g}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Danh sách */}
       {status === "loading" && (
         <div className="student-find-tutor__grid">
-          <TutorCardSkeleton />
-          <TutorCardSkeleton />
-          <TutorCardSkeleton />
+          <TutorCardSkeleton /><TutorCardSkeleton /><TutorCardSkeleton />
         </div>
       )}
 
       {status === "empty" && <EmptyState />}
 
-      {status === "error" && <ErrorState onRetry={handleRetry} />}
+      {status === "error" && <ErrorState onRetry={loadClasses} />}
 
       {status === "success" && (
         <div className="student-find-tutor__grid">
-          {tutors.map((tutor) => (
-            <TutorCard key={tutor.id} tutor={tutor} />
+          {classes.map((cls) => (
+            <ClassCard key={cls.id} cls={cls} onBook={() => openBookingModal(cls)} />
           ))}
         </div>
       )}
+
+      {/* Modal Đặt Lịch */}
+      {showModal && (
+        <div className="modal-overlay" style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center",
+          justifyContent: "center", zIndex: 1000, padding: 20
+        }}>
+          <div className="modal-content" style={{
+            background: "#fff", padding: 24, borderRadius: 20,
+            maxWidth: 450, width: "100%", position: "relative"
+          }}>
+            <h2 style={{ marginBottom: 16 }}>Xác nhận đặt lịch</h2>
+            {selectedClass && (
+              <div style={{ marginBottom: 20, padding: 16, background: "#f9f9f0", borderRadius: 12 }}>
+                <p><strong>Lớp:</strong> {selectedClass.title}</p>
+                <p><strong>Gia sư:</strong> {selectedClass.tutorName}</p>
+                <p><strong>Học phí:</strong> {selectedClass.pricePerSession?.toLocaleString("vi-VN")}đ/buổi</p>
+              </div>
+            )}
+
+            <form onSubmit={handleBookingSubmit}>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>Thời gian bắt đầu học:</label>
+                <input
+                  type="datetime-local"
+                  required
+                  value={bookingForm.startTime}
+                  onChange={(e) => setBookingForm({ ...bookingForm, startTime: e.target.value })}
+                  style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>Ghi chú cho gia sư:</label>
+                <textarea
+                  placeholder="Yêu cầu riêng, trình độ hiện tại..."
+                  value={bookingForm.note}
+                  onChange={(e) => setBookingForm({ ...bookingForm, note: e.target.value })}
+                  style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ddd", minHeight: 80 }}
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: 12 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  style={{ flex: 1, padding: 12, borderRadius: 99, border: "1px solid #ddd", background: "#fff" }}
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  style={{
+                    flex: 1, padding: 12, borderRadius: 99, border: "none",
+                    background: "var(--color-primary, #7C6E27)", color: "#fff",
+                    fontWeight: 600, opacity: isSubmitting ? 0.7 : 1
+                  }}
+                >
+                  {isSubmitting ? "Đang xử lý..." : "Xác nhận & Thanh toán"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+// Component card lớp học
+function ClassCard({ cls, onBook }) {
+  return (
+    <article className="tutor-card" style={{ cursor: "default" }}>
+      <div className="tutor-card__top">
+        <div className="lazy-avatar">
+          <div style={{
+            width: 56, height: 56, borderRadius: 14,
+            background: "linear-gradient(135deg, #b0a18e, #d4c5b0)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#fff", fontSize: 22, fontWeight: 700,
+          }}>
+            {cls.subjectName?.[0] ?? "?"}
+          </div>
+        </div>
+
+        <div className="tutor-card__main">
+          <h3 className="tutor-card__name">{cls.title}</h3>
+
+          <div className="tutor-card__rating">
+            <span className="material-symbols-outlined tutor-card__star">star</span>
+            <span className="tutor-card__rating-value">{cls.tutorRating?.toFixed(1) ?? "--"}</span>
+            <span className="tutor-card__reviews">({cls.tutorTotalReviews ?? 0} đánh giá)</span>
+          </div>
+
+          <div className="tutor-card__tags">
+            <span className="tutor-card__tag">{cls.subjectName}</span>
+            <span className="tutor-card__tag">Lớp {cls.grade}</span>
+          </div>
+        </div>
+      </div>
+
+      <p className="tutor-card__desc" style={{ fontSize: 13, marginTop: 8, color: "#666" }}>
+        Gia sư: <strong>{cls.tutorName}</strong> · {cls.durationMinutes} phút/buổi ·{" "}
+        {cls.currentStudents}/{cls.maxStudents} học viên
+      </p>
+
+      <div className="tutor-card__bottom">
+        <div>
+          <p className="tutor-card__fee-label">HỌC PHÍ/BUỔI</p>
+          <p className="tutor-card__fee">
+            {cls.pricePerSession?.toLocaleString("vi-VN")}
+            <span>đ</span>
+          </p>
+        </div>
+
+        <button
+          className="tutor-card__btn"
+          disabled={cls.isFull}
+          onClick={onBook}
+          style={{ opacity: cls.isFull ? 0.5 : 1 }}
+        >
+          {cls.isFull ? "Hết chỗ" : "Đặt lịch"}
+        </button>
+      </div>
+    </article>
   );
 }

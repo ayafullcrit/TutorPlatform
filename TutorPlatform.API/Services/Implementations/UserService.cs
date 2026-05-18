@@ -174,8 +174,33 @@ namespace TutorPlatform.API.Services.Implementations
                 );
             }
         }
-    
-     private UpdateProfileResponse MapToUserProfile(Models.Entities.User user)
+
+        public async Task<ApiResponse<List<UpdateProfileResponse>>> GetAllUsersAsync()
+        {
+            try
+            {
+                var users = await _context.Users
+                    .Include(u => u.Student)
+                    .Include(u => u.Tutor)
+                    .ToListAsync();
+
+                var profiles = users.Select(u => MapToUserProfile(u)).ToList();
+
+                return new ApiResponse<List<UpdateProfileResponse>>(
+                    profiles,
+                    "Lấy danh sách người dùng thành công"
+                );
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<List<UpdateProfileResponse>>(
+                    "Đã xảy ra lỗi khi lấy danh sách người dùng",
+                    new List<string> { ex.Message }
+                );
+            }
+        }
+
+        private UpdateProfileResponse MapToUserProfile(Models.Entities.User user)
         {
             var profile = new UpdateProfileResponse
             {

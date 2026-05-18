@@ -13,7 +13,7 @@ namespace TutorPlatform.API.Services.Implementations
         private readonly ApplicationDbContext _context;
         public ClassService(ApplicationDbContext context)
         {
-            if (_context == null) _context = context;
+            _context = context;
         }
         //Create class
         public async Task<ApiResponse<ClassResponse>> CreateClassAsync(

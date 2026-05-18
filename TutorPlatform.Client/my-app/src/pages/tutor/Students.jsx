@@ -1,19 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TutorStudentTable from "../../components/tutor/TutorStudentTable";
 import TutorRequestCard from "../../components/tutor/TutorRequestCard";
-import { tutorStudents, tutorRequests } from "../../mock/mockTutorStudents";
+import { getTutorBookings, confirmBooking, cancelBookingByTutor } from "../../services/bookingService";
 
 export default function Students() {
   const [tab, setTab] = useState("list");
 
-  const [students, setStudents] = useState(tutorStudents);
-  const [requests, setRequests] = useState(tutorRequests);
+  const [students, setStudents] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+
+  useEffect(() => {
+    loadBookings();
+  }, []);
+
+  const loadBookings = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await getTutorBookings();
+      if (result?.success && result.data) {
+        const allBookings = result.data;
+        
+        // Map bookings to "students" (Confirmed, Completed)
+        // BookingStatus: Pending=1, Confirmed=2, Completed=3, Cancelled=4
+        const activeStudents = allBookings
+          .filter(b => b.status === 2 || b.status === 3)
+          .map(b => ({
+            id: b.id,
+            name: b.studentName || "Học viên",
+            subject: b.subjectName || b.classTitle || "Chưa rõ",
+            status: b.status === 2 ? "active" : "completed",
+            progress: 0, // Backend might not have progress yet
+            next: b.startTime ? new Date(b.startTime).toLocaleString("vi-VN") : "Chưa có lịch",
+            userId: b.studentUserId
+          }));
+          
+        // Map bookings to "requests" (Pending)
+        const pendingRequests = allBookings
+          .filter(b => b.status === 1)
+          .map(b => ({
+            id: b.id,
+            name: b.studentName || "Học viên mới",
+            subject: b.subjectName || b.classTitle || "Đăng ký lớp",
+            time: b.startTime ? new Date(b.startTime).toLocaleString("vi-VN") : "Gần đây",
+            message: b.notes || "Muốn đăng ký học cùng gia sư."
+          }));
+
+        setStudents(activeStudents);
+        setRequests(pendingRequests);
+      }
+    } catch (err) {
+      console.error("Failed to load bookings:", err);
+      setError("Không thể tải danh sách học viên");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredStudents = students.filter((student) => {
     const matchSearch =
@@ -28,52 +78,51 @@ export default function Students() {
 
   const handleAddStudent = (e) => {
     e.preventDefault();
-
-    const form = e.target;
-
-    const newStudent = {
-      name: form.name.value,
-      subject: form.subject.value,
-      status: "active",
-      progress: Number(form.progress.value) || 0,
-      next: form.next.value || "Chưa có lịch",
-    };
-
-    setStudents([newStudent, ...students]);
+    alert("Vui lòng tạo lớp học để nhận học viên mới.");
     setIsAddOpen(false);
-    form.reset();
   };
 
-  const handleApproveRequest = (request) => {
-    const newStudent = {
-      name: request.name,
-      subject: request.subject,
-      status: "active",
-      progress: 0,
-      next: "Chờ xếp lịch",
-    };
-
-    setStudents([newStudent, ...students]);
-    setRequests(requests.filter((item) => item.name !== request.name));
+  const handleApproveRequest = async (request) => {
+    try {
+      const result = await confirmBooking(request.id);
+      if (result.success) {
+        alert("Đã phê duyệt học viên!");
+        loadBookings();
+      }
+    } catch (err) {
+      alert("Lỗi khi phê duyệt: " + (err.response?.data?.message || err.message));
+    }
   };
 
-  const handleRejectRequest = (request) => {
-    setRequests(requests.filter((item) => item.name !== request.name));
+  const handleRejectRequest = async (request) => {
+    if (!window.confirm("Bạn có chắc muốn từ chối yêu cầu này?")) return;
+    try {
+      const result = await cancelBookingByTutor(request.id);
+      if (result.success) {
+        alert("Đã từ chối yêu cầu.");
+        loadBookings();
+      }
+    } catch (err) {
+      alert("Lỗi khi từ chối: " + (err.response?.data?.message || err.message));
+    }
   };
 
   const handlePauseStudent = (student) => {
-    setStudents(
-      students.map((item) =>
-        item.name === student.name
-          ? { ...item, status: "suspended", next: "Đang tạm dừng" }
-          : item
-      )
-    );
+    alert("Tính năng này đang được phát triển.");
   };
 
-  const handleDeleteStudent = (student) => {
-    setStudents(students.filter((item) => item.name !== student.name));
-    setSelectedStudent(null);
+  const handleDeleteStudent = async (student) => {
+    if (!window.confirm("Bạn có chắc muốn hủy lớp học với học viên này?")) return;
+    try {
+      const result = await cancelBookingByTutor(student.id);
+      if (result.success) {
+        alert("Đã hủy lớp học.");
+        loadBookings();
+        setSelectedStudent(null);
+      }
+    } catch (err) {
+      alert("Lỗi: " + (err.response?.data?.message || err.message));
+    }
   };
 
   return (
@@ -94,6 +143,10 @@ export default function Students() {
           Thêm học viên
         </button>
       </div>
+
+      {error && (
+        <div style={{ color: "red", marginBottom: 20 }}>{error}</div>
+      )}
 
       <div className="tutor-students__tabs">
         <button
@@ -118,7 +171,9 @@ export default function Students() {
         </button>
       </div>
 
-      {tab === "list" ? (
+      {loading ? (
+        <div style={{ textAlign: "center", padding: 40 }}>Đang tải...</div>
+      ) : tab === "list" ? (
         <TutorStudentTable
           students={filteredStudents}
           searchTerm={searchTerm}
@@ -142,7 +197,7 @@ export default function Students() {
           ) : (
             requests.map((item) => (
               <TutorRequestCard
-                key={item.name}
+                key={item.id}
                 item={item}
                 onApprove={() => handleApproveRequest(item)}
                 onReject={() => handleRejectRequest(item)}
@@ -156,51 +211,29 @@ export default function Students() {
         <div className="tutor-modal">
           <div className="tutor-modal__content">
             <h2>Thêm học viên mới</h2>
+            <p style={{ margin: "10px 0", color: "#666" }}>
+              Để thêm học viên, bạn nên tạo một lớp học công khai. Học viên sẽ tìm thấy và đăng ký vào lớp của bạn.
+            </p>
 
-            <form onSubmit={handleAddStudent}>
-              <label>Tên học viên</label>
-              <input
-                name="name"
-                required
-                placeholder="VD: Nguyễn Văn An"
-              />
+            <div className="tutor-modal__actions">
+              <button
+                type="button"
+                className="tutor-btn tutor-btn--ghost"
+                onClick={() => setIsAddOpen(false)}
+              >
+                Đóng
+              </button>
 
-              <label>Môn học</label>
-              <input
-                name="subject"
-                required
-                placeholder="VD: Toán lớp 12"
-              />
-
-              <label>Tiến độ ban đầu (%)</label>
-              <input
-                name="progress"
-                type="number"
-                min="0"
-                max="100"
-                placeholder="VD: 20"
-              />
-
-              <label>Buổi kế tiếp</label>
-              <input
-                name="next"
-                placeholder="VD: 14:00 - Mai"
-              />
-
-              <div className="tutor-modal__actions">
-                <button
-                  type="button"
-                  className="tutor-btn tutor-btn--ghost"
-                  onClick={() => setIsAddOpen(false)}
-                >
-                  Hủy
-                </button>
-
-                <button type="submit" className="tutor-btn tutor-btn--primary">
-                  Thêm học viên
-                </button>
-              </div>
-            </form>
+              <button 
+                className="tutor-btn tutor-btn--primary"
+                onClick={() => {
+                  setIsAddOpen(false);
+                  // navigate to classes or similar logic
+                }}
+              >
+                Đi đến Quản lý lớp học
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -214,13 +247,10 @@ export default function Students() {
               <strong>Môn học:</strong> {selectedStudent.subject}
             </p>
             <p>
-              <strong>Trạng thái:</strong> {selectedStudent.status}
+              <strong>Trạng thái:</strong> {selectedStudent.status === "active" ? "Đang học" : "Đã hoàn thành"}
             </p>
             <p>
-              <strong>Tiến độ:</strong> {selectedStudent.progress}%
-            </p>
-            <p>
-              <strong>Buổi kế tiếp:</strong> {selectedStudent.next}
+              <strong>Buổi gần nhất:</strong> {selectedStudent.next}
             </p>
 
             <div className="tutor-modal__actions">
@@ -242,7 +272,7 @@ export default function Students() {
                 className="tutor-btn tutor-btn--danger"
                 onClick={() => handleDeleteStudent(selectedStudent)}
               >
-                Xóa
+                Hủy lớp
               </button>
             </div>
           </div>

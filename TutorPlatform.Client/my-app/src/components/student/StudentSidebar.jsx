@@ -1,13 +1,22 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const menuItems = [
   { to: "/student/dashboard", label: "Tổng quan", icon: "dashboard" },
   { to: "/student/find-tutor", label: "Tìm gia sư", icon: "search" },
   { to: "/student/schedule", label: "Lịch trình", icon: "calendar_month" },
+  { to: "/student/wallet", label: "Ví của tôi", icon: "account_balance_wallet" },
   { to: "/student/profile", label: "Hồ sơ cá nhân", icon: "person" },
 ];
 
 export default function StudentSidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   return (
     <div className="student-sidebar">
       <div className="student-sidebar__brand">
@@ -45,7 +54,7 @@ export default function StudentSidebar() {
           </div>
         </div>
 
-        <button className="student-sidebar__logout">
+        <button onClick={handleLogout} className="student-sidebar__logout">
           <span className="material-symbols-outlined student-sidebar__icon">
             logout
           </span>

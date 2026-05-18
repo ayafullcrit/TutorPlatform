@@ -1,15 +1,10 @@
 import { useState, useEffect } from "react";
 import TutorChartCard from "../../components/tutor/TutorChartCard";
 import TutorTransactionItem from "../../components/tutor/TutorTransactionItem";
-import { getTutorEarnings } from "../../services/dashboardService";
-import { getUserTransactions } from "../../services/transactionService";
-import { getCurrentUser } from "../../services/authService";
+import { getWallet } from "../../services/transactionService";
 
 export default function Finance() {
-  const [balance, setBalance] = useState("₫0");
-  const [monthIncome, setMonthIncome] = useState("₫0");
-  const [pendingFee, setPendingFee] = useState("₫0");
-  const [transactions, setTransactions] = useState([]);
+  const [wallet, setWallet] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,21 +14,9 @@ export default function Finance() {
   const loadFinanceData = async () => {
     try {
       setLoading(true);
-      const user = getCurrentUser();
-      if (!user) return;
-
-      // Get earnings data
-      const earningsData = await getTutorEarnings(user.id);
-      if (earningsData.data) {
-        setBalance(earningsData.data.currentBalance || "₫0");
-        setMonthIncome(earningsData.data.monthlyIncome || "₫0");
-        setPendingFee(earningsData.data.pendingFee || "₫0");
-      }
-
-      // Get transactions
-      const transactionsData = await getUserTransactions(user.id);
-      if (transactionsData.data) {
-        setTransactions(transactionsData.data.slice(0, 5));
+      const result = await getWallet();
+      if (result.success) {
+        setWallet(result.data);
       }
     } catch (error) {
       console.error("Failed to load finance data:", error);
@@ -59,14 +42,14 @@ export default function Finance() {
         <button className="tutor-btn tutor-btn--ghost">Xuất báo cáo</button>
       </div>
 
-      {loading ? (
+      {loading && !wallet ? (
         <div style={{ textAlign: "center", padding: "40px" }}>Đang tải dữ liệu tài chính...</div>
       ) : (
         <>
           <section className="tutor-finance__summary">
             <div className="tutor-finance__balance">
               <p>Số dư hiện tại</p>
-              <h2>{balance}</h2>
+              <h2>{wallet?.balance?.toLocaleString("vi-VN")}đ</h2>
               <div className="tutor-finance__actions">
                 <button onClick={handleWithdraw}>Rút tiền</button>
                 <button>Chi tiết</button>
@@ -75,16 +58,16 @@ export default function Finance() {
 
             <div className="tutor-finance__small-card tutor-card">
               <span className="material-symbols-outlined">trending_up</span>
-              <p>Thu nhập tháng này</p>
-              <h3>{monthIncome}</h3>
-              <small style={{ color: "var(--tutor-success)" }}>+12% so với tháng trước</small>
+              <p>Tổng thu nhập</p>
+              <h3>{wallet?.totalEarned?.toLocaleString("vi-VN")}đ</h3>
+              <small style={{ color: "var(--tutor-success)" }}>Đã quyết toán</small>
             </div>
 
             <div className="tutor-finance__small-card tutor-card">
               <span className="material-symbols-outlined">receipt_long</span>
-              <p>Học phí chờ thu</p>
-              <h3>{pendingFee}</h3>
-              <small style={{ color: "var(--tutor-muted)" }}>Từ các học viên</small>
+              <p>Đã rút tiền</p>
+              <h3>0đ</h3>
+              <small style={{ color: "var(--tutor-muted)" }}>Về tài khoản ngân hàng</small>
             </div>
           </section>
 
@@ -93,15 +76,15 @@ export default function Finance() {
 
             <div className="tutor-transactions tutor-card">
               <h3>Giao dịch gần đây</h3>
-              {transactions.length > 0 ? (
-                transactions.map((item) => (
+              {wallet?.recentTransactions?.length > 0 ? (
+                wallet.recentTransactions.map((item) => (
                   <TutorTransactionItem 
                     key={item.id} 
                     item={{
-                      name: `${item.type}`,
+                      name: item.description,
                       amount: item.amount,
-                      date: new Date(item.createdAt).toLocaleDateString('vi-VN'),
-                      status: item.status,
+                      date: item.timeAgo,
+                      status: item.typeText,
                     }} 
                   />
                 ))

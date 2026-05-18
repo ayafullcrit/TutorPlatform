@@ -1,4 +1,4 @@
-﻿namespace TutorPlatform.API.Models.DTOs.Responses.Payment
+namespace TutorPlatform.API.Models.DTOs.Responses.Payment
 {
     public class TransactionResponse
     {
@@ -15,6 +15,9 @@
         public DateTime CreatedAt { get; set; }
         public string TimeAgo { get; set; }
         public string FormattedAmount { get; set; }  // "+150,000 VNĐ"
+        public string? TutorName { get; set; }
+        public string? BankInfo { get; set; }
+        public string? Status { get; set; }
     }
 
     public class WalletSummary

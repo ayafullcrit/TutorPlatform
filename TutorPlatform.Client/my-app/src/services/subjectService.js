@@ -1,51 +1,35 @@
 import api from "./api";
 
+// SubjectController route: api/[controller] = api/subjects
+// GET /api/subjects       -> GetAllSubjects  (AllowAnonymous)
+// GET /api/subjects/{id}  -> GetSubjectById  (AllowAnonymous)
+
 export const getAllSubjects = async () => {
-  try {
-    const response = await api.get("/subject");
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching subjects:", error);
-    throw error;
-  }
+  const response = await api.get("/subjects");
+  // Backend trả về ApiResponse<List<SubjectResponse>>
+  // { success, message, data: [ { id, name, description, isActive, totalClasses } ] }
+  return response.data;
 };
 
 export const getSubjectById = async (id) => {
-  try {
-    const response = await api.get(`/subject/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching subject ${id}:`, error);
-    throw error;
-  }
+  const response = await api.get(`/subjects/${id}`);
+  return response.data;
 };
 
+// Các hàm dưới đây không có endpoint backend tương ứng (SubjectController chỉ có GET)
+// Giữ lại nhưng sẽ báo lỗi 404 nếu gọi - cần backend implement thêm nếu muốn dùng
+
 export const createSubject = async (subjectData) => {
-  try {
-    const response = await api.post("/subject", subjectData);
-    return response.data;
-  } catch (error) {
-    console.error("Error creating subject:", error);
-    throw error;
-  }
+  const response = await api.post("/subjects", subjectData);
+  return response.data;
 };
 
 export const updateSubject = async (id, subjectData) => {
-  try {
-    const response = await api.put(`/subject/${id}`, subjectData);
-    return response.data;
-  } catch (error) {
-    console.error(`Error updating subject ${id}:`, error);
-    throw error;
-  }
+  const response = await api.put(`/subjects/${id}`, subjectData);
+  return response.data;
 };
 
 export const deleteSubject = async (id) => {
-  try {
-    const response = await api.delete(`/subject/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error deleting subject ${id}:`, error);
-    throw error;
-  }
+  const response = await api.delete(`/subjects/${id}`);
+  return response.data;
 };

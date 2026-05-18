@@ -17,6 +17,9 @@ namespace TutorPlatform.API.Services.Interfaces
         Task<ApiResponse<List<TransactionResponse>>> GetTransactionHistoryAsync(
             int userId, int page = 1, int pageSize = 20);
 
+        // Lấy tất cả giao dịch trong hệ thống (dùng cho Admin)
+        Task<ApiResponse<List<TransactionResponse>>> GetAdminTransactionsAsync();
+
         // Ghi nhận giao dịch nội bộ (dùng bởi BookingService, ReviewService)
         Task<Transaction> RecordTransactionAsync(
             int userId,

@@ -10,5 +10,6 @@ namespace TutorPlatform.API.Services.Interfaces
         Task<ApiResponse<UpdateProfileResponse>> UpdateProfileAsync(int UserId, UpdateProfileRequest request);
         Task<ApiResponse<UpdateProfileResponse>> UpdateStudentProfileAsync(int UserId, UpdateStudentProfileRequest request);
         Task<ApiResponse<UpdateProfileResponse>> UpdateTutorProfileAsync(int UserId, UpdateTutorProfileRequest request);
+        Task<ApiResponse<List<UpdateProfileResponse>>> GetAllUsersAsync();
     }
 }

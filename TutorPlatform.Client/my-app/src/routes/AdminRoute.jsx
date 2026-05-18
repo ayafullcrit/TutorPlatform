@@ -1,16 +1,16 @@
 import { Navigate, Outlet } from "react-router-dom";
 
+// Backend UserRole enum: Student=1, Tutor=2, Admin=3
 export default function AdminRoute() {
   const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user") || "null");
 
-  // chưa login
   if (!token) {
     return <Navigate to="/login" replace />;
   }
 
-  // không phải admin
-  if (!user || user.role !== "admin") {
+  // role là số nguyên từ backend (Admin = 3)
+  if (!user || user.role !== 3) {
     return <Navigate to="/" replace />;
   }
 

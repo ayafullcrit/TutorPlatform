@@ -1,18 +1,19 @@
 import api from "./api";
 
+// Backend trả về: { success, message, data: { token, expiresAt, user: { id, role (int), ... } } }
+// UserRole enum: Student=1, Tutor=2, Admin=3
+
 export const loginApi = async (loginData) => {
   try {
     const response = await api.post("/auth/login", loginData);
+
     if (response.data.success) {
-      const { token, data } = response.data;
-      // Store token and user info
+      const { token, user } = response.data.data; // data.data = AuthResponse
       localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(data));
-      return {
-        token,
-        user: data,
-      };
+      localStorage.setItem("user", JSON.stringify(user));
+      return { token, user };
     }
+
     throw new Error(response.data.message || "Đăng nhập thất bại");
   } catch (error) {
     console.error("Login error:", error);
@@ -33,11 +34,24 @@ export const registerApi = async (registerData) => {
 export const logoutApi = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
-  // Optional: call backend logout if needed
-  // return api.post("/auth/logout");
 };
 
 export const getCurrentUser = () => {
   const user = localStorage.getItem("user");
   return user ? JSON.parse(user) : null;
 };
+
+// Helper: lấy role text từ số
+// Backend UserRole enum: Student=1, Tutor=2, Admin=3
+export const getRoleText = (role) => {
+  switch (role) {
+    case 1: return "student";
+    case 2: return "tutor";
+    case 3: return "admin";
+    default: return null;
+  }
+};
+
+export const isAdmin = (user) => user?.role === 3;
+export const isTutor = (user) => user?.role === 2;
+export const isStudent = (user) => user?.role === 1;

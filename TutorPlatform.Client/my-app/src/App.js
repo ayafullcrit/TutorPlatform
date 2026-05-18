@@ -15,13 +15,16 @@ import SystemConfig from "./pages/admin/SystemConfig";
 import ClassManagement from "./pages/admin/ClassManagement";
 
 /* Student */
+import StudentRoute from "./routes/StudentRoute";
 import StudentLayout from "./layouts/StudentLayout";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import FindTutor from "./pages/student/FindTutor";
 import Schedule from "./pages/student/Schedule";
 import Profile from "./pages/student/Profile";
+import Wallet from "./pages/student/Wallet";
 
 /* Tutor */
+import TutorRoute from "./routes/TutorRoute";
 import TutorLayout from "./layouts/TutorLayout";
 import TutorDashboard from "./pages/tutor/Dashboard";
 import TutorClasses from "./pages/tutor/Classes";
@@ -53,22 +56,27 @@ function App() {
         </Route>
 
         {/* Student */}
-        <Route path="/student" element={<StudentLayout />}>
-          <Route path="dashboard" element={<StudentDashboard />} />
-          <Route path="find-tutor" element={<FindTutor />} />
-          <Route path="schedule" element={<Schedule />} />
-          <Route path="profile" element={<Profile />} />
+        <Route element={<StudentRoute />}>
+          <Route path="/student" element={<StudentLayout />}>
+            <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="find-tutor" element={<FindTutor />} />
+            <Route path="schedule" element={<Schedule />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="wallet" element={<Wallet />} />
+          </Route>
         </Route>
 
         {/* Tutor */}
-        <Route path="/tutor" element={<TutorLayout />}>
-          <Route path="dashboard" element={<TutorDashboard />} />
-          <Route path="classes" element={<TutorClasses />} />
-          <Route path="students" element={<TutorStudents />} />
-          <Route path="schedule" element={<TutorSchedule />} />
-          <Route path="finance" element={<TutorFinance />} />
-          <Route path="profile" element={<TutorProfile />} />
-          <Route path="subjects" element={<TutorSubjects />} />
+        <Route element={<TutorRoute />}>
+          <Route path="/tutor" element={<TutorLayout />}>
+            <Route path="dashboard" element={<TutorDashboard />} />
+            <Route path="classes" element={<TutorClasses />} />
+            <Route path="students" element={<TutorStudents />} />
+            <Route path="schedule" element={<TutorSchedule />} />
+            <Route path="finance" element={<TutorFinance />} />
+            <Route path="profile" element={<TutorProfile />} />
+            <Route path="subjects" element={<TutorSubjects />} />
+          </Route>
         </Route>
       </Routes>
     </Router>

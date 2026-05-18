@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import StatCard from "../../components/student/StatCard";
-import { getStudentStats, getChartData } from "../../services/dashboardService";
+import { getStudentStats } from "../../services/dashboardService";
 import { getStudentBookings } from "../../services/bookingService";
 
 export default function Dashboard() {
@@ -20,27 +20,56 @@ export default function Dashboard() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      // Get student stats
-      const statsData = await getStudentStats();
-      if (statsData.data) {
+
+      // Fetch both stats and bookings
+      const [statsData, bookingsData] = await Promise.all([
+        getStudentStats(),
+        getStudentBookings()
+      ]);
+
+      // Handle Bookings & Manual Stats Fallback
+      if (bookingsData?.success && bookingsData.data) {
+        const allBookings = bookingsData.data;
+        setBookings(allBookings.slice(0, 5)); // Show more than 2
+
+        const completedBookings = allBookings.filter(b => b.status === 3);
+        const uniqueClasses = new Set(allBookings.map(b => b.classId)).size;
+
+        // Set initial stats from bookings
         setStats({
-          courses: statsData.data.totalCourses || 0,
-          hours: statsData.data.totalHours || "0h",
-          rating: statsData.data.averageRating || 0,
-          attendance: statsData.data.attendanceRate || 0,
+          courses: uniqueClasses,
+          hours: `${completedBookings.length * 1.5 | 0}h`,
+          rating: 0,
+          attendance: allBookings.length > 0
+            ? Math.round((completedBookings.length / allBookings.length) * 100)
+            : 0,
         });
       }
 
-      // Get upcoming bookings
-      const bookingsData = await getStudentBookings();
-      if (bookingsData.data) {
-        setBookings(bookingsData.data.slice(0, 2));
+      // Overwrite with dedicated stats API if available
+      if (statsData?.success && statsData.data) {
+        const d = statsData.data;
+        setStats(prev => ({
+          courses: d.totalCourses ?? prev.courses,
+          hours: `${d.totalHours ?? 0}h`,
+          rating: d.averageRating ?? prev.rating,
+          attendance: d.attendanceRate ?? prev.attendance,
+        }));
       }
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // BookingStatus: Pending=1, Confirmed=2, Completed=3, Cancelled=4, NoShow=5
+  const statusText = {
+    1: "Chờ xác nhận",
+    2: "Đã xác nhận",
+    3: "Hoàn thành",
+    4: "Đã hủy",
+    5: "Không đến",
   };
 
   return (
@@ -60,30 +89,10 @@ export default function Dashboard() {
       </section>
 
       <section className="student-dashboard__stats">
-        <StatCard 
-          icon="menu_book" 
-          title="Khóa học" 
-          value={stats.courses} 
-          trend="+12%" 
-        />
-        <StatCard 
-          icon="schedule" 
-          title="Giờ học" 
-          value={stats.hours} 
-          trend="+12%" 
-        />
-        <StatCard 
-          icon="star" 
-          title="Đánh giá" 
-          value={stats.rating} 
-          trend="+12%" 
-        />
-        <StatCard 
-          icon="trending_up" 
-          title="Điểm chuyên cần" 
-          value={`${stats.attendance}%`} 
-          trend="+12%" 
-        />
+        <StatCard icon="menu_book" title="Khóa học" value={stats.courses} trend="+12%" />
+        <StatCard icon="schedule" title="Giờ học" value={stats.hours} trend="+12%" />
+        <StatCard icon="star" title="Đánh giá" value={stats.rating || "--"} trend="+12%" />
+        <StatCard icon="trending_up" title="Điểm chuyên cần" value={`${stats.attendance}%`} trend="+12%" />
       </section>
 
       <section className="student-dashboard__grid">
@@ -106,12 +115,8 @@ export default function Dashboard() {
           </div>
 
           <div className="student-dashboard__chart-labels">
-            <span>T3</span>
-            <span>T4</span>
-            <span>T5</span>
-            <span>T6</span>
-            <span>T7</span>
-            <span>CN</span>
+            <span>T3</span><span>T4</span><span>T5</span>
+            <span>T6</span><span>T7</span><span>CN</span>
           </div>
         </div>
 
@@ -123,25 +128,27 @@ export default function Dashboard() {
 
           <div className="student-dashboard__schedule-list">
             {loading ? (
-              <div style={{ padding: "20px", textAlign: "center" }}>
-                Đang tải...
-              </div>
+              <div style={{ padding: "20px", textAlign: "center" }}>Đang tải...</div>
             ) : bookings.length > 0 ? (
               bookings.map((booking) => (
                 <div key={booking.id} className="student-dashboard__schedule-item">
                   <div className="student-dashboard__schedule-date">
-                    <span>{new Date(booking.bookingDate).toLocaleDateString('vi-VN', { weekday: 'short' })}</span>
-                    <strong>{new Date(booking.bookingDate).getDate()}</strong>
+                    <span>{new Date(booking.startTime).toLocaleDateString("vi-VN", { weekday: "short" })}</span>
+                    <strong>{new Date(booking.startTime).getDate()}</strong>
                   </div>
                   <div>
                     <div className="student-dashboard__schedule-subject">
-                      {booking.class?.subject || "Học với gia sư"}
+                      {booking.subjectName || booking.classTitle || "Học với gia sư"}
                     </div>
                     <div className="student-dashboard__schedule-time">
-                      {new Date(booking.bookingDate).toLocaleTimeString('vi-VN', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
+                      {new Date(booking.startTime).toLocaleTimeString("vi-VN", {
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })}
+                      {" · "}
+                      <span style={{ fontSize: "12px", color: "#999" }}>
+                        {statusText[booking.status] ?? ""}
+                      </span>
                     </div>
                   </div>
                 </div>

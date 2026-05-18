@@ -90,6 +90,15 @@ namespace TutorPlatform.API.Controllers
             return Ok(result);
         }
 
+        // GET: api/users
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var result = await _userService.GetAllUsersAsync();
+            return Ok(result);
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
