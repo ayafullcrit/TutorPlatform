@@ -1,0 +1,16 @@
+@echo off
+echo Starting TutorPlatform API and Client...
+
+echo Checking port 5102...
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :5102 ^| findstr LISTENING') do (
+    echo Port 5102 is in use by PID %%a. Stopping process...
+    taskkill /PID %%a /F >nul 2>&1
+)
+
+echo Starting Backend...
+start "TutorPlatform API" cmd /k "cd TutorPlatform.API && dotnet run"
+
+echo Starting Frontend...
+start "TutorPlatform Client" cmd /k "cd TutorPlatform.Client\my-app && npm start"
+
+echo Both services are starting!

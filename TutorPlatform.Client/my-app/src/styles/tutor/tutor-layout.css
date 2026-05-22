@@ -1,0 +1,116 @@
+.tutor-layout {
+  min-height: 100vh;
+  display: flex;
+  background: var(--tutor-bg);
+  color: var(--tutor-text);
+}
+
+.tutor-layout__sidebar {
+  width: var(--tutor-sidebar-width);
+  flex-shrink: 0;
+  background: var(--tutor-bg);
+  border-right: 1px solid var(--tutor-border);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.tutor-layout__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tutor-layout__content {
+  padding: 32px;
+}
+
+.tutor-topbar {
+  height: 78px;
+  padding: 18px 32px;
+  background: var(--tutor-bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tutor-topbar__search {
+  width: 360px;
+  background: var(--tutor-surface);
+  border: 1px solid var(--tutor-border);
+  border-radius: 999px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--tutor-muted);
+}
+
+.tutor-topbar__search input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  color: var(--tutor-text);
+}
+
+.tutor-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.tutor-topbar__icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--tutor-primary);
+  cursor: pointer;
+}
+
+.tutor-topbar__profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--tutor-surface);
+  border-radius: 18px;
+  padding: 8px 14px 8px 8px;
+  border: 1px solid var(--tutor-border);
+}
+
+.tutor-topbar__profile img {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.tutor-topbar__name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.tutor-topbar__role {
+  color: var(--tutor-primary);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+@media (max-width: 992px) {
+  .tutor-layout__sidebar {
+    display: none;
+  }
+
+  .tutor-layout__content {
+    padding: 20px;
+  }
+
+  .tutor-topbar {
+    padding: 16px 20px;
+  }
+
+  .tutor-topbar__search {
+    width: 220px;
+  }
+}
