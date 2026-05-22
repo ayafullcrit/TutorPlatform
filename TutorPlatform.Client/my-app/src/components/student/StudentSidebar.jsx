@@ -4,6 +4,7 @@ const menuItems = [
   { to: "/student/dashboard", label: "Tổng quan", icon: "dashboard" },
   { to: "/student/find-tutor", label: "Tìm gia sư", icon: "search" },
   { to: "/student/schedule", label: "Lịch trình", icon: "calendar_month" },
+  { to: "/student/reviews", label: "Đánh giá", icon: "rate_review" },
   { to: "/student/wallet", label: "Ví của tôi", icon: "account_balance_wallet" },
   { to: "/student/profile", label: "Hồ sơ cá nhân", icon: "person" },
 ];

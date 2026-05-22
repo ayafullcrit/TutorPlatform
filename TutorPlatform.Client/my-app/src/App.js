@@ -22,6 +22,7 @@ import FindTutor from "./pages/student/FindTutor";
 import Schedule from "./pages/student/Schedule";
 import Profile from "./pages/student/Profile";
 import Wallet from "./pages/student/Wallet";
+import Reviews from "./pages/student/Reviews";
 
 /* Tutor */
 import TutorRoute from "./routes/TutorRoute";
@@ -63,6 +64,7 @@ function App() {
             <Route path="schedule" element={<Schedule />} />
             <Route path="profile" element={<Profile />} />
             <Route path="wallet" element={<Wallet />} />
+            <Route path="reviews" element={<Reviews />} />
           </Route>
         </Route>
 
