@@ -5,7 +5,7 @@ import "./Tutors.css";
 const tutors = [
   {
     id: 1,
-    name: "Nguyễn Văn A",
+    name: "Nguyễn Đình Minh",
     subject: "Toán lớp 12",
     rating: "4.9",
     reviews: 126,
@@ -29,7 +29,7 @@ const tutors = [
   },
   {
     id: 2,
-    name: "Trần Thị B",
+    name: "Trần Thị Bích Phương",
     subject: "IELTS Writing",
     rating: "4.8",
     reviews: 98,
@@ -52,7 +52,7 @@ const tutors = [
   },
   {
     id: 3,
-    name: "Lê Minh C",
+    name: "Lê Minh Tâm",
     subject: "Lập trình Java",
     rating: "5.0",
     reviews: 74,
@@ -71,6 +71,30 @@ const tutors = [
       {
         student: "Thanh Bình",
         content: "Giải thích dễ hiểu, đặc biệt là phần OOP và SQL.",
+      },
+    ],
+  },
+  {
+    id: 4,
+    name: "Phạm Đình Thắng",
+    subject: "Vật Lý lớp 10-12",
+    rating: "5.0",
+    reviews: 74,
+    price: "300.000đ/giờ",
+    experience: "3 năm kinh nghiệm",
+    badge: "Sinh Viên Sư Phạm Lý",
+    desc: "Hỗ trợ Vật Lý lớp 10-12, giúp học viên hiểu bản chất và giải quyết bài tập hiệu quả.",
+    detail:
+      "Gia sư hướng dẫn tận tâm ",
+    feedbacks: [
+      {
+        student: "Đức Trí",
+        content:
+          "Anh hướng dẫn rất thực tế, giúp em hiểu cách làm bài tập rõ hơn.",
+      },
+      {
+        student: "Thanh Bình",
+        content: "Giải thích dễ hiểu, đặc biệt là phần cơ học và điện từ.",
       },
     ],
   },
