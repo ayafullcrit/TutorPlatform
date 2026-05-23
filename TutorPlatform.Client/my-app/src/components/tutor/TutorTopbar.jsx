@@ -1,9 +1,51 @@
+﻿import { useEffect, useState } from "react";
+import { getCurrentUser, getCurrentUserApi } from "../../services/authService";
+
+const mockTutorProfile = {
+  fullName: "Tran Minh Thang",
+  avatar: "https://i.pravatar.cc/100?img=12",
+  badge: "GIA SU KIM CUONG",
+};
+
 export default function TutorTopbar() {
+  const [profile, setProfile] = useState(mockTutorProfile);
+
+  useEffect(() => {
+    const localUser = getCurrentUser();
+    if (localUser) {
+      setProfile((prev) => ({
+        ...prev,
+        fullName: localUser.fullName || prev.fullName,
+        avatar: localUser.avatar || prev.avatar,
+      }));
+    }
+
+    const loadProfile = async () => {
+      try {
+        const result = await getCurrentUserApi();
+        const user = result?.data;
+        if (!user) return;
+
+        localStorage.setItem("user", JSON.stringify(user));
+        setProfile((prev) => ({
+          ...prev,
+          fullName: user.fullName || prev.fullName,
+          avatar: user.avatar || prev.avatar,
+        }));
+      } catch (error) {
+        // Fallback mock data when API is unavailable
+        console.warn("Using mock topbar profile:", error?.message);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
   return (
     <header className="tutor-topbar">
       <div className="tutor-topbar__search">
         <span className="material-symbols-outlined">search</span>
-        <input placeholder="Tìm kiếm lớp học, học viên, hóa đơn..." />
+        <input placeholder="Tim kiem lop hoc, hoc vien, hoa don..." />
       </div>
 
       <div className="tutor-topbar__actions">
@@ -12,10 +54,10 @@ export default function TutorTopbar() {
         </button>
 
         <div className="tutor-topbar__profile">
-          <img src="https://i.pravatar.cc/100?img=12" alt="Tutor avatar" />
+          <img src={profile.avatar} alt="Tutor avatar" />
           <div>
-            <div className="tutor-topbar__name">Trần Minh Thắng</div>
-            <div className="tutor-topbar__role">Gia sư kim cương</div>
+            <div className="tutor-topbar__name">{profile.fullName}</div>
+            <div className="tutor-topbar__role">{profile.badge}</div>
           </div>
         </div>
       </div>

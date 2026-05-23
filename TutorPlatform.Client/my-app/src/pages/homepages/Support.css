@@ -1,0 +1,96 @@
+.support-hero {
+  padding: 90px 70px 50px;
+  text-align: center;
+}
+
+.support-hero h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 58px;
+  margin: 0;
+}
+
+.support-hero p {
+  max-width: 680px;
+  margin: 20px auto 0;
+  color: #6b6b6b;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.support-content {
+  padding: 30px 70px 90px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 28px;
+}
+
+.faq-box,
+.support-form {
+  background: white;
+  padding: 32px;
+  border-radius: 28px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.06);
+}
+
+.faq-box h2,
+.support-form h2 {
+  font-size: 30px;
+  margin-top: 0;
+}
+
+.faq-item {
+  padding: 20px 0;
+  border-bottom: 1px solid #eee6cf;
+}
+
+.faq-item h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.faq-item p {
+  margin: 0;
+  color: #6b6b6b;
+  line-height: 1.6;
+}
+
+.support-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.support-form input,
+.support-form select,
+.support-form textarea {
+  border: 1px solid #e1d9bd;
+  border-radius: 16px;
+  padding: 15px;
+  font-size: 15px;
+  font-family: Inter, sans-serif;
+}
+
+.support-form textarea {
+  min-height: 140px;
+  resize: none;
+}
+
+.support-form button {
+  border: none;
+  padding: 15px;
+  border-radius: 16px;
+  background: #7c6e27;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .support-content {
+    grid-template-columns: 1fr;
+  }
+
+  .support-hero h1 {
+    font-size: 40px;
+  }
+}

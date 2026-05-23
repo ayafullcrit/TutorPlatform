@@ -61,9 +61,23 @@ export default function Register() {
         setError(result.message || "Đăng ký thất bại");
       }
     } catch (err) {
+      const responseData = err.response?.data;
+      const apiErrors = responseData?.errors;
+
+      let normalizedErrors = "";
+      if (Array.isArray(apiErrors)) {
+        normalizedErrors = apiErrors.join(" | ");
+      } else if (apiErrors && typeof apiErrors === "object") {
+        normalizedErrors = Object.values(apiErrors)
+          .flat()
+          .filter(Boolean)
+          .join(" | ");
+      }
+
       const errMsg =
-        err.response?.data?.message ||
-        err.response?.data?.errors?.[0] ||
+        normalizedErrors ||
+        responseData?.message ||
+        responseData?.title ||
         err.message ||
         "Đăng ký thất bại";
       setError(errMsg);

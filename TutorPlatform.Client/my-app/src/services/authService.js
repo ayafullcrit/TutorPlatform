@@ -31,6 +31,11 @@ export const registerApi = async (registerData) => {
   }
 };
 
+export const getCurrentUserApi = async () => {
+  const response = await api.get("/auth/me");
+  return response.data;
+};
+
 export const logoutApi = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");

@@ -1,0 +1,116 @@
+.classes-hero {
+  padding: 80px 70px 50px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.classes-hero h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 58px;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.classes-hero p {
+  max-width: 650px;
+  font-size: 18px;
+  color: #6b6b6b;
+  line-height: 1.7;
+}
+
+.class-stats {
+  display: grid;
+  gap: 18px;
+}
+
+.class-stats div {
+  background: white;
+  padding: 26px;
+  border-radius: 26px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.06);
+  border-left: 7px solid #7c6e27;
+}
+
+.class-stats h2 {
+  margin: 0;
+  font-size: 42px;
+  color: #7c6e27;
+}
+
+.class-stats p {
+  margin: 6px 0 0;
+}
+
+.classes-section {
+  padding: 30px 70px 80px;
+}
+
+.classes-section h2 {
+  font-size: 34px;
+  margin-bottom: 24px;
+}
+
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.class-card {
+  background: white;
+  padding: 28px;
+  border-radius: 28px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.06);
+  transition: 0.25s;
+}
+
+.class-card:hover {
+  transform: translateY(-6px);
+}
+
+.class-tag {
+  display: inline-block;
+  background: #e8e2c7;
+  color: #7c6e27;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+.class-card h3 {
+  font-size: 24px;
+}
+
+.class-card p {
+  color: #6b6b6b;
+}
+
+.class-card h4 {
+  color: #7c6e27;
+  font-size: 24px;
+}
+
+.class-card button {
+  width: 100%;
+  border: none;
+  padding: 14px;
+  border-radius: 16px;
+  background: #7c6e27;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .classes-hero,
+  .class-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .classes-hero h1 {
+    font-size: 40px;
+  }
+}

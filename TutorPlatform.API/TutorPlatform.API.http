@@ -1,4 +1,4 @@
-@TutorPlatform.API_HostAddress = http://localhost:5101
+@TutorPlatform.API_HostAddress = http://localhost:5102
 
 GET {{TutorPlatform.API_HostAddress}}/weatherforecast/
 Accept: application/json

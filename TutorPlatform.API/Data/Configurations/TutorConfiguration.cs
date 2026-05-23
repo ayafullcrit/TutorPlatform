@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TutorPlatform.API.Models.Entities;
 
@@ -25,6 +25,7 @@ namespace TutorPlatform.API.Data.Configurations
             builder.Property(t => t.HourlyRate)
                 .HasPrecision(18, 2)
                 .HasDefaultValue(0m);
+
         }
     }
 }

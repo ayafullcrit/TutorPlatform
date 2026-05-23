@@ -64,7 +64,7 @@ export default function Profile() {
               {user.fullName?.[0] || "S"}
             </div>
             <div>
-              <h2 style={{ margin: 0, fontSize: "38px", fontWeight: 700 }}>{user.fullName}</h2>
+              <h2 style={{ margin: "18px 0 0", fontSize: "38px", fontWeight: 700 }}>{user.fullName}</h2>
               <p style={{ margin: "6px 0 0", color: "var(--color-primary)", fontWeight: 600 }}>
                 Học viên · {user.email}
               </p>

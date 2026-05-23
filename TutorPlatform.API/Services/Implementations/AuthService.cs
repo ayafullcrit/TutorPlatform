@@ -75,7 +75,7 @@ namespace TutorPlatform.API.Services.Implementations
                     {
                         UserId = user.Id,  // ✅ UserId = Primary Key
                         GradeLevel = request.Grade ?? 10,
-                        School = request.School,
+                        School = request.School ?? string.Empty,
                     };
 
                     _context.Students.Add(student); //JOIN
