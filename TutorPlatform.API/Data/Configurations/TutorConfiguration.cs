@@ -4,18 +4,27 @@ using TutorPlatform.API.Models.Entities;
 
 namespace TutorPlatform.API.Data.Configurations
 {
-    public class TutorConfiguration
+    public class TutorConfiguration : IEntityTypeConfiguration<Tutor>
     {
         public void Configure(EntityTypeBuilder<Tutor> builder)
         {
-            builder.ToTable("Users");
+            // Map tutors to their own table
+            builder.ToTable("Tutors");
             builder.HasKey(t => t.UserId);
+
             builder.Property(t => t.Rating)
                 .HasDefaultValue(0.0);
+
             builder.Property(t => t.TotalReviews)
                 .HasDefaultValue(0);
-           builder.Property(t => t.IsVerified)
+
+            builder.Property(t => t.IsVerified)
                 .HasDefaultValue(false);
+
+            // Ensure HourlyRate has an explicit precision to avoid silent truncation
+            builder.Property(t => t.HourlyRate)
+                .HasPrecision(18, 2)
+                .HasDefaultValue(0m);
         }
     }
 }
