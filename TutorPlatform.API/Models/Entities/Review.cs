@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TutorPlatform.API.Models.Entities
@@ -9,10 +9,10 @@ namespace TutorPlatform.API.Models.Entities
         public int StudentId { get; set; }//nguoi danh gia
         public int TutorId { get; set; }// nguoi duoc danh gia
 
-        public int Rating { get; set; } 
+        public int Rating { get; set; } = 5; 
         public string Comment { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public bool IsVerified { get; set; } 
+        public bool IsVerified { get; set; } = false; 
         public Student Student { get; set; }
         public Tutor Tutor { get; set; }
     }

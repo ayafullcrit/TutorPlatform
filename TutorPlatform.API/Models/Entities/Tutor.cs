@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace TutorPlatform.API.Models.Entities
 {
@@ -6,11 +6,10 @@ namespace TutorPlatform.API.Models.Entities
     {
         [Key]
         public int UserId { get; set; }
-        public double Rating { get; set; }
-
-        public int TotalReviews { get; set; }
-        public bool IsVerified { get; set; }
-        public decimal HourlyRate { get; set; }
+        public double Rating { get; set; } = 0.0;
+        public int TotalReviews { get; set; } = 0;
+        public bool IsVerified { get; set; } = false;
+        public decimal HourlyRate { get; set; } = 0.0m;
 
         public User User { get; set; }
         public ICollection<Booking> Bookings { get; set; }

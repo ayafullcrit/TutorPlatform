@@ -1,11 +1,11 @@
-﻿namespace TutorPlatform.API.Models.Entities
+namespace TutorPlatform.API.Models.Entities
 {
     public class Subject
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
         public ICollection<Class> Classes { get; set; }
     }
 }

@@ -12,19 +12,15 @@ namespace TutorPlatform.API.Data.Configurations
             builder.ToTable("Tutors");
             builder.HasKey(t => t.UserId);
 
-            builder.Property(t => t.Rating)
-                .HasDefaultValue(0.0);
+            builder.Property(t => t.Rating);
 
-            builder.Property(t => t.TotalReviews)
-                .HasDefaultValue(0);
+            builder.Property(t => t.TotalReviews);
 
-            builder.Property(t => t.IsVerified)
-                .HasDefaultValue(false);
+            builder.Property(t => t.IsVerified);
 
             // Ensure HourlyRate has an explicit precision to avoid silent truncation
             builder.Property(t => t.HourlyRate)
-                .HasPrecision(18, 2)
-                .HasDefaultValue(0m);
+                .HasPrecision(18, 2);
 
         }
     }

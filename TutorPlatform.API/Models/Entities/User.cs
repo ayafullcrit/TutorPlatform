@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using TutorPlatform.API.Models.Enums;
 
 namespace TutorPlatform.API.Models.Entities
@@ -15,7 +15,7 @@ namespace TutorPlatform.API.Models.Entities
         public decimal Balance { get; set; }
 
         public UserRole Role { get; set; }
-        public bool IsActivated { get; set; }
+        public bool IsActivated { get; set; } = true;
         public Tutor Tutor { get; set; }
         public Student Student { get; set; }
     }

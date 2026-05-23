@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TutorPlatform.API.Models.Entities;
 
@@ -23,8 +23,7 @@ namespace TutorPlatform.API.Models.Configurations
                 .IsRequired();
 
             builder.Property(r => r.Rating)
-                .IsRequired()
-                .HasDefaultValue(5);
+                .IsRequired();
 
             builder.Property(r => r.Comment)
                 .IsRequired(false)
@@ -36,8 +35,7 @@ namespace TutorPlatform.API.Models.Configurations
                 .ValueGeneratedOnAdd();
 
             builder.Property(r => r.IsVerified)
-                .IsRequired()
-                .HasDefaultValue(false);
+                .IsRequired();
 
             // Indexes
             builder.HasIndex(r => r.StudentId).HasDatabaseName("IX_Reviews_StudentId");

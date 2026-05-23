@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TutorPlatform.API.Models.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,8 +15,6 @@ namespace TutorPlatform.API.Data.Configurations
                 .HasMaxLength(80);
             builder.Property(s => s.Description)
                 .HasMaxLength(500);
-            builder.Property(s => s.IsActive)
-                .HasDefaultValue(true);
 
             //indexing
             builder.HasIndex(s => s.IsActive);

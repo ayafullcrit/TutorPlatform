@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TutorPlatform.API.Models.Entities;
 
@@ -15,8 +15,7 @@ namespace TutorPlatform.API.Data.Configurations
                 .HasMaxLength(255);
             builder.Property(u => u.GradeLevel)
                 .IsRequired();
-            builder.Property(u => u.IsActive)
-                .HasDefaultValue(false);            
+            builder.Property(u => u.IsActive);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TutorPlatform.API.Models.Entities;
 using TutorPlatform.API.Models.Enums;
@@ -38,8 +38,6 @@ namespace TutorPlatform.API.Data.Configurations
                 .IsRequired()
                 .HasConversion<int>();
 
-            builder.Property(u => u.IsActivated)
-                .HasDefaultValue(true);
 
             builder.Property(u => u.Balance)
                 .IsRequired()
