@@ -3,6 +3,10 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Tutors from "./pages/homepages/Tutors";
+import Classes from "./pages/homepages/Classes";
+import About from "./pages/homepages/About";
+import Support from "./pages/homepages/Support";
 
 /* Admin */
 import AdminRoute from "./routes/AdminRoute";
@@ -41,6 +45,10 @@ function App() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<Home />} />
+        <Route path="/tutors" element={<Tutors />} />
+        <Route path="/classes" element={<Classes />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/support" element={<Support />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
