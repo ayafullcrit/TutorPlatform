@@ -6,6 +6,7 @@ namespace TutorPlatform.API.Models.Entities
     public class Review
     {
         public int Id { get; set; }
+        public int? BookingId { get; set; } // buổi học (booking) được đánh giá
         public int StudentId { get; set; }//nguoi danh gia
         public int TutorId { get; set; }// nguoi duoc danh gia
 
@@ -15,5 +16,6 @@ namespace TutorPlatform.API.Models.Entities
         public bool IsVerified { get; set; } = false; 
         public Student Student { get; set; }
         public Tutor Tutor { get; set; }
+        public Booking? Booking { get; set; }
     }
 }

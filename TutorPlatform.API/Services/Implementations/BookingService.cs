@@ -15,6 +15,8 @@ namespace TutorPlatform.API.Services.Implementations
         private readonly ApplicationDbContext _context;
         private readonly INotificationService _notificationService;
         private readonly IPaymentService _paymentService;
+        private const decimal PlatformFeeRate = 0.10m;
+        private const decimal TutorPayoutRate = 1.0m - PlatformFeeRate;
 
         public BookingService(ApplicationDbContext context,
         IPaymentService paymentService,
@@ -25,6 +27,16 @@ namespace TutorPlatform.API.Services.Implementations
             _notificationService = notificationService;
 
         }
+
+        private static decimal GetTutorPayout(decimal grossAmount) =>
+            Math.Round(grossAmount * TutorPayoutRate, 2, MidpointRounding.AwayFromZero);
+
+        private async Task<bool> HasTutorPayoutTransactionAsync(int tutorUserId, int bookingId) =>
+            await _context.Transactions.AnyAsync(t =>
+                t.UserId == tutorUserId &&
+                t.Type == TransactionType.Earning &&
+                t.ReferenceId == bookingId.ToString() &&
+                t.Amount > 0);
         // ============================================
         // STUDENT: Tạo booking mới
         // ============================================
@@ -204,6 +216,25 @@ namespace TutorPlatform.API.Services.Implementations
                     $"Hoàn tiền hủy lớp: {booking.Class.Title}",
                     referenceId: bookingId.ToString()
                 );
+                if (booking.Status == BookingStatus.Confirmed &&
+                    await HasTutorPayoutTransactionAsync(booking.TutorId, booking.Id))
+                {
+                    var grossKept = booking.Class.PricePerSession - refundAmount; // phần HS bị mất do hủy
+                    var alreadyPaid = GetTutorPayout(booking.Class.PricePerSession);
+                    var desiredNet = GetTutorPayout(Math.Max(0, grossKept));
+                    var clawback = alreadyPaid - desiredNet;
+
+                    if (clawback > 0)
+                    {
+                        await _paymentService.RecordTransactionAsync(
+                            booking.TutorId,
+                            -clawback,
+                            TransactionType.Earning,
+                            $"Payout adjustment (student refund): {booking.Class.Title}",
+                            referenceId: booking.Id.ToString()
+                        );
+                    }
+                }
 
                 // Giảm CurrentStudents
                 booking.Class.CurrentStudents = Math.Max(0, booking.Class.CurrentStudents - 1);
@@ -276,6 +307,19 @@ namespace TutorPlatform.API.Services.Implementations
                     return Fail<BookingResponse>("Chỉ có thể xác nhận booking đang ở trạng thái Pending");
 
                 booking.Status = BookingStatus.Confirmed;
+
+                if (!await HasTutorPayoutTransactionAsync(booking.TutorId, booking.Id))
+                {
+                    var tutorPayout = GetTutorPayout(booking.Class.PricePerSession);
+                    await _paymentService.RecordTransactionAsync(
+                        booking.TutorId,
+                        tutorPayout,
+                        TransactionType.Earning,
+                        $"Thu nháº­p tá»« lá»›p: {booking.Class.Title}",
+                        referenceId: booking.Id.ToString()
+                    );
+                }
+
                 await _context.SaveChangesAsync();
                 await BookingNotifications.OnBookingConfirmed(
                     _notificationService,
@@ -318,16 +362,15 @@ namespace TutorPlatform.API.Services.Implementations
                 booking.Status = BookingStatus.Completed;
 
                 // Cộng tiền cho tutor (90% sau khi trừ phí platform 10%)
-                var tutorUser = await _context.Users.FindAsync(booking.TutorId);
-                if (tutorUser != null)
+                if (!await HasTutorPayoutTransactionAsync(booking.TutorId, booking.Id))
                 {
-                    //tutorUser.Balance += booking.Class.PricePerSession * 0.9m;
+                    var tutorPayout = GetTutorPayout(booking.Class.PricePerSession);
                     await _paymentService.RecordTransactionAsync(
                         booking.TutorId,
-                        booking.Class.PricePerSession * 0.9m,
+                        tutorPayout,
                         TransactionType.Earning,
-                        $"Thu nhập từ lớp: {booking.Class.Title}",
-                        referenceId: bookingId.ToString()
+                        $"Thu nháº­p tá»« lá»›p: {booking.Class.Title}",
+                        referenceId: booking.Id.ToString()
                     );
                 }
 
@@ -338,7 +381,7 @@ namespace TutorPlatform.API.Services.Implementations
                     tutorUserId: booking.TutorId,
                     bookingId: bookingId,
                     classTitle: booking.Class.Title,
-                    tutorEarning: booking.Class.PricePerSession * 0.9m
+                    tutorEarning: GetTutorPayout(booking.Class.PricePerSession)
                 );
 
                 return new ApiResponse<BookingResponse>(
@@ -385,6 +428,19 @@ namespace TutorPlatform.API.Services.Implementations
                     referenceId: bookingId.ToString()
                 );
 
+
+                if (booking.Status == BookingStatus.Confirmed &&
+                    await HasTutorPayoutTransactionAsync(booking.TutorId, booking.Id))
+                {
+                    var tutorPayout = GetTutorPayout(booking.Class.PricePerSession);
+                    await _paymentService.RecordTransactionAsync(
+                        booking.TutorId,
+                        -tutorPayout,
+                        TransactionType.Earning,
+                        $"Payout reversal (booking cancelled): {booking.Class.Title}",
+                        referenceId: booking.Id.ToString()
+                    );
+                }
                 booking.Class.CurrentStudents = Math.Max(0, booking.Class.CurrentStudents - 1);
                 booking.Status = BookingStatus.Cancelled;
 

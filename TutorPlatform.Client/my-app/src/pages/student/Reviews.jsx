@@ -67,15 +67,12 @@ export default function Reviews() {
         );
         setReviews(myReviews);
 
-        // Build set of already-reviewed bookingIds from my reviews
-        // We match by checking: one review per booking.
-        // Since API returns reviews by tutor, we track tutorIds already reviewed.
-        // Better: we mark a booking as reviewed if there's already a review for that tutorId from the student.
-        const reviewedTutorIds = new Set(myReviews.map((rv) => rv.tutorId));
+        // Build set of already-reviewed bookingIds from my reviews (1 review / booking)
         const reviewed = new Set(
-          completedBookings
-            .filter((b) => reviewedTutorIds.has(b.tutorUserId))
-            .map((b) => b.id)
+          myReviews
+            .map((rv) => rv.bookingId)
+            .filter((id) => id !== null && id !== undefined)
+            .map((id) => Number(id))
         );
         setReviewedBookingIds(reviewed);
       }
@@ -90,17 +87,10 @@ export default function Reviews() {
     loadData();
   }, []);
 
-  const reviewableCourses = useMemo(() => {
-    const courseMap = new Map();
-    bookings.forEach((b) => {
-      if (!reviewedBookingIds.has(b.id)) {
-        if (!courseMap.has(b.classId)) {
-          courseMap.set(b.classId, b);
-        }
-      }
-    });
-    return Array.from(courseMap.values());
-  }, [bookings, reviewedBookingIds]);
+  const reviewableBookings = useMemo(
+    () => bookings.filter((b) => !reviewedBookingIds.has(b.id)),
+    [bookings, reviewedBookingIds]
+  );
 
   const selectedBooking = useMemo(
     () => bookings.find((b) => String(b.id) === form.bookingId),
@@ -130,12 +120,9 @@ export default function Reviews() {
 
       if (result?.success) {
         setSuccess("Đánh giá đã được gửi thành công!");
-        // Mark this tutor's bookings as reviewed
         setReviewedBookingIds((prev) => {
           const next = new Set(prev);
-          bookings
-            .filter((b) => b.tutorUserId === selectedBooking.tutorUserId)
-            .forEach((b) => next.add(b.id));
+          next.add(Number(form.bookingId));
           return next;
         });
         // Add new review to list optimistically
@@ -160,9 +147,9 @@ export default function Reviews() {
       {/* Hero */}
       <div className="student-dashboard__hero">
         <div>
-          <h1 className="student-dashboard__heading">Đánh giá khóa học</h1>
+          <h1 className="student-dashboard__heading">Đánh giá buổi học</h1>
           <p className="student-dashboard__subtext">
-            Gửi đánh giá gia sư sau khi hoàn thành buổi học.
+            Chọn đúng buổi học đã hoàn thành để gửi đánh giá gia sư.
           </p>
         </div>
         <div className="student-reviews__hero-badge">
@@ -178,7 +165,7 @@ export default function Reviews() {
           <span className="student-card__muted">
             {loading
               ? "Đang tải..."
-              : `${reviewableCourses.length} khóa học có thể đánh giá`}
+              : `${reviewableBookings.length} buổi học có thể đánh giá`}
           </span>
         </div>
 
@@ -199,27 +186,27 @@ export default function Reviews() {
           className="student-form student-form--inline"
           onSubmit={handleSubmit}
         >
-          {/* Course selector */}
+          {/* Booking selector */}
           <label htmlFor="bookingId">
-            Khóa học
+            Buổi học
             <select
               id="bookingId"
               name="bookingId"
               value={form.bookingId}
               onChange={handleChange}
               required
-              disabled={loading || reviewableCourses.length === 0}
+              disabled={loading || reviewableBookings.length === 0}
             >
               <option value="">
                 {loading
                   ? "Đang tải..."
-                  : reviewableCourses.length === 0
-                  ? "Không có khóa học cần đánh giá"
-                  : "Chọn khóa học"}
+                  : reviewableBookings.length === 0
+                  ? "Không có buổi học cần đánh giá"
+                  : "Chọn buổi học"}
               </option>
-              {reviewableCourses.map((b) => (
+              {reviewableBookings.map((b) => (
                 <option key={b.id} value={b.id}>
-                  {b.classTitle} – {b.tutorName}
+                  {b.classTitle} – {new Date(b.startTime).toLocaleString("vi-VN")} – {b.tutorName}
                 </option>
               ))}
             </select>
@@ -274,7 +261,7 @@ export default function Reviews() {
           <button
             type="submit"
             className="student-dashboard__primary-btn"
-            disabled={submitting || reviewableCourses.length === 0 || loading}
+            disabled={submitting || reviewableBookings.length === 0 || loading}
           >
             {submitting ? (
               <>
@@ -312,7 +299,7 @@ export default function Reviews() {
             <span className="material-symbols-outlined">rate_review</span>
             <p>Bạn chưa có đánh giá nào.</p>
             <p className="student-card__muted">
-              Hoàn thành khóa học để bắt đầu đánh giá gia sư.
+              Hoàn thành buổi học để bắt đầu đánh giá gia sư.
             </p>
           </div>
         ) : (

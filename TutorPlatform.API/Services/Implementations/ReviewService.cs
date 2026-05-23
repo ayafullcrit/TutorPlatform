@@ -47,8 +47,7 @@ namespace TutorPlatform.API.Services.Implementations
                 // 3. Kiểm tra chưa review tutor này (unique constraint StudentId+TutorId)
                 var existing = await _context.Reviews
                     .FirstOrDefaultAsync(r =>
-                        r.StudentId == studentUserId &&
-                        r.TutorId == request.TutorId);
+                        r.BookingId == request.BookingId);
 
                 if (existing != null)
                     return Fail<ReviewResponse>("Bạn đã đánh giá gia sư này rồi");
@@ -56,6 +55,7 @@ namespace TutorPlatform.API.Services.Implementations
                 // 4. Tạo review
                 var review = new Review
                 {
+                    BookingId = request.BookingId,
                     StudentId = studentUserId,
                     TutorId = request.TutorId,
                     Rating = request.Rating,
@@ -143,8 +143,9 @@ namespace TutorPlatform.API.Services.Implementations
                 var review = await _context.Reviews
                     .Include(r => r.Student).ThenInclude(s => s.User)
                     .Include(r => r.Tutor).ThenInclude(t => t.User)
-                    .FirstOrDefaultAsync(r =>
-                        r.StudentId == studentUserId && r.TutorId == tutorId);
+                    .Where(r => r.StudentId == studentUserId && r.TutorId == tutorId)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .FirstOrDefaultAsync();
 
                 if (review == null)
                     return Fail<ReviewResponse>("Bạn chưa đánh giá gia sư này");

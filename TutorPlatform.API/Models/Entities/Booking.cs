@@ -17,5 +17,6 @@ namespace TutorPlatform.API.Models.Entities
         public Tutor Tutor { get; set; } 
         public Class Class { get; set; }
         public Payment Payment { get; set; }
+        public Review? Review { get; set; }
     }
 }

@@ -10,6 +10,7 @@ export default function TutorStudentTable({
     active: ["Đang học", "tutor-badge--active"],
     pending: ["Chờ lịch", "tutor-badge--pending"],
     suspended: ["Tạm dừng", "tutor-badge--error"],
+    completed: ["Đã hoàn thành", "tutor-badge--success"],
   };
 
   return (
@@ -31,6 +32,7 @@ export default function TutorStudentTable({
         >
           <option value="all">Tất cả trạng thái</option>
           <option value="active">Đang học</option>
+          <option value="completed">Đã hoàn thành</option>
           <option value="pending">Chờ lịch</option>
           <option value="suspended">Tạm dừng</option>
         </select>
@@ -54,7 +56,7 @@ export default function TutorStudentTable({
               statusMap[item.status] || statusMap.active;
 
             return (
-              <tr key={item.name}>
+              <tr key={item.id}>
                 <td>
                   <div className="tutor-student-table__person">
                     <img

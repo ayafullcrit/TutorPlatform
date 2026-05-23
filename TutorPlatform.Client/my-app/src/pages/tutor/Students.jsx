@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import TutorStudentTable from "../../components/tutor/TutorStudentTable";
 import TutorRequestCard from "../../components/tutor/TutorRequestCard";
-import { getTutorBookings, confirmBooking, cancelBookingByTutor } from "../../services/bookingService";
+import { getTutorBookings, confirmBooking, cancelBookingByTutor, completeBooking } from "../../services/bookingService";
 
 export default function Students() {
   const [tab, setTab] = useState("list");
@@ -40,7 +40,9 @@ export default function Students() {
             status: b.status === 2 ? "active" : "completed",
             progress: 0, // Backend might not have progress yet
             next: b.startTime ? new Date(b.startTime).toLocaleString("vi-VN") : "Chưa có lịch",
-            userId: b.studentUserId
+            userId: b.studentUserId,
+            startTime: b.startTime,
+            bookingStatus: b.status
           }));
           
         // Map bookings to "requests" (Pending)
@@ -124,6 +126,22 @@ export default function Students() {
       alert("Lỗi: " + (err.response?.data?.message || err.message));
     }
   };
+  const handleCompleteStudent = async (student) => {
+    if (!window.confirm("Đánh dấu buổi học này là đã hoàn thành?")) return;
+    try {
+      const result = await completeBooking(student.id);
+      if (result.success) {
+        alert("Đã đánh dấu hoàn thành!");
+        loadBookings();
+        setSelectedStudent(null);
+      } else {
+        alert(result.message || "Không thể đánh dấu hoàn thành");
+      }
+    } catch (err) {
+      alert("Lỗi: " + (err.response?.data?.message || err.message));
+    }
+  };
+
 
   return (
     <div>
@@ -260,6 +278,15 @@ export default function Students() {
               >
                 Đóng
               </button>
+
+              {selectedStudent.status === "active" && (
+                <button
+                  className="tutor-btn tutor-btn--primary"
+                  onClick={() => handleCompleteStudent(selectedStudent)}
+                >
+                  Hoàn thành
+                </button>
+              )}
 
               <button
                 className="tutor-btn tutor-btn--secondary"

@@ -4,6 +4,8 @@
     {
         public int Id { get; set; }
 
+        public int? BookingId { get; set; }
+
         // Student info
         public int StudentId { get; set; }
         public string StudentName { get; set; }

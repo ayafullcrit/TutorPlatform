@@ -22,6 +22,9 @@ namespace TutorPlatform.API.Models.Configurations
             builder.Property(r => r.TutorId)
                 .IsRequired();
 
+            builder.Property(r => r.BookingId)
+                .IsRequired(false);
+
             builder.Property(r => r.Rating)
                 .IsRequired();
 
@@ -54,13 +57,19 @@ namespace TutorPlatform.API.Models.Configurations
                 .HasForeignKey(r => r.TutorId)
                 .OnDelete(DeleteBehavior.NoAction);  // Thay Restrict bằng NoAction
 
+            builder.HasOne(r => r.Booking)
+                .WithOne(b => b.Review)
+                .HasForeignKey<Review>(r => r.BookingId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             // Check constraint cho Rating
             builder.ToTable(t => t.HasCheckConstraint("CK_Review_Rating", "Rating >= 1 AND Rating <= 5"));
 
             // Unique constraint: mỗi student chỉ review một tutor một lần
-            builder.HasIndex(r => new { r.StudentId, r.TutorId })
+            builder.HasIndex(r => r.BookingId)
                 .IsUnique()
-                .HasDatabaseName("IX_Reviews_StudentId_TutorId_Unique");
+                .HasFilter("[BookingId] IS NOT NULL")
+                .HasDatabaseName("IX_Reviews_BookingId_Unique");
         }
     }
 }
