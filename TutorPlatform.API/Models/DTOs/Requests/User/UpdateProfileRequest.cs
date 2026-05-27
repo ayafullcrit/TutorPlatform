@@ -16,8 +16,8 @@ namespace TutorPlatform.API.Models.DTOs.Requests.User
     public class UpdateStudentProfileRequest
     {
         [Range(1, 12)]
-        public int GradeLevel;
-        public string School;
+        public int GradeLevel { get; set; }
+        public string School { get; set; } = string.Empty;
         //public string LearningGoals;
     }
     public class UpdateTutorProfileRequest
@@ -26,8 +26,8 @@ namespace TutorPlatform.API.Models.DTOs.Requests.User
         public string Bio {  get; set; }
         public string Education { get; set; }
         public string Experience { get; set; }
-        public int TotalReviews;
-        public double Rating;
+        public int TotalReviews { get; set; }
+        public double Rating { get; set; }
 
         [Range(0, 10000000)]
         public decimal HourlyRate { get; set; }

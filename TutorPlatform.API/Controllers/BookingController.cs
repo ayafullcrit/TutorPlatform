@@ -67,6 +67,36 @@ namespace TutorPlatform.API.Controllers
         }
 
         // ============================================
+        // STUDENT: GET /api/bookings/my-tutors
+        // ============================================
+        [HttpGet("my-tutors")]
+        public async Task<IActionResult> GetMyTutors()
+        {
+            var userId = GetCurrentUserId();
+            var result = await _bookingService.GetMyTutorsAsync(userId);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        // ============================================
+        // STUDENT: POST /api/bookings/{id}/request-cancel
+        // ============================================
+        [HttpPost("{id}/request-cancel")]
+        public async Task<IActionResult> RequestCancelBooking(int id, [FromBody] RequestCancelBookingRequest request)
+        {
+            var userId = GetCurrentUserId();
+            var result = await _bookingService.RequestCancelBookingAsync(userId, id, request.Reason);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        // ============================================
         // TUTOR: GET /api/bookings/tutor-bookings
         // ============================================
         [HttpGet("tutor-bookings")]

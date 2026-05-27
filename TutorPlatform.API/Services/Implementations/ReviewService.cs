@@ -94,6 +94,8 @@ namespace TutorPlatform.API.Services.Implementations
                         .ThenInclude(s => s.User)
                     .Include(r => r.Tutor)
                         .ThenInclude(t => t.User)
+                    .Include(r => r.Booking)
+                        .ThenInclude(b => b.Class)
                     .Where(r => r.TutorId == tutorId && r.IsVerified)
                     .OrderByDescending(r => r.CreatedAt)
                     .ToListAsync();
@@ -143,6 +145,7 @@ namespace TutorPlatform.API.Services.Implementations
                 var review = await _context.Reviews
                     .Include(r => r.Student).ThenInclude(s => s.User)
                     .Include(r => r.Tutor).ThenInclude(t => t.User)
+                    .Include(r => r.Booking).ThenInclude(b => b.Class)
                     .Where(r => r.StudentId == studentUserId && r.TutorId == tutorId)
                     .OrderByDescending(r => r.CreatedAt)
                     .FirstOrDefaultAsync();
@@ -217,6 +220,7 @@ namespace TutorPlatform.API.Services.Implementations
             return await _context.Reviews
                 .Include(r => r.Student).ThenInclude(s => s.User)
                 .Include(r => r.Tutor).ThenInclude(t => t.User)
+                .Include(r => r.Booking).ThenInclude(b => b.Class)
                 .FirstOrDefaultAsync(r => r.Id == reviewId);
         }
 
@@ -238,7 +242,8 @@ namespace TutorPlatform.API.Services.Implementations
                 CreatedAt = review.CreatedAt,
                 IsVerified = review.IsVerified,
                 RatingStars = stars,
-                TimeAgo = timeAgo
+                TimeAgo = timeAgo,
+                ClassTitle = review.Booking?.Class?.Title ?? ""
             };
         }
 

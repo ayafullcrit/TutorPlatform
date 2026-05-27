@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 
 const menuItems = [
   { to: "/student/dashboard", label: "Tổng quan", icon: "dashboard" },
+  { to: "/student/my-tutors", label: "Gia sư của tôi", icon: "school" },
   { to: "/student/find-tutor", label: "Tìm gia sư", icon: "search" },
   { to: "/student/schedule", label: "Lịch trình", icon: "calendar_month" },
   { to: "/student/reviews", label: "Đánh giá", icon: "rate_review" },

@@ -49,14 +49,14 @@ namespace TutorPlatform.API.Controllers
                 .CountAsync();
 
             var totalStudents = await _context.Bookings
-                .Where(b => b.Class.TutorId == userId && (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Completed))
+                .Where(b => b.TutorId == userId && (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Completed))
                 .Select(b => b.StudentId)
                 .Distinct()
                 .CountAsync();
 
             var now = DateTime.UtcNow;
             var monthlyEarnings = await _context.Payments
-                .Where(p => p.Booking.Class.TutorId == userId && 
+                .Where(p => p.Booking.TutorId == userId && 
                             p.Status == PaymentStatus.Successful && 
                             p.PaymentDate.Month == now.Month && 
                             p.PaymentDate.Year == now.Year)
@@ -85,19 +85,19 @@ namespace TutorPlatform.API.Controllers
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             
             var totalBalance = await _context.Payments
-                .Where(p => p.Booking.Class.TutorId == userId && p.Status == PaymentStatus.Successful)
+                .Where(p => p.Booking.TutorId == userId && p.Status == PaymentStatus.Successful)
                 .SumAsync(p => p.Amount);
 
             var now = DateTime.UtcNow;
             var monthlyIncome = await _context.Payments
-                .Where(p => p.Booking.Class.TutorId == userId && 
+                .Where(p => p.Booking.TutorId == userId && 
                             p.Status == PaymentStatus.Successful && 
                             p.PaymentDate.Month == now.Month && 
                             p.PaymentDate.Year == now.Year)
                 .SumAsync(p => p.Amount);
 
             var pendingFee = await _context.Payments
-                .Where(p => p.Booking.Class.TutorId == userId && p.Status == PaymentStatus.Pending)
+                .Where(p => p.Booking.TutorId == userId && p.Status == PaymentStatus.Pending)
                 .SumAsync(p => p.Amount);
 
             var earnings = new
@@ -139,6 +139,42 @@ namespace TutorPlatform.API.Controllers
             };
 
             return Ok(new ApiResponse<StudentDashboardStats>(stats));
+        }
+
+        [HttpGet("tutor/earnings-chart")]
+        [Authorize(Roles = "Tutor")]
+        public async Task<IActionResult> GetTutorEarningsChart([FromQuery] int months = 6)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var now = DateTime.UtcNow;
+            var startDate = new DateTime(now.Year, now.Month, 1).AddMonths(-(months - 1));
+
+            // Fetch all successful payments in the range
+            var payments = await _context.Payments
+                .Where(p => p.Booking.TutorId == userId &&
+                            p.Status == PaymentStatus.Successful &&
+                            p.PaymentDate >= startDate)
+                .Select(p => new { p.PaymentDate, p.Amount })
+                .ToListAsync();
+
+            // Build ordered list of month labels + totals
+            var result = Enumerable.Range(0, months)
+                .Select(i =>
+                {
+                    var date = startDate.AddMonths(i);
+                    var total = payments
+                        .Where(p => p.PaymentDate.Year == date.Year && p.PaymentDate.Month == date.Month)
+                        .Sum(p => p.Amount);
+                    return new
+                    {
+                        month = $"T{date.Month}/{date.Year % 100}",
+                        earnings = total
+                    };
+                })
+                .ToList();
+
+            return Ok(new ApiResponse<object>(result));
         }
 
         [HttpGet("public/stats")]

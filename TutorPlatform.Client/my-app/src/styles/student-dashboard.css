@@ -419,6 +419,7 @@
 }
 
 .student-form select,
+.student-form input,
 .student-form textarea {
   padding: 10px 14px;
   border: 1px solid var(--color-border);
@@ -432,6 +433,7 @@
 }
 
 .student-form select:focus,
+.student-form input:focus,
 .student-form textarea:focus {
   border-color: var(--color-primary);
 }
@@ -457,5 +459,137 @@
 
   .student-reviews__hero-badge {
     display: none;
+  }
+}
+
+/* ============================================
+   My Tutors (shared student management UI)
+============================================ */
+.student-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.student-badge--success {
+  color: var(--color-success);
+  background: var(--color-success-bg);
+  border-color: rgba(70, 112, 79, 0.18);
+}
+
+.student-badge--pending {
+  color: var(--color-pending);
+  background: var(--color-pending-bg);
+  border-color: rgba(184, 136, 37, 0.22);
+}
+
+.student-detail-list {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.student-detail-list p {
+  margin: 0;
+  padding: 16px 18px;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.student-detail-list span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.student-detail-list strong {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.student-note {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  background: rgba(124, 110, 39, 0.08);
+  border: 1px solid rgba(124, 110, 39, 0.18);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+.student-card-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.student-secondary-btn {
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.student-secondary-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(124, 110, 39, 0.35);
+  box-shadow: 0 10px 26px rgba(28, 28, 28, 0.06);
+}
+
+.student-secondary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.student-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 28, 28, 0.44);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.student-modal__content {
+  width: min(560px, 100%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 22px 22px 18px;
+}
+
+.student-modal__content h2 {
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+
+.student-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .student-detail-list {
+    grid-template-columns: 1fr;
   }
 }

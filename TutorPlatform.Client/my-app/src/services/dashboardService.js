@@ -66,6 +66,17 @@ export const getTutorRecentBookings = async (tutorId, params = {}) => {
   }
 };
 
+// Get tutor earnings chart data (last N months)
+export const getTutorEarningsChart = async (months = 6) => {
+  try {
+    const response = await api.get(`/dashboard/tutor/earnings-chart`, { params: { months } });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching tutor earnings chart:", error);
+    throw error;
+  }
+};
+
 // Get chart data for dashboards
 export const getChartData = async (role, params = {}) => {
   try {

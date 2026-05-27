@@ -44,6 +44,21 @@ export const topUpBalance = async (amount, paymentMethod = "Mock") => {
   }
 };
 
+/**
+ * Rút tiền từ ví
+ */
+export const withdrawBalance = async (amount) => {
+  try {
+    const response = await api.post("/payments/withdraw", {
+      amount
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error withdrawing:", error);
+    throw error;
+  }
+};
+
 // --- Legacy support (if needed by other components) ---
 
 export const getUserTransactions = async () => {

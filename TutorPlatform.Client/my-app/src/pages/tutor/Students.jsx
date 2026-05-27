@@ -14,7 +14,6 @@ export default function Students() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const [isAddOpen, setIsAddOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
@@ -78,11 +77,7 @@ export default function Students() {
     return matchSearch && matchStatus;
   });
 
-  const handleAddStudent = (e) => {
-    e.preventDefault();
-    alert("Vui lòng tạo lớp học để nhận học viên mới.");
-    setIsAddOpen(false);
-  };
+
 
   const handleApproveRequest = async (request) => {
     try {
@@ -153,13 +148,7 @@ export default function Students() {
           </p>
         </div>
 
-        <button
-          className="tutor-btn tutor-btn--primary"
-          onClick={() => setIsAddOpen(true)}
-        >
-          <span className="material-symbols-outlined">person_add</span>
-          Thêm học viên
-        </button>
+
       </div>
 
       {error && (
@@ -222,37 +211,6 @@ export default function Students() {
               />
             ))
           )}
-        </div>
-      )}
-
-      {isAddOpen && (
-        <div className="tutor-modal">
-          <div className="tutor-modal__content">
-            <h2>Thêm học viên mới</h2>
-            <p style={{ margin: "10px 0", color: "#666" }}>
-              Để thêm học viên, bạn nên tạo một lớp học công khai. Học viên sẽ tìm thấy và đăng ký vào lớp của bạn.
-            </p>
-
-            <div className="tutor-modal__actions">
-              <button
-                type="button"
-                className="tutor-btn tutor-btn--ghost"
-                onClick={() => setIsAddOpen(false)}
-              >
-                Đóng
-              </button>
-
-              <button 
-                className="tutor-btn tutor-btn--primary"
-                onClick={() => {
-                  setIsAddOpen(false);
-                  // navigate to classes or similar logic
-                }}
-              >
-                Đi đến Quản lý lớp học
-              </button>
-            </div>
-          </div>
         </div>
       )}
 

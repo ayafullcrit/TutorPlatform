@@ -67,9 +67,11 @@ namespace TutorPlatform.API.Services.Implementations
                     TotalTopUp = transactions.Where(t => t.Type == TransactionType.TopUp)
                                                 .Sum(t => t.Amount),
                     TotalSpent = Math.Abs(transactions.Where(t => t.Type == TransactionType.BookingPay)
-                                                         .Sum(t => t.Amount)),
+                                                          .Sum(t => t.Amount)),
                     TotalEarned = transactions.Where(t => t.Type == TransactionType.Earning)
                                                 .Sum(t => t.Amount),
+                    TotalWithdrawn = Math.Abs(transactions.Where(t => t.Type == TransactionType.Withdrawal)
+                                                             .Sum(t => t.Amount)),
                     RecentTransactions = transactions.Take(10)
                                                      .Select(MapToResponse).ToList()
                 };
@@ -160,6 +162,40 @@ namespace TutorPlatform.API.Services.Implementations
             _context.Transactions.Add(tx);
             await _context.SaveChangesAsync();
             return tx;
+        }
+
+        public async Task<ApiResponse<TransactionResponse>> WithdrawAsync(int userId, decimal amount)
+        {
+            try
+            {
+                if (amount <= 0)
+                    return Fail<TransactionResponse>("Số tiền rút phải lớn hơn 0");
+
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                    return Fail<TransactionResponse>("Người dùng không tồn tại");
+
+                if (user.Balance < amount)
+                    return Fail<TransactionResponse>("Số dư tài khoản không đủ để thực hiện giao dịch này");
+
+                // Ghi transaction (amount là số âm vì rút tiền là trừ balance)
+                var tx = await RecordTransactionAsync(
+                    userId,
+                    -amount,
+                    TransactionType.Withdrawal,
+                    "Yêu cầu rút tiền về tài khoản ngân hàng",
+                    referenceId: $"WITHDRAW-{Guid.NewGuid().ToString("N")[..8].ToUpper()}"
+                );
+
+                return new ApiResponse<TransactionResponse>(
+                    MapToResponse(tx),
+                    "Yêu cầu rút tiền thành công!"
+                );
+            }
+            catch (Exception ex)
+            {
+                return Fail<TransactionResponse>("Lỗi rút tiền: " + ex.Message);
+            }
         }
     
         private TransactionResponse MapToResponse(Transaction tx)

@@ -27,5 +27,8 @@ namespace TutorPlatform.API.Services.Interfaces
             TutorPlatform.API.Models.Enums.TransactionType type,
             string description,
             string? referenceId = null);
+
+        // Rút tiền từ ví
+        Task<ApiResponse<TransactionResponse>> WithdrawAsync(int userId, decimal amount);
     }
 }

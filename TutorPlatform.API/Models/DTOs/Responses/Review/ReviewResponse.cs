@@ -1,4 +1,7 @@
-﻿namespace TutorPlatform.API.Models.DTOs.Responses.Review
+using System;
+using System.Collections.Generic;
+
+namespace TutorPlatform.API.Models.DTOs.Responses.Review
 {
     public class ReviewResponse
     {
@@ -24,6 +27,7 @@
         // Computed
         public string RatingStars { get; set; }    
         public string TimeAgo { get; set; }       
+        public string ClassTitle { get; set; } = string.Empty;
     }
 
     public class TutorRatingSummary

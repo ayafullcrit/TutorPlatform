@@ -17,6 +17,7 @@ namespace TutorPlatform.API.Services.Implementations
         private readonly IPaymentService _paymentService;
         private const decimal PlatformFeeRate = 0.10m;
         private const decimal TutorPayoutRate = 1.0m - PlatformFeeRate;
+        private const string LeaveRequestPrefix = "LEAVE_REQUEST:";
 
         public BookingService(ApplicationDbContext context,
         IPaymentService paymentService,
@@ -37,6 +38,159 @@ namespace TutorPlatform.API.Services.Implementations
                 t.Type == TransactionType.Earning &&
                 t.ReferenceId == bookingId.ToString() &&
                 t.Amount > 0);
+
+        // ============================================
+        // STUDENT: Danh sách gia sư đang học
+        // ============================================
+        public async Task<ApiResponse<List<MyTutorResponse>>> GetMyTutorsAsync(int studentUserId)
+        {
+            try
+            {
+                var studentExists = await _context.Students.AnyAsync(s => s.UserId == studentUserId);
+                if (!studentExists)
+                    return Fail<List<MyTutorResponse>>("Chỉ học sinh mới có thể xem danh sách gia sư");
+
+                var bookings = await _context.Bookings
+                    .Include(b => b.Class)
+                        .ThenInclude(c => c.Subject)
+                    .Include(b => b.Tutor)
+                        .ThenInclude(t => t.User)
+                    .Where(b => b.StudentId == studentUserId && b.Status != BookingStatus.Cancelled)
+                    .ToListAsync();
+
+                if (bookings.Count == 0)
+                    return new ApiResponse<List<MyTutorResponse>>(new List<MyTutorResponse>(), "Không có gia sư nào");
+
+                var now = DateTime.UtcNow;
+                var tutorIds = bookings.Select(b => b.TutorId).Distinct().ToList();
+
+                var ratings = await _context.Reviews
+                    .Where(r => tutorIds.Contains(r.TutorId))
+                    .GroupBy(r => r.TutorId)
+                    .Select(g => new { TutorId = g.Key, Avg = g.Average(x => (double)x.Rating) })
+                    .ToDictionaryAsync(x => x.TutorId, x => x.Avg);
+
+                var result = bookings
+                    .GroupBy(b => b.TutorId)
+                    .Select(g =>
+                    {
+                        var latestBooking = g.OrderByDescending(b => b.StartTime).First();
+                        var next = g
+                            .Where(b => b.StartTime > now && (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending))
+                            .OrderBy(b => b.StartTime)
+                            .FirstOrDefault();
+
+                        var leaveReason = ExtractLeaveReason(latestBooking.Note);
+                        var status = string.IsNullOrWhiteSpace(leaveReason) ? "active" : "removal_pending";
+
+                        return new MyTutorResponse
+                        {
+                            TutorUserId = latestBooking.TutorId,
+                            TutorName = latestBooking.Tutor?.User?.FullName ?? string.Empty,
+                            TutorAvatar = latestBooking.Tutor?.User?.AvatarUrl ?? string.Empty,
+                            Subject = latestBooking.Class?.Subject?.Name ?? string.Empty,
+                            City = latestBooking.Tutor?.User?.Address ?? string.Empty,
+                            PricePerSession = latestBooking.Class?.PricePerSession ?? 0,
+                            Rating = ratings.TryGetValue(latestBooking.TutorId, out var avg) ? Math.Round(avg, 1) : 0,
+                            NextLesson = next == null ? "--" : FormatLessonTime(next.StartTime),
+                            Status = status,
+                            LeaveReason = leaveReason,
+                            LatestBookingId = latestBooking.Id
+                        };
+                    })
+                    .OrderBy(x => x.TutorName)
+                    .ToList();
+
+                return new ApiResponse<List<MyTutorResponse>>(result, "Lấy danh sách gia sư thành công");
+            }
+            catch (Exception ex)
+            {
+                return Fail<List<MyTutorResponse>>("Lỗi: " + ex.Message);
+            }
+        }
+
+        // ============================================
+        // STUDENT: Xin nghỉ học với gia sư (gửi yêu cầu)
+        // ============================================
+        public async Task<ApiResponse<MyTutorResponse>> RequestCancelBookingAsync(int studentUserId, int bookingId, string reason)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(reason))
+                    return Fail<MyTutorResponse>("Vui lòng nhập lý do");
+
+                var booking = await _context.Bookings
+                    .Include(b => b.Class)
+                        .ThenInclude(c => c.Subject)
+                    .Include(b => b.Tutor)
+                        .ThenInclude(t => t.User)
+                    .FirstOrDefaultAsync(b => b.Id == bookingId);
+
+                if (booking == null)
+                    return Fail<MyTutorResponse>("Booking không tồn tại");
+
+                if (booking.StudentId != studentUserId)
+                    return Fail<MyTutorResponse>("Bạn không có quyền gửi yêu cầu cho booking này");
+
+                if (booking.Status == BookingStatus.Cancelled || booking.Status == BookingStatus.Completed)
+                    return Fail<MyTutorResponse>("Không thể gửi yêu cầu ở trạng thái booking hiện tại");
+
+                booking.Note = $"{LeaveRequestPrefix} {reason}".Trim();
+                await _context.SaveChangesAsync();
+
+                await _notificationService.CreateAsync(
+                    userId: booking.TutorId,
+                    title: "Yêu cầu nghỉ học",
+                    message: $"Học viên đã gửi yêu cầu nghỉ học cho lớp \"{booking.Class?.Title ?? "lớp học"}\". Lý do: {reason}",
+                    type: "booking"
+                );
+
+                var avgRating = await _context.Reviews
+                    .Where(r => r.TutorId == booking.TutorId)
+                    .AverageAsync(r => (double?)r.Rating) ?? 0;
+
+                var response = new MyTutorResponse
+                {
+                    TutorUserId = booking.TutorId,
+                    TutorName = booking.Tutor?.User?.FullName ?? string.Empty,
+                    TutorAvatar = booking.Tutor?.User?.AvatarUrl ?? string.Empty,
+                    Subject = booking.Class?.Subject?.Name ?? string.Empty,
+                    City = booking.Tutor?.User?.Address ?? string.Empty,
+                    PricePerSession = booking.Class?.PricePerSession ?? 0,
+                    Rating = Math.Round(avgRating, 1),
+                    NextLesson = "--",
+                    Status = "removal_pending",
+                    LeaveReason = reason,
+                    LatestBookingId = booking.Id
+                };
+
+                return new ApiResponse<MyTutorResponse>(response, "Đã gửi yêu cầu nghỉ học");
+            }
+            catch (Exception ex)
+            {
+                return Fail<MyTutorResponse>("Lỗi: " + ex.Message);
+            }
+        }
+
+        private static string? ExtractLeaveReason(string? note)
+        {
+            if (string.IsNullOrWhiteSpace(note))
+                return null;
+
+            if (!note.TrimStart().StartsWith(LeaveRequestPrefix, StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            var trimmed = note.Trim();
+            var idx = trimmed.IndexOf(':');
+            if (idx < 0 || idx >= trimmed.Length - 1)
+                return null;
+
+            var reason = trimmed[(idx + 1)..].Trim();
+            return string.IsNullOrWhiteSpace(reason) ? null : reason;
+        }
+
+        private static string FormatLessonTime(DateTime utcStartTime) =>
+            utcStartTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
         // ============================================
         // STUDENT: Tạo booking mới
         // ============================================

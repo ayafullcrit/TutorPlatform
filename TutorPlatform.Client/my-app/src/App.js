@@ -22,6 +22,7 @@ import ClassManagement from "./pages/admin/ClassManagement";
 import StudentRoute from "./routes/StudentRoute";
 import StudentLayout from "./layouts/StudentLayout";
 import StudentDashboard from "./pages/student/StudentDashboard";
+import MyTutors from "./pages/student/MyTutors";
 import FindTutor from "./pages/student/FindTutor";
 import Schedule from "./pages/student/Schedule";
 import Profile from "./pages/student/Profile";
@@ -38,6 +39,7 @@ import TutorSchedule from "./pages/tutor/Schedule";
 import TutorFinance from "./pages/tutor/Finance";
 import TutorProfile from "./pages/tutor/Profile";
 import TutorSubjects from "./pages/tutor/Subjects";
+import TutorReviews from "./pages/tutor/Reviews";
 
 function App() {
   return (
@@ -68,6 +70,7 @@ function App() {
         <Route element={<StudentRoute />}>
           <Route path="/student" element={<StudentLayout />}>
             <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="my-tutors" element={<MyTutors />} />
             <Route path="find-tutor" element={<FindTutor />} />
             <Route path="schedule" element={<Schedule />} />
             <Route path="profile" element={<Profile />} />
@@ -86,6 +89,7 @@ function App() {
             <Route path="finance" element={<TutorFinance />} />
             <Route path="profile" element={<TutorProfile />} />
             <Route path="subjects" element={<TutorSubjects />} />
+            <Route path="reviews" element={<TutorReviews />} />
           </Route>
         </Route>
       </Routes>

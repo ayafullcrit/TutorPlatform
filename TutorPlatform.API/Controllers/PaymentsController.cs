@@ -33,6 +33,21 @@ namespace TutorPlatform.API.Controllers
             return Ok(result);
         }
 
+        // POST /api/payments/withdraw
+        [HttpPost("withdraw")]
+        public async Task<IActionResult> Withdraw([FromBody] WithdrawRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _paymentService.WithdrawAsync(GetCurrentUserId(), request.Amount);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
         // GET /api/payments/wallet
         [HttpGet("wallet")]
         public async Task<IActionResult> GetWallet()

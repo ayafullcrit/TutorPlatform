@@ -26,6 +26,7 @@ namespace TutorPlatform.API.Models.DTOs.Responses.Payment
         public decimal TotalTopUp { get; set; }
         public decimal TotalSpent { get; set; }
         public decimal TotalEarned { get; set; }
+        public decimal TotalWithdrawn { get; set; }
         public List<TransactionResponse> RecentTransactions { get; set; }
     }
 }
