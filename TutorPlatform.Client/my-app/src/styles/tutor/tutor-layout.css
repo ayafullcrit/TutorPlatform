@@ -85,6 +85,20 @@
   object-fit: cover;
 }
 
+.tutor-topbar__avatar-fallback {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #8c7355;
+  background: #f6efe1;
+  border: 1px solid #d9c8ad;
+}
+
 .tutor-topbar__name {
   font-weight: 700;
   font-size: 14px;
