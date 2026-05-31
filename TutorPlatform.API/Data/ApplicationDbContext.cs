@@ -23,6 +23,7 @@ namespace TutorPlatform.API.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<PlatformSetting> PlatformSettings { get; set; }
 
 
         //Model configuration
@@ -36,6 +37,16 @@ namespace TutorPlatform.API.Data
             //seed data
             SubjectsSeed.SeedSubjects(modelBuilder);
             AdminUserSeed.SeedAdminUser(modelBuilder);
+            modelBuilder.Entity<PlatformSetting>().HasData(new PlatformSetting
+            {
+                Id = 1,
+                PlatformFeeRate = 0.10m,
+                UpdatedAt = new DateTime(2026, 1, 1)
+            });
+
+            modelBuilder.Entity<PlatformSetting>()
+                .Property(x => x.PlatformFeeRate)
+                .HasPrecision(18, 2);
         }
     }
 }

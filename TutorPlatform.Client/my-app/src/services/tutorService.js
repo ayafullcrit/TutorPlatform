@@ -78,9 +78,9 @@ export const updateTutor = async (id, tutorData) => {
 };
 
 // Verify tutor (admin only)
-export const verifyTutor = async (id) => {
+export const verifyTutor = async (id, status = 1, note = "") => {
   try {
-    const response = await api.put(`/tutors/${id}/verify`);
+    const response = await api.put(`/tutors/${id}/verify`, { status, note });
     return response.data;
   } catch (error) {
     console.error(`Error verifying tutor ${id}:`, error);
@@ -91,7 +91,7 @@ export const verifyTutor = async (id) => {
 // Get pending tutors (admin)
 export const getPendingTutors = async (params = {}) => {
   try {
-    const response = await api.get("/tutors/pending", { params });
+    const response = await api.get("/tutors/pending-verification", { params });
     return response.data;
   } catch (error) {
     console.error("Error fetching pending tutors:", error);

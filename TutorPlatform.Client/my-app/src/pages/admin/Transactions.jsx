@@ -1,161 +1,170 @@
-import { useState, useEffect } from "react";
-import { getTransactions, refundPayment } from "../../services/transactionService";
+import { useEffect, useMemo, useState } from "react";
+import { approveAllWithdrawals, approveWithdrawal, getTransactions, getWithdrawalRequests, rejectWithdrawal } from "../../services/transactionService";
+
+const statusOf = (item) => {
+  if (item.status === "completed") return "APPROVED";
+  if (item.status === "rejected") return "REJECTED";
+  return "PENDING";
+};
 
 export default function Transactions() {
-  const [transactions, setTransactions] = useState([]);
+  const [txs, setTxs] = useState([]);
+  const [withdrawals, setWithdrawals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalDisbursed: "₫0",
-    pendingRequests: 0,
-  });
 
-  useEffect(() => {
-    loadTransactions();
-  }, []);
-
-  const loadTransactions = async () => {
+  const load = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const result = await getTransactions();
-      if (result.data) {
-        const allTransactions = result.data;
-        setTransactions(allTransactions);
-
-        // Calculate stats
-        const totalDisbursed = allTransactions
-          .filter((t) => t.status === "completed")
-          .reduce((sum, t) => sum + (t.amount || 0), 0);
-
-        const pending = allTransactions.filter((t) => t.status === "pending").length;
-
-        setStats({
-          totalDisbursed: `₫${totalDisbursed.toLocaleString('vi-VN')}`,
-          pendingRequests: pending,
-        });
-      }
-    } catch (error) {
-      console.error("Failed to load transactions:", error);
+      const [a, b] = await Promise.allSettled([getTransactions(), getWithdrawalRequests()]);
+      const transactionsResult = a.status === "fulfilled" ? a.value : { success: false, data: [] };
+      const withdrawalsResult = b.status === "fulfilled" ? b.value : { success: false, data: [] };
+      setTxs(transactionsResult.success ? transactionsResult.data || [] : []);
+      setWithdrawals(withdrawalsResult.success ? withdrawalsResult.data || [] : []);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleProcessPayment = async (transactionId) => {
-    if (!window.confirm("Xác nhận xử lý thanh toán này?")) return;
+  useEffect(() => {
+    load();
+  }, []);
 
-    try {
-      // Simulate processing - in real app this would call an API
-      setTransactions((prev) =>
-        prev.map((t) =>
-          t.id === transactionId ? { ...t, status: "completed" } : t
-        )
-      );
-    } catch (error) {
-      console.error("Failed to process payment:", error);
-    }
+  const pendingWithdrawals = useMemo(() => withdrawals.filter((item) => statusOf(item) === "PENDING"), [withdrawals]);
+
+  const handleBulkAccept = async () => {
+    await approveAllWithdrawals();
+    await load();
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10">
-      <div>
-        <h1 className="text-5xl font-serif text-[#7b5800]">Giao dịch & Rút tiền</h1>
-        <p className="mt-3 text-lg text-stone-600 max-w-2xl">
-          Quản lý sổ cái tài chính, kiểm tra thanh toán lớp học, và xử lý yêu cầu rút tiền của gia sư.
-        </p>
+    <section className="admin-page">
+      <div className="admin-page__header">
+        <h2>Quản lý giao dịch</h2>
+        <p>Xử lý các yêu cầu rút tiền, duyệt hàng loạt và theo dõi toàn bộ luồng tiền trong hệ thống.</p>
       </div>
 
-      {loading ? (
-        <div style={{ textAlign: "center", padding: "40px" }}>Đang tải giao dịch...</div>
-      ) : (
-        <div className="grid lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-4 space-y-6">
-            <div className="bg-[#efefd7] p-8 rounded">
-              <p className="text-xs uppercase tracking-widest text-stone-500">Tổng Thanh Toán (Tháng)</p>
-              <h3 className="mt-4 text-5xl font-serif text-[#7b5800]">{stats.totalDisbursed}</h3>
-              <p className="mt-3 text-sm text-stone-500">+12% so với tháng trước</p>
-            </div>
-
-            <div className="bg-[#efefd7] p-8 rounded">
-              <p className="text-xs uppercase tracking-widest text-stone-500">Hàng Chờ Rút</p>
-              <div className="mt-4 flex items-end gap-3">
-                <span className="text-4xl font-serif">{stats.pendingRequests}</span>
-                <span className="text-stone-500">Yêu cầu chờ xử lý</span>
-              </div>
-              <button className="mt-6 w-full bg-[#e1aa36] text-[#5b4000] py-3 rounded">
-                Xử lý hàng loạt
-              </button>
-            </div>
+      <div className="admin-card" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <div>
+            <div className="admin-stat__label">Đang chờ xử lý</div>
+            <div className="admin-stat__value" style={{ fontSize: 32 }}>{pendingWithdrawals.length}</div>
+            <div className="admin-stat__sub">Accept tất cả pending hoặc xử lý từng giao dịch bên dưới</div>
           </div>
+          <button
+            type="button"
+            className="admin-btn admin-btn--primary"
+            onClick={handleBulkAccept}
+            disabled={pendingWithdrawals.length === 0}
+          >
+            Accept tất cả pending
+          </button>
+      </div>
 
-          <div className="lg:col-span-8 bg-white p-8 rounded">
-            <h2 className="text-3xl font-serif mb-6">Yêu Cầu Rút Tiền Chờ Xử Lý</h2>
-            <div className="space-y-4">
-              {transactions
-                .filter((t) => t.status === "pending")
-                .map((transaction) => (
-                  <div key={transaction.id} className="flex flex-col sm:flex-row justify-between gap-4 p-4 bg-[#fbfbe2] rounded">
-                    <div>
-                      <h4 className="font-medium">{transaction.tutorName || "Gia sư"}</h4>
-                      <p className="text-xs uppercase tracking-wider text-stone-500 mt-1">
-                        {transaction.bankInfo || "Thông tin ngân hàng"}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="font-serif text-xl text-[#7b5800]">
-                          ₫{(transaction.amount || 0).toLocaleString('vi-VN')}
-                        </p>
-                        <span className="text-xs bg-slate-200 px-2 py-1 rounded">
-                          {transaction.status === "pending" ? "Chờ xử lý" : "Đã xử lý"}
-                        </span>
-                      </div>
-                      {transaction.status === "pending" && (
-                        <button
-                          className="bg-[#7b5800] text-white px-4 py-2 rounded"
-                          onClick={() => handleProcessPayment(transaction.id)}
-                        >
-                          Xử lý
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
+      <div className="admin-card" style={{ overflowX: "auto" }}>
+        <div className="admin-page__header" style={{ marginBottom: 16 }}>
+          <h2>Yêu cầu rút tiền</h2>
+          <p>Thao tác từng giao dịch hoặc duyệt hàng loạt khi đã kiểm tra thông tin.</p>
+        </div>
 
-          <div className="lg:col-span-12 bg-[#efefd7] rounded p-8 overflow-x-auto">
-            <h2 className="text-3xl font-serif mb-6">Sổ Cái Chung</h2>
-            <table className="w-full">
-              <thead>
-                <tr className="text-xs uppercase tracking-widest text-stone-500 border-b">
-                  <th className="py-4 text-left">Ngày / Giờ</th>
-                  <th className="text-left">ID Giao Dịch</th>
-                  <th className="text-left">Loại</th>
-                  <th className="text-left">Mô Tả</th>
-                  <th className="text-right">Số Tiền</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.slice(0, 10).map((transaction) => (
-                  <tr key={transaction.id} className="border-b">
-                    <td className="py-4">
-                      {new Date(transaction.createdAt).toLocaleString('vi-VN')}
+        {loading ? (
+          <div style={{ padding: 24, textAlign: "center", color: "var(--color-text-muted)" }}>Đang tải giao dịch...</div>
+        ) : (
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Gia sư</th>
+                <th>Số tiền</th>
+                <th>Trạng thái</th>
+                <th>Mô tả</th>
+                <th style={{ textAlign: "right" }}>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {withdrawals.map((item) => {
+                const status = statusOf(item);
+                return (
+                  <tr key={item.id}>
+                    <td>#{item.id}</td>
+                    <td>{item.tutorName || "Gia sư"}</td>
+                    <td>{item.formattedAmount || `${Number(item.amount || 0).toLocaleString("vi-VN")} VNĐ`}</td>
+                    <td>
+                      <span className={`admin-badge ${status === "PENDING" ? "admin-badge--inactive" : "admin-badge--active"}`}>
+                        {status}
+                      </span>
                     </td>
-                    <td>TXN-{transaction.id}</td>
-                    <td>{transaction.type || "Giao dịch"}</td>
-                    <td>{transaction.description || "N/A"}</td>
-                    <td className={`text-right font-serif ${
-                      transaction.type === "withdrawal" ? "text-red-600" : "text-[#7b5800]"
-                    }`}>
-                      {transaction.type === "withdrawal" ? "-" : "+"}₫{(transaction.amount || 0).toLocaleString('vi-VN')}
+                    <td>{item.description || "N/A"}</td>
+                    <td style={{ textAlign: "right" }}>
+                      {status === "PENDING" ? (
+                        <div style={{ display: "inline-flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn--secondary"
+                            onClick={async () => {
+                              await approveWithdrawal(item.id);
+                              await load();
+                            }}
+                          >
+                            Xử lý
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn--secondary"
+                            onClick={async () => {
+                              await rejectWithdrawal(item.id);
+                              await load();
+                            }}
+                          >
+                            Từ chối
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="admin-page__muted">Đã xử lý</span>
+                      )}
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                );
+              })}
+              {withdrawals.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: "center", color: "var(--color-text-muted)" }}>
+                    Chưa có yêu cầu rút tiền nào.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <div className="admin-card" style={{ overflowX: "auto" }}>
+        <div className="admin-page__header" style={{ marginBottom: 16 }}>
+          <h2>Lịch sử giao dịch hệ thống</h2>
+          <p>Toàn bộ giao dịch phát sinh trong hệ thống.</p>
         </div>
-      )}
-    </div>
+
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Ngày</th>
+              <th>ID</th>
+              <th>Loại</th>
+              <th>Mô tả</th>
+              <th style={{ textAlign: "right" }}>Số tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            {txs.slice(0, 20).map((item) => (
+              <tr key={item.id}>
+                <td>{item.createdAt ? new Date(item.createdAt).toLocaleString("vi-VN") : "N/A"}</td>
+                <td>TXN-{item.id}</td>
+                <td>{item.typeText || "Giao dịch"}</td>
+                <td>{item.description || "N/A"}</td>
+                <td style={{ textAlign: "right" }}>{item.formattedAmount || `${Number(item.amount || 0).toLocaleString("vi-VN")} VNĐ`}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }

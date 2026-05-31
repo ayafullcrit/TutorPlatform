@@ -1,0 +1,9 @@
+namespace TutorPlatform.API.Models.Enums
+{
+    public enum VerificationStatus
+    {
+        Pending = 0,
+        Approved = 1,
+        Rejected = 2
+    }
+}

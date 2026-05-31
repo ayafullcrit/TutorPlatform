@@ -12,6 +12,7 @@ namespace TutorPlatform.API.Models.Entities
         public TransactionType Type { get; set; }
         public string Description { get; set; } = string.Empty;
         public string? ReferenceId { get; set; }    
+        public WithdrawalRequestStatus WithdrawalStatus { get; set; } = WithdrawalRequestStatus.Pending;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation

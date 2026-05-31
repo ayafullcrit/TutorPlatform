@@ -24,6 +24,7 @@ namespace TutorPlatform.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAdminStats()
         {
+            var feeRate = await _context.PlatformSettings.Select(x => x.PlatformFeeRate).FirstOrDefaultAsync();
             var stats = new AdminDashboardStats
             {
                 TotalTutors = await _context.Tutors.CountAsync(),
@@ -33,8 +34,16 @@ namespace TutorPlatform.API.Controllers
                     .Where(p => p.Status == PaymentStatus.Successful)
                     .SumAsync(p => p.Amount)
             };
-
-            return Ok(new ApiResponse<AdminDashboardStats>(stats));
+            var monthlyGrowth = await _context.Users
+                .GroupBy(u => new { u.Id, Month = u.Id })
+                .Select(g => new { g.Key.Month, Count = g.Count() })
+                .ToListAsync();
+            return Ok(new ApiResponse<object>(new
+            {
+                stats,
+                platformFeeRate = feeRate,
+                monthlyGrowth
+            }));
         }
 
         [HttpGet("tutor/stats")]

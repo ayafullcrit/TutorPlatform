@@ -13,6 +13,7 @@ namespace TutorPlatform.API.Models.Entities
         public DateTime EndTime { get; set; }
         public BookingStatus Status { get; set; }
         public string Note { get; set; }
+        public string? CancelReason { get; set; }
         public Student Student { get; set; }
         public Tutor Tutor { get; set; } 
         public Class Class { get; set; }

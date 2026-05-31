@@ -16,7 +16,6 @@ import Accounts from "./pages/admin/Accounts";
 import Verifications from "./pages/admin/Verifications";
 import Transactions from "./pages/admin/Transactions";
 import SystemConfig from "./pages/admin/SystemConfig";
-import ClassManagement from "./pages/admin/ClassManagement";
 
 /* Student */
 import StudentRoute from "./routes/StudentRoute";
@@ -62,7 +61,6 @@ function App() {
             <Route path="verifications" element={<Verifications />} />
             <Route path="transactions" element={<Transactions />} />
             <Route path="system-config" element={<SystemConfig />} />
-            <Route path="classes" element={<ClassManagement />} />
           </Route>
         </Route>
 

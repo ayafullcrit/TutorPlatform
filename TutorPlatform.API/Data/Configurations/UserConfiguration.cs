@@ -38,6 +38,8 @@ namespace TutorPlatform.API.Data.Configurations
                 .IsRequired()
                 .HasConversion<int>();
 
+            builder.Property(u => u.IsActive)
+                .HasColumnName("IsActivated");
 
             builder.Property(u => u.Balance)
                 .IsRequired()
@@ -49,7 +51,7 @@ namespace TutorPlatform.API.Data.Configurations
                 .IsUnique();
 
             builder.HasIndex(u => u.Role);
-            builder.HasIndex(u => u.IsActivated);
+            builder.HasIndex(u => u.IsActive);
 
             // ============================================
             // RELATIONSHIPS (ONE-TO-ONE)

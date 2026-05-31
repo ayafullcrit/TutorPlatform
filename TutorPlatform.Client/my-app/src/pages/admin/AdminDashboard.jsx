@@ -1,68 +1,154 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getAdminStats } from "../../services/dashboardService";
 
-export default function Dashboard() {
-  const [stats, setStats] = useState({
-    registeredTutors: 0,
-    activeStudents: 0,
-    totalRevenue: "₫0",
-  });
+const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString("vi-VN")}đ`;
+
+export default function AdminDashboard() {
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadAdminStats();
+    const load = async () => {
+      try {
+        const response = await getAdminStats();
+        if (response?.success) setStats(response.data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
-  const loadAdminStats = async () => {
-    try {
-      setLoading(true);
-      const result = await getAdminStats();
-      if (result.data) {
-        setStats({
-          registeredTutors: result.data.totalTutors || 0,
-          activeStudents: result.data.totalStudents || 0,
-          totalRevenue: `₫${(result.data.totalRevenue || 0).toLocaleString('vi-VN')}`,
-        });
-      }
-    } catch (error) {
-      console.error("Failed to load admin stats:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const summaryCards = useMemo(() => {
+    const data = stats?.stats ?? stats ?? {};
+    const monthlyGrowth = stats?.monthlyGrowth ?? [];
+    const latestGrowth = monthlyGrowth.at(-1)?.Count ?? monthlyGrowth.at(-1)?.count ?? 0;
+    return [
+      {
+        label: "Tổng gia sư",
+        value: data.totalTutors ?? data.TotalTutors ?? 0,
+        icon: "school",
+        tone: "teacher",
+      },
+      {
+        label: "Tổng học viên",
+        value: data.totalStudents ?? data.TotalStudents ?? 0,
+        icon: "person",
+        tone: "student",
+      },
+      {
+        label: "Tổng doanh thu",
+        value: formatCurrency(data.totalRevenue ?? data.TotalRevenue ?? 0),
+        icon: "payments",
+        tone: "revenue",
+      },
+      {
+        label: "Phí nền tảng",
+        value: `${(((stats?.platformFeeRate ?? 0) * 100) || 0).toFixed(0)}%`,
+        icon: "percent",
+        tone: "fee",
+      },
+      {
+        label: "Tăng trưởng tháng này",
+        value: latestGrowth,
+        icon: "trending_up",
+        tone: "growth",
+      },
+    ];
+  }, [stats]);
+
+  if (loading) {
+    return (
+      <div className="admin-dashboard__loading">
+        <div className="admin-spinner" />
+        <p>Đang tải dữ liệu tổng quan...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-10">
-      <div>
-        <h2 className="text-5xl font-serif text-[#1b1d0e]">Tổng Quan</h2>
-        <p className="mt-2 text-lg text-stone-600">
-          Tổng hợp thông tin về hệ thống: gia sư, học viên và doanh thu.
-        </p>
-      </div>
+    <section className="admin-dashboard">
+      <header className="admin-dashboard__hero">
+        <div>
+          <span className="admin-dashboard__eyebrow">Quản trị hệ thống</span>
+          <h1 className="admin-dashboard__title">Bảng điều khiển admin</h1>
+          <p className="admin-dashboard__subtitle">
+            Theo dõi số lượng gia sư, học viên và doanh thu nền tảng trong một màn hình.
+          </p>
+        </div>
 
-      {loading ? (
-        <div style={{ textAlign: "center", padding: "40px" }}>Đang tải thông tin...</div>
-      ) : (
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-8 rounded">
-            <p className="text-xs uppercase tracking-widest text-stone-500">Gia Sư Đã Đăng Ký</p>
-            <h3 className="mt-4 text-5xl text-[#7b5800] font-serif">{stats.registeredTutors}</h3>
-            <p className="mt-3 text-sm text-stone-500">+12% trong kỳ này</p>
+        <div className="admin-dashboard__hero-note">
+          <span className="material-symbols-outlined">insights</span>
+          <div>
+            <strong>Tổng quan vận hành</strong>
+            <span>Cập nhật theo dữ liệu thực từ backend</span>
+          </div>
+        </div>
+      </header>
+
+      <section className="admin-dashboard__grid">
+        {summaryCards.map((card) => (
+          <article key={card.label} className={`admin-dashboard__card admin-dashboard__card--${card.tone}`}>
+            <div className="admin-dashboard__card-icon">
+              <span className="material-symbols-outlined">{card.icon}</span>
+            </div>
+            <div>
+              <p className="admin-dashboard__card-label">{card.label}</p>
+              <h3 className="admin-dashboard__card-value">{card.value}</h3>
+            </div>
+          </article>
+        ))}
+      </section>
+
+      <section className="admin-dashboard__panel">
+        <div className="admin-card">
+          <div className="admin-page__header">
+            <h2>Thông tin doanh thu</h2>
+            <p>
+              Giá trị doanh thu hiển thị là tổng tiền hệ thống thu được từ phí nền tảng.
+            </p>
           </div>
 
-          <div className="bg-white p-8 rounded">
-            <p className="text-xs uppercase tracking-widest text-stone-500">Học Viên Hoạt Động</p>
-            <h3 className="mt-4 text-5xl text-[#7b5800] font-serif">{stats.activeStudents}</h3>
-            <p className="mt-3 text-sm text-stone-500">+8% trong kỳ này</p>
-          </div>
+          <div className="admin-dashboard__revenue">
+            <div className="admin-dashboard__revenue-main">
+              <span className="admin-dashboard__revenue-label">Tổng doanh thu</span>
+              <strong>{formatCurrency(stats?.stats?.totalRevenue ?? stats?.totalRevenue ?? 0)}</strong>
+            </div>
 
-          <div className="bg-white p-8 rounded">
-            <p className="text-xs uppercase tracking-widest text-stone-500">Tổng Doanh Thu</p>
-            <h3 className="mt-4 text-5xl text-[#7b5800] font-serif">{stats.totalRevenue}</h3>
-            <p className="mt-3 text-sm text-stone-500">Đã thanh toán</p>
+            <div className="admin-dashboard__revenue-meta">
+              <div>
+                <span>Gia sư đã duyệt</span>
+                <strong>{stats?.stats?.totalTutors ?? stats?.totalTutors ?? 0}</strong>
+              </div>
+              <div>
+                <span>Học viên đang hoạt động</span>
+                <strong>{stats?.stats?.totalStudents ?? stats?.totalStudents ?? 0}</strong>
+              </div>
+              <div>
+                <span>Phí nền tảng</span>
+                <strong>{(((stats?.platformFeeRate ?? 0) * 100) || 0).toFixed(0)}%</strong>
+              </div>
+            </div>
           </div>
-        </section>
-      )}
-    </div>
+        </div>
+      </section>
+
+      <section className="admin-dashboard__mini-grid">
+        <article className="admin-card admin-dashboard__mini-card">
+          <span className="material-symbols-outlined">person_add</span>
+          <div>
+            <p>Người dùng mới tháng này</p>
+            <strong>{stats?.monthlyGrowth?.at?.(-1)?.Count ?? stats?.monthlyGrowth?.at?.(-1)?.count ?? 0}</strong>
+          </div>
+        </article>
+        <article className="admin-card admin-dashboard__mini-card">
+          <span className="material-symbols-outlined">account_balance_wallet</span>
+          <div>
+            <p>Tổng lớp học</p>
+            <strong>{stats?.stats?.totalClasses ?? stats?.totalClasses ?? 0}</strong>
+          </div>
+        </article>
+      </section>
+    </section>
   );
 }

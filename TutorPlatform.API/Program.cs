@@ -141,13 +141,25 @@ if (string.IsNullOrWhiteSpace(testSecretKey))
 var app = builder.Build();
 
 // ============================================
-// APPLY MIGRATIONS (DEV)
+// APPLY MIGRATIONS
 // ============================================
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
-    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
+
+    await db.Database.ExecuteSqlRawAsync("""
+        IF COL_LENGTH('Transactions', 'WithdrawalStatus') IS NULL
+        BEGIN
+            ALTER TABLE [Transactions]
+            ADD [WithdrawalStatus] int NOT NULL CONSTRAINT [DF_Transactions_WithdrawalStatus] DEFAULT(0);
+        END
+    """);
+
+    if (app.Environment.IsDevelopment())
+    {
+        await TutorPlatform.API.Data.SeedData.RuntimeAdminSeeder.EnsureAdminUserAsync(db);
+    }
 }
 
 // ============================================

@@ -11,8 +11,7 @@ namespace TutorPlatform.API.Models.DTOs.Requests.Auth
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
-        [StringLength(100, MinimumLength = 6,
-            ErrorMessage = "Mật khẩu phải từ 6-100 ký tự")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Mật khẩu phải từ 6-100 ký tự")]
         public string Password { get; set; }
 
         [Required(ErrorMessage = "Xác nhận mật khẩu là bắt buộc")]
@@ -32,8 +31,10 @@ namespace TutorPlatform.API.Models.DTOs.Requests.Auth
 
         [Range(6, 12, ErrorMessage = "Khối lớp phải từ 6-12")]
         public int? Grade { get; set; }
+
         public string? School { get; set; }
-        //   public string Bio { get; set; }
-        //   public string Education { get; set; }
+
+        [StringLength(100, ErrorMessage = "Tỉnh/thành không được quá 100 ký tự")]
+        public string? Address { get; set; }
     }
 }

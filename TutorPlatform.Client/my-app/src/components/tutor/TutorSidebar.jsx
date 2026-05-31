@@ -9,11 +9,12 @@ const menuItems = [
   { to: "/tutor/finance", label: "Tài chính", icon: "account_balance_wallet" },
   { to: "/tutor/profile", label: "Hồ sơ cá nhân", icon: "account_circle" },
   { to: "/tutor/reviews", label: "Đánh giá", icon: "reviews" },
-  
 ];
 
 export default function TutorSidebar() {
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const isVerified = Boolean(user?.isTutorVerified);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -29,18 +30,33 @@ export default function TutorSidebar() {
       </div>
 
       <nav className="tutor-sidebar__menu">
-        {menuItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              `tutor-sidebar__link ${isActive ? "tutor-sidebar__link--active" : ""}`
-            }
-          >
-            <span className="material-symbols-outlined">{item.icon}</span>
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
+        {menuItems.map((item) => {
+          const isLocked = !isVerified && item.to === "/tutor/classes";
+          return isLocked ? (
+            <div
+              key={item.to}
+              className="tutor-sidebar__link tutor-sidebar__link--disabled"
+              title="Chức năng này đang chờ admin duyệt"
+              onClick={() => navigate("/tutor/classes")}
+              role="button"
+              tabIndex={0}
+            >
+              <span className="material-symbols-outlined">{item.icon}</span>
+              <span>{item.label}</span>
+            </div>
+          ) : (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `tutor-sidebar__link ${isActive ? "tutor-sidebar__link--active" : ""}`
+              }
+            >
+              <span className="material-symbols-outlined">{item.icon}</span>
+              <span>{item.label}</span>
+            </NavLink>
+          );
+        })}
       </nav>
 
       <div className="tutor-sidebar__footer">
@@ -49,6 +65,9 @@ export default function TutorSidebar() {
           <div>
             <div className="tutor-sidebar__role-caption">Đang là</div>
             <div className="tutor-sidebar__role-value">Gia sư</div>
+            <div className="tutor-sidebar__role-caption">
+              {isVerified ? "Đã được duyệt" : "Đang chờ admin duyệt"}
+            </div>
           </div>
         </div>
 

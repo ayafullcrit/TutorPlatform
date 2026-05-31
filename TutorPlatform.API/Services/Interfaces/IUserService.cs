@@ -11,5 +11,8 @@ namespace TutorPlatform.API.Services.Interfaces
         Task<ApiResponse<UpdateProfileResponse>> UpdateStudentProfileAsync(int UserId, UpdateStudentProfileRequest request);
         Task<ApiResponse<UpdateProfileResponse>> UpdateTutorProfileAsync(int UserId, UpdateTutorProfileRequest request);
         Task<ApiResponse<List<UpdateProfileResponse>>> GetAllUsersAsync();
+        Task<ApiResponse<object>> GetAdminUsersAsync(string? role = null, bool? isActive = null, int page = 1, int pageSize = 20);
+        Task<ApiResponse<UpdateProfileResponse>> AdminUpdateUserAsync(int userId, AdminUpdateUserRequest request);
+        Task<ApiResponse<object>> ToggleUserStatusAsync(int userId, bool isActive);
     }
 }

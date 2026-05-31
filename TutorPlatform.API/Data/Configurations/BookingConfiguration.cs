@@ -18,6 +18,9 @@ namespace TutorPlatform.API.Data.Configurations
             builder.Property(b => b.Note)
                 .HasMaxLength(500); // Ví dụ: giới hạn độ dài
 
+            builder.Property(b => b.CancelReason)
+                .HasMaxLength(500);
+
             // Quan hệ với Student
             builder.HasOne(b => b.Student)
                 .WithMany(s => s.Bookings) // Giả sử Student có collection Bookings

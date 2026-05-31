@@ -23,4 +23,17 @@ namespace TutorPlatform.API.Models.DTOs.Responses.Dashboard
         public double AverageRating { get; set; }
         public int AttendanceRate { get; set; }
     }
+
+    public class TutorEarningsResponse
+    {
+        public string CurrentBalance { get; set; } = string.Empty;
+        public string MonthlyIncome { get; set; } = string.Empty;
+        public string PendingFee { get; set; } = string.Empty;
+    }
+
+    public class TutorEarningsChartItem
+    {
+        public string Month { get; set; } = string.Empty;
+        public decimal Earnings { get; set; }
+    }
 }

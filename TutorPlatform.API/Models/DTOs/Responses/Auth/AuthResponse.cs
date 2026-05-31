@@ -10,6 +10,7 @@ namespace TutorPlatform.API.Models.DTOs.Responses.Auth
         public string FullName { get; set; }
         public string PhoneNumber { get; set; }
         public string Avatar { get; set; }
+        public string Address { get; set; }
         public decimal Balance { get; set; }
         public UserRole Role { get; set; }
         public bool IsEmailVerified { get; set; }

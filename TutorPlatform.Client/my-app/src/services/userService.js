@@ -49,3 +49,23 @@ export const getAllUsers = async () => {
     throw error;
   }
 };
+
+export const getAdminUsers = async (params = {}) => {
+  try {
+    const response = await api.get("/users/admin/list", { params });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching admin users:", error);
+    throw error;
+  }
+};
+
+export const updateAdminUser = async (id, payload) => {
+  const response = await api.put(`/users/admin/${id}`, payload);
+  return response.data;
+};
+
+export const toggleUserStatus = async (id, isActive) => {
+  const response = await api.put(`/users/admin/${id}/toggle-status`, { isActive });
+  return response.data;
+};

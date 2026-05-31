@@ -12,6 +12,7 @@ namespace TutorPlatform.API.Models.DTOs.Responses.User
         public string AvatarUrl { get; set; }
         public decimal Balance { get; set; }
         public UserRole Role { get; set; }
+        public bool IsActive { get; set; }
         public StudentProfile Student { get; set; }
         public TutorProfile Tutor { get; set; }
     }

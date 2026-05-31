@@ -1,4 +1,4 @@
-﻿using TutorPlatform.API.Models.Enums;
+using TutorPlatform.API.Models.Enums;
 
 namespace TutorPlatform.API.Models.DTOs.Responses.Booking
 {
@@ -28,6 +28,7 @@ namespace TutorPlatform.API.Models.DTOs.Responses.Booking
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public string Note { get; set; }
+        public string? CancelReason { get; set; }
 
         // Status
         public BookingStatus Status { get; set; }

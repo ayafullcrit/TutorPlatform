@@ -99,6 +99,30 @@ namespace TutorPlatform.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("admin/list")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAdminUsers([FromQuery] string? role = null, [FromQuery] bool? isActive = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        {
+            return Ok(await _userService.GetAdminUsersAsync(role, isActive, page, pageSize));
+        }
+
+        [HttpPut("admin/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AdminUpdateUser(int id, [FromBody] AdminUpdateUserRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var result = await _userService.AdminUpdateUserAsync(id, request);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPut("admin/{id}/toggle-status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ToggleStatus(int id, [FromBody] ToggleUserStatusRequest request)
+        {
+            var result = await _userService.ToggleUserStatusAsync(id, request.IsActive);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);

@@ -16,8 +16,7 @@ namespace TutorPlatform.API.Models.Configurations
                 .ValueGeneratedOnAdd();
 
             builder.Property(r => r.StudentId)
-                .IsRequired()
-                .HasMaxLength(450);
+                .IsRequired();
 
             builder.Property(r => r.TutorId)
                 .IsRequired();

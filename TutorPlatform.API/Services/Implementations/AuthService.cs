@@ -57,8 +57,9 @@ namespace TutorPlatform.API.Services.Implementations
                     PasswordHash = passwordHash,
                     FullName = request.FullName,
                     PhoneNumber = request.PhoneNumber,
+                    Address = request.Address ?? string.Empty,
                     Role = request.Role,
-                    IsActivated = true,
+                    IsActive = true,
                     Balance = 0,                    
                 };
                 user.Balance = 0;
@@ -188,7 +189,7 @@ namespace TutorPlatform.API.Services.Implementations
                 }
 
                 // 2. Kiểm tra tài khoản có active không
-                if (!user.IsActivated)
+                if (!user.IsActive)
                 {
                     return new ApiResponse<AuthResponse>(
                         "Tài khoản đã bị khóa",
@@ -330,6 +331,7 @@ namespace TutorPlatform.API.Services.Implementations
                 FullName = user.FullName,
                 PhoneNumber = user.PhoneNumber,
                 Avatar = user.AvatarUrl,
+                Address = user.Address,
                 Role = user.Role,
                 Balance = user.Balance,
                 //  IsEmailVerified = user.IsEmailVerified,

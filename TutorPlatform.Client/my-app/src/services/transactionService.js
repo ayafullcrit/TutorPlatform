@@ -80,7 +80,47 @@ export const getTransactions = async () => {
     return response.data;
   } catch (error) {
     console.error("Error fetching transactions for admin:", error);
-    throw error;
+    return { success: false, data: [], message: error?.response?.data?.message || "Không tải được lịch sử giao dịch" };
+  }
+};
+
+export const getWithdrawalRequests = async () => {
+  try {
+    const response = await api.get("/payments/admin/withdrawals");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching withdrawal requests:", error);
+    return { success: false, data: [], message: error?.response?.data?.message || "Không tải được yêu cầu rút tiền" };
+  }
+};
+
+export const approveWithdrawal = async (id) => {
+  try {
+    const response = await api.put(`/payments/admin/withdrawals/${id}/approve`);
+    return response.data;
+  } catch (error) {
+    console.error("Error approving withdrawal:", error);
+    return { success: false, data: null, message: error?.response?.data?.message || "Không duyệt được giao dịch" };
+  }
+};
+
+export const rejectWithdrawal = async (id) => {
+  try {
+    const response = await api.put(`/payments/admin/withdrawals/${id}/reject`);
+    return response.data;
+  } catch (error) {
+    console.error("Error rejecting withdrawal:", error);
+    return { success: false, data: null, message: error?.response?.data?.message || "Không từ chối được giao dịch" };
+  }
+};
+
+export const approveAllWithdrawals = async () => {
+  try {
+    const response = await api.put("/payments/admin/withdrawals/approve-all");
+    return response.data;
+  } catch (error) {
+    console.error("Error approving all withdrawals:", error);
+    return { success: false, data: 0, message: error?.response?.data?.message || "Không duyệt hàng loạt được" };
   }
 };
 

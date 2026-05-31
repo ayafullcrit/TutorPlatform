@@ -17,8 +17,8 @@ namespace TutorPlatform.API.Services.Implementations
         {
             _context = context;
         }
-        public async Task<ApiResponse<TransactionResponse>> TopUpAsync(
-            int userId, TopUpRequest request)
+
+        public async Task<ApiResponse<TransactionResponse>> TopUpAsync(int userId, TopUpRequest request)
         {
             try
             {
@@ -26,10 +26,8 @@ namespace TutorPlatform.API.Services.Implementations
                 if (user == null)
                     return Fail<TransactionResponse>("Người dùng không tồn tại");
 
-                // Giả lập độ trễ xử lý cổng thanh toán (mock)
                 await Task.Delay(300);
 
-                // Ghi transaction + cộng balance
                 var tx = await RecordTransactionAsync(
                     userId,
                     request.Amount,
@@ -48,6 +46,7 @@ namespace TutorPlatform.API.Services.Implementations
                 return Fail<TransactionResponse>("Lỗi nạp tiền: " + ex.Message);
             }
         }
+
         public async Task<ApiResponse<WalletSummary>> GetWalletAsync(int userId)
         {
             try
@@ -64,16 +63,13 @@ namespace TutorPlatform.API.Services.Implementations
                 var summary = new WalletSummary
                 {
                     Balance = user.Balance,
-                    TotalTopUp = transactions.Where(t => t.Type == TransactionType.TopUp)
-                                                .Sum(t => t.Amount),
-                    TotalSpent = Math.Abs(transactions.Where(t => t.Type == TransactionType.BookingPay)
-                                                          .Sum(t => t.Amount)),
-                    TotalEarned = transactions.Where(t => t.Type == TransactionType.Earning)
-                                                .Sum(t => t.Amount),
-                    TotalWithdrawn = Math.Abs(transactions.Where(t => t.Type == TransactionType.Withdrawal)
-                                                             .Sum(t => t.Amount)),
-                    RecentTransactions = transactions.Take(10)
-                                                     .Select(MapToResponse).ToList()
+                    TotalTopUp = transactions.Where(t => t.Type == TransactionType.TopUp).Sum(t => t.Amount),
+                    TotalSpent = Math.Abs(transactions.Where(t => t.Type == TransactionType.BookingPay).Sum(t => t.Amount)),
+                    TotalEarned = transactions.Where(t => t.Type == TransactionType.Earning).Sum(t => t.Amount),
+                    TotalWithdrawn = Math.Abs(transactions
+                        .Where(t => t.Type == TransactionType.Withdrawal && t.WithdrawalStatus == WithdrawalRequestStatus.Approved)
+                        .Sum(t => t.Amount)),
+                    RecentTransactions = transactions.Take(10).Select(MapToResponse).ToList()
                 };
 
                 return new ApiResponse<WalletSummary>(summary, "Lấy thông tin ví thành công");
@@ -84,8 +80,7 @@ namespace TutorPlatform.API.Services.Implementations
             }
         }
 
-        public async Task<ApiResponse<List<TransactionResponse>>> GetTransactionHistoryAsync(
-            int userId, int page = 1, int pageSize = 20)
+        public async Task<ApiResponse<List<TransactionResponse>>> GetTransactionHistoryAsync(int userId, int page = 1, int pageSize = 20)
         {
             try
             {
@@ -116,12 +111,13 @@ namespace TutorPlatform.API.Services.Implementations
                     .OrderByDescending(t => t.CreatedAt)
                     .ToListAsync();
 
-                var response = transactions.Select(tx => {
+                var response = transactions.Select(tx =>
+                {
                     var resp = MapToResponse(tx);
                     resp.TutorName = tx.User?.FullName ?? "N/A";
                     resp.BankInfo = tx.User != null ? $"Vietcombank - {tx.User.PhoneNumber}" : "N/A";
-                    resp.Status = tx.Type == TransactionType.Withdrawal 
-                        ? (tx.Description.Contains("Đã xử lý") ? "completed" : "pending") 
+                    resp.Status = tx.Type == TransactionType.Withdrawal
+                        ? tx.WithdrawalStatus.ToString().ToLowerInvariant()
                         : "completed";
                     return resp;
                 }).ToList();
@@ -134,28 +130,106 @@ namespace TutorPlatform.API.Services.Implementations
             }
         }
 
-        public async Task<Transaction> RecordTransactionAsync(
-            int userId,
-            decimal amount,
-            TransactionType type,
-            string description,
-            string? referenceId = null)
+        public async Task<ApiResponse<List<TransactionResponse>>> GetAdminWithdrawalRequestsAsync()
+        {
+            var result = await GetAdminTransactionsAsync();
+            var withdrawals = result.Data?.Where(t => t.Type == (int)TransactionType.Withdrawal && t.Status == "pending").ToList()
+                              ?? new List<TransactionResponse>();
+            return new ApiResponse<List<TransactionResponse>>(withdrawals, "Lấy danh sách rút tiền thành công");
+        }
+
+        public async Task<ApiResponse<TransactionResponse>> ApproveWithdrawalAsync(int transactionId)
+        {
+            var tx = await _context.Transactions.Include(t => t.User).FirstOrDefaultAsync(t => t.Id == transactionId);
+            if (tx == null) return Fail<TransactionResponse>("Giao dịch không tồn tại");
+            if (tx.Type != TransactionType.Withdrawal) return Fail<TransactionResponse>("Giao dịch không phải rút tiền");
+            if (tx.WithdrawalStatus != WithdrawalRequestStatus.Pending)
+                return new ApiResponse<TransactionResponse>(MapToResponse(tx), "Giao dịch đã được xử lý trước đó");
+
+            var withdrawalAmount = Math.Abs(tx.Amount);
+            var balanceBefore = tx.User.Balance;
+            if (balanceBefore < withdrawalAmount)
+                return Fail<TransactionResponse>("Số dư không đủ để duyệt rút tiền");
+
+            tx.User.Balance -= withdrawalAmount;
+            tx.BalanceBefore = balanceBefore;
+            tx.BalanceAfter = tx.User.Balance;
+            tx.WithdrawalStatus = WithdrawalRequestStatus.Approved;
+            tx.Description = $"{tx.Description} - Đã duyệt";
+
+            await _context.SaveChangesAsync();
+
+            var resp = MapToResponse(tx);
+            resp.Status = "completed";
+            return new ApiResponse<TransactionResponse>(resp, "Duyệt rút tiền thành công");
+        }
+
+        public async Task<ApiResponse<TransactionResponse>> RejectWithdrawalAsync(int transactionId)
+        {
+            var tx = await _context.Transactions.Include(t => t.User).FirstOrDefaultAsync(t => t.Id == transactionId);
+            if (tx == null) return Fail<TransactionResponse>("Giao dịch không tồn tại");
+            if (tx.Type != TransactionType.Withdrawal) return Fail<TransactionResponse>("Giao dịch không phải rút tiền");
+            if (tx.WithdrawalStatus != WithdrawalRequestStatus.Pending)
+                return new ApiResponse<TransactionResponse>(MapToResponse(tx), "Giao dịch đã được xử lý trước đó");
+
+            tx.WithdrawalStatus = WithdrawalRequestStatus.Rejected;
+            tx.Description = $"{tx.Description} - Từ chối";
+
+            await _context.SaveChangesAsync();
+
+            var resp = MapToResponse(tx);
+            resp.Status = "rejected";
+            return new ApiResponse<TransactionResponse>(resp, "Từ chối rút tiền thành công");
+        }
+
+        public async Task<ApiResponse<int>> ApproveAllPendingWithdrawalsAsync()
+        {
+            var pending = await _context.Transactions
+                .Include(t => t.User)
+                .Where(t => t.Type == TransactionType.Withdrawal && t.WithdrawalStatus == WithdrawalRequestStatus.Pending)
+                .ToListAsync();
+
+            var count = 0;
+            foreach (var tx in pending)
+            {
+                var withdrawalAmount = Math.Abs(tx.Amount);
+                var balanceBefore = tx.User.Balance;
+                if (balanceBefore < withdrawalAmount)
+                    continue;
+
+                tx.User.Balance -= withdrawalAmount;
+                tx.BalanceBefore = balanceBefore;
+                tx.BalanceAfter = tx.User.Balance;
+                tx.Description = $"{tx.Description} - Đã duyệt";
+                tx.WithdrawalStatus = WithdrawalRequestStatus.Approved;
+                count++;
+            }
+
+            await _context.SaveChangesAsync();
+            return new ApiResponse<int>(count, $"Đã duyệt {count} giao dịch chờ xử lý");
+        }
+
+        public async Task<Transaction> RecordTransactionAsync(int userId, decimal amount, TransactionType type, string description, string? referenceId = null)
         {
             var user = await _context.Users.FindAsync(userId)
                 ?? throw new Exception($"User {userId} không tồn tại");
 
             var balanceBefore = user.Balance;
-            user.Balance += amount;   // amount âm = trừ, dương = cộng
+            if (type != TransactionType.Withdrawal)
+            {
+                user.Balance += amount;
+            }
 
             var tx = new Transaction
             {
                 UserId = userId,
                 Amount = amount,
                 BalanceBefore = balanceBefore,
-                BalanceAfter = user.Balance,
+                BalanceAfter = type == TransactionType.Withdrawal ? balanceBefore : user.Balance,
                 Type = type,
                 Description = description,
                 ReferenceId = referenceId,
+                WithdrawalStatus = type == TransactionType.Withdrawal ? WithdrawalRequestStatus.Pending : WithdrawalRequestStatus.Approved,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -178,7 +252,6 @@ namespace TutorPlatform.API.Services.Implementations
                 if (user.Balance < amount)
                     return Fail<TransactionResponse>("Số dư tài khoản không đủ để thực hiện giao dịch này");
 
-                // Ghi transaction (amount là số âm vì rút tiền là trừ balance)
                 var tx = await RecordTransactionAsync(
                     userId,
                     -amount,
@@ -189,7 +262,7 @@ namespace TutorPlatform.API.Services.Implementations
 
                 return new ApiResponse<TransactionResponse>(
                     MapToResponse(tx),
-                    "Yêu cầu rút tiền thành công!"
+                    "Yêu cầu rút tiền đã được gửi và đang chờ admin xác nhận"
                 );
             }
             catch (Exception ex)
@@ -197,7 +270,7 @@ namespace TutorPlatform.API.Services.Implementations
                 return Fail<TransactionResponse>("Lỗi rút tiền: " + ex.Message);
             }
         }
-    
+
         private TransactionResponse MapToResponse(Transaction tx)
         {
             var (typeText, typeIcon, typeColor) = tx.Type switch
@@ -226,12 +299,14 @@ namespace TutorPlatform.API.Services.Implementations
                 ReferenceId = tx.ReferenceId,
                 CreatedAt = tx.CreatedAt,
                 TimeAgo = GetTimeAgo(tx.CreatedAt),
-                FormattedAmount = $"{sign}{FormatVnd(Math.Abs(tx.Amount))}"
+                FormattedAmount = $"{sign}{FormatVnd(Math.Abs(tx.Amount))}",
+                Status = tx.Type == TransactionType.Withdrawal
+                    ? tx.WithdrawalStatus.ToString().ToLowerInvariant()
+                    : "completed"
             };
         }
 
-        private static string FormatVnd(decimal amount) =>
-            $"{amount:N0} VNĐ";
+        private static string FormatVnd(decimal amount) => $"{amount:N0} VNĐ";
 
         private static string GetTimeAgo(DateTime dt)
         {

@@ -34,6 +34,10 @@ namespace TutorPlatform.API.Data.Configurations
                 .HasMaxLength(100)
                 .IsRequired(false);
 
+            builder.Property(t => t.WithdrawalStatus)
+                .HasConversion<int>()
+                .HasDefaultValue(TutorPlatform.API.Models.Enums.WithdrawalRequestStatus.Pending);
+
             builder.Property(t => t.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()")
                 .ValueGeneratedOnAdd();

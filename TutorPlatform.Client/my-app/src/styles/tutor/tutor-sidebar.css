@@ -122,3 +122,51 @@
 .tutor-sidebar__logout:hover {
   background: var(--tutor-error-bg);
 }
+
+.tutor-sidebar__link--disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.tutor-page__pending {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.tutor-page__pending-card {
+  width: 100%;
+  max-width: 720px;
+  background: #fffdf7;
+  border: 1px solid rgba(124, 110, 39, 0.12);
+  border-radius: 24px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06);
+}
+
+.tutor-page__pending-icon {
+  font-size: 56px;
+  color: var(--tutor-primary);
+  margin-bottom: 16px;
+}
+
+.tutor-page__pending-card h1 {
+  font-size: 30px;
+  margin-bottom: 12px;
+  color: var(--tutor-text);
+}
+
+.tutor-page__pending-card p {
+  font-size: 16px;
+  color: var(--tutor-muted);
+  line-height: 1.7;
+}
+
+.tutor-page__pending-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}

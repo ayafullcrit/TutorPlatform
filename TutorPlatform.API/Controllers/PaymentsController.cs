@@ -88,6 +88,38 @@ namespace TutorPlatform.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("admin/withdrawals")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetWithdrawals()
+        {
+            var result = await _paymentService.GetAdminWithdrawalRequestsAsync();
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPut("admin/withdrawals/{id}/approve")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ApproveWithdrawal(int id)
+        {
+            var result = await _paymentService.ApproveWithdrawalAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPut("admin/withdrawals/{id}/reject")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RejectWithdrawal(int id)
+        {
+            var result = await _paymentService.RejectWithdrawalAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPut("admin/withdrawals/approve-all")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ApproveAllWithdrawals()
+        {
+            var result = await _paymentService.ApproveAllPendingWithdrawalsAsync();
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
         private int GetCurrentUserId()
         {
             var claim = User.FindFirst(ClaimTypes.NameIdentifier);

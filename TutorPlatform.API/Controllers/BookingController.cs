@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using TutorPlatform.API.Data;
 using TutorPlatform.API.Models.DTOs.Requests.Booking;
+using TutorPlatform.API.Models.Enums;
 using TutorPlatform.API.Services.Interfaces;
 
 namespace TutorPlatform.API.Controllers
@@ -11,10 +14,12 @@ namespace TutorPlatform.API.Controllers
     [Authorize]
     public class BookingsController : ControllerBase
     {
+        private readonly ApplicationDbContext _context;
         private readonly IBookingService _bookingService;
 
-        public BookingsController(IBookingService bookingService)
+        public BookingsController(ApplicationDbContext context, IBookingService bookingService)
         {
+            _context = context;
             _bookingService = bookingService;
         }
 
@@ -103,6 +108,7 @@ namespace TutorPlatform.API.Controllers
         public async Task<IActionResult> GetMyBookingsAsTutor()
         {
             var userId = GetCurrentUserId();
+            if (!await IsTutorApprovedAsync(userId)) return Forbid();
             var result = await _bookingService.GetMyBookingsAsTutorAsync(userId);
 
             if (!result.Success)
@@ -118,6 +124,7 @@ namespace TutorPlatform.API.Controllers
         public async Task<IActionResult> ConfirmBooking(int id)
         {
             var userId = GetCurrentUserId();
+            if (!await IsTutorApprovedAsync(userId)) return Forbid();
             var result = await _bookingService.ConfirmBookingAsync(userId, id);
 
             if (!result.Success)
@@ -133,6 +140,7 @@ namespace TutorPlatform.API.Controllers
         public async Task<IActionResult> CompleteBooking(int id)
         {
             var userId = GetCurrentUserId();
+            if (!await IsTutorApprovedAsync(userId)) return Forbid();
             var result = await _bookingService.CompleteBookingAsync(userId, id);
 
             if (!result.Success)
@@ -148,6 +156,7 @@ namespace TutorPlatform.API.Controllers
         public async Task<IActionResult> CancelBookingByTutor(int id)
         {
             var userId = GetCurrentUserId();
+            if (!await IsTutorApprovedAsync(userId)) return Forbid();
             var result = await _bookingService.CancelBookingByTutorAsync(userId, id);
 
             if (!result.Success)
@@ -175,6 +184,15 @@ namespace TutorPlatform.API.Controllers
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             return int.Parse(userIdClaim!.Value);
+        }
+
+        private async Task<bool> IsTutorApprovedAsync(int tutorUserId)
+        {
+            return await _context.Tutors.AnyAsync(t =>
+                t.UserId == tutorUserId &&
+                t.IsVerified &&
+                t.VerificationStatus == VerificationStatus.Approved &&
+                t.User.IsActive);
         }
     }
 }

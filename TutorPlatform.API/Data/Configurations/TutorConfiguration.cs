@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TutorPlatform.API.Models.Entities;
+using TutorPlatform.API.Models.Enums;
 
 namespace TutorPlatform.API.Data.Configurations
 {
@@ -17,6 +18,11 @@ namespace TutorPlatform.API.Data.Configurations
             builder.Property(t => t.TotalReviews);
 
             builder.Property(t => t.IsVerified);
+            builder.Property(t => t.VerificationStatus)
+                .HasConversion<int>()
+                .HasDefaultValue(VerificationStatus.Pending);
+            builder.Property(t => t.VerificationNote)
+                .HasMaxLength(1000);
 
             // Ensure HourlyRate has an explicit precision to avoid silent truncation
             builder.Property(t => t.HourlyRate)

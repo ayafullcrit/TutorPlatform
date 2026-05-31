@@ -200,6 +200,46 @@ namespace TutorPlatform.API.Services.Implementations
             }
         }
 
+        public async Task<ApiResponse<object>> GetAdminUsersAsync(string? role = null, bool? isActive = null, int page = 1, int pageSize = 20)
+        {
+            var query = _context.Users.Include(u => u.Student).Include(u => u.Tutor).AsQueryable();
+            if (!string.IsNullOrWhiteSpace(role) && Enum.TryParse<UserRole>(role, true, out var parsedRole))
+                query = query.Where(u => u.Role == parsedRole);
+            if (isActive.HasValue)
+                query = query.Where(u => u.IsActive == isActive.Value);
+            var total = await query.CountAsync();
+            var items = await query.OrderByDescending(u => u.Id).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            return new ApiResponse<object>(new
+            {
+                items = items.Select(MapToUserProfile).ToList(),
+                total,
+                page,
+                pageSize
+            }, "Lấy danh sách admin thành công");
+        }
+
+        public async Task<ApiResponse<UpdateProfileResponse>> AdminUpdateUserAsync(int userId, AdminUpdateUserRequest request)
+        {
+            var user = await _context.Users.Include(u => u.Student).Include(u => u.Tutor).FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return new ApiResponse<UpdateProfileResponse>("User không tồn tại", new List<string> { "Không tìm thấy người dùng" });
+            user.FullName = request.FullName;
+            user.PhoneNumber = request.PhoneNumber ?? user.PhoneNumber;
+            user.Address = request.Address ?? user.Address;
+            user.AvatarUrl = request.AvatarUrl ?? user.AvatarUrl;
+            if (request.Role.HasValue) user.Role = request.Role.Value;
+            await _context.SaveChangesAsync();
+            return new ApiResponse<UpdateProfileResponse>(MapToUserProfile(user), "Cập nhật người dùng thành công");
+        }
+
+        public async Task<ApiResponse<object>> ToggleUserStatusAsync(int userId, bool isActive)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return new ApiResponse<object>("User không tồn tại", new List<string> { "Không tìm thấy người dùng" });
+            user.IsActive = isActive;
+            await _context.SaveChangesAsync();
+            return new ApiResponse<object>(new { userId, isActive }, "Cập nhật trạng thái thành công");
+        }
+
         private UpdateProfileResponse MapToUserProfile(Models.Entities.User user)
         {
             var profile = new UpdateProfileResponse
@@ -211,7 +251,8 @@ namespace TutorPlatform.API.Services.Implementations
                 Address = user.Address,
                 AvatarUrl = user.AvatarUrl,
                 Balance = user.Balance,
-                Role = user.Role
+                Role = user.Role,
+                IsActive = user.IsActive
             };
 
             if (user.Student != null)

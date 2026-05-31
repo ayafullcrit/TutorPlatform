@@ -1,89 +1,251 @@
-import { useState, useEffect } from "react";
-import { getAllUsers } from "../../services/userService";
+import { useEffect, useMemo, useState } from "react";
+import { getAdminUsers, toggleUserStatus, updateAdminUser } from "../../services/userService";
+
+const roles = ["All", "Tutor", "Student", "Admin"];
+
+const roleLabels = {
+  1: "Student",
+  2: "Tutor",
+  3: "Admin",
+};
 
 export default function Accounts() {
+  const [query, setQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("All");
   const [accounts, setAccounts] = useState([]);
+  const [selectedAccount, setSelectedAccount] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadAccounts();
-  }, []);
+  const [saving, setSaving] = useState(false);
 
   const loadAccounts = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const result = await getAllUsers();
+      const result = await getAdminUsers({ page: 1, pageSize: 200 });
       if (result.success) {
-        setAccounts(result.data);
+        setAccounts(result.data?.items || []);
       }
-    } catch (error) {
-      console.error("Failed to load accounts:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getRoleName = (role) => {
-    const roles = { 1: "Student", 2: "Tutor", 3: "Admin" };
-    return roles[role] || "Unknown";
+  useEffect(() => {
+    loadAccounts();
+  }, []);
+
+  const filtered = useMemo(() => {
+    return accounts.filter((item) => {
+      const roleName = roleLabels[item.role] || item.role || "Unknown";
+      const statusName = item.isActive ? "ACTIVE" : "SUSPENDED";
+      const matchRole = roleFilter === "All" || roleName === roleFilter;
+      const key = `${item.id} ${item.fullName} ${item.email} ${statusName}`.toLowerCase();
+      const matchQuery = key.includes(query.trim().toLowerCase());
+      return matchRole && matchQuery;
+    });
+  }, [accounts, query, roleFilter]);
+
+  const handleToggleStatus = async (account) => {
+    await toggleUserStatus(account.id, !account.isActive);
+    await loadAccounts();
+    if (selectedAccount?.id === account.id) {
+      setSelectedAccount((current) => current && { ...current, isActive: !current.isActive });
+    }
+  };
+
+  const handleSave = async () => {
+    if (!selectedAccount) return;
+    setSaving(true);
+    try {
+      await updateAdminUser(selectedAccount.id, {
+        fullName: selectedAccount.fullName,
+        phoneNumber: selectedAccount.phoneNumber,
+        address: selectedAccount.address,
+        avatarUrl: selectedAccount.avatarUrl,
+        role: selectedAccount.role,
+      });
+      setSelectedAccount(null);
+      await loadAccounts();
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      <div>
-        <h2 className="text-5xl font-serif">Account Registry</h2>
-        <p className="mt-2 text-stone-600">Manage and audit system access.</p>
+    <section className="admin-page">
+      <div className="admin-page__header">
+        <h2>Quản lý tài khoản</h2>
+        <p>Quản trị người dùng, chỉnh sửa thông tin và khóa/mở tài khoản.</p>
       </div>
 
-      <div className="bg-[#efefd7] p-6 rounded flex flex-col lg:flex-row gap-4 justify-between">
+      <div className="admin-toolbar">
         <input
-          className="bg-transparent border-b border-stone-300 outline-none px-1 py-2 w-full lg:max-w-md"
-          placeholder="Search by name, email, or ID..."
+          className="admin-input"
+          placeholder="Tìm theo tên, email hoặc mã..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
         />
-        <div className="flex gap-2 flex-wrap">
-          <button className="px-4 py-2 bg-[#e1aa36] text-[#5b4000] rounded">All Roles</button>
-          <button className="px-4 py-2 bg-white rounded">Tutor</button>
-          <button className="px-4 py-2 bg-white rounded">Student</button>
-          <button className="px-4 py-2 bg-white rounded">Admin</button>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {roles.map((role) => {
+            const isActive = roleFilter === role;
+            return (
+              <button
+                key={role}
+                type="button"
+                className={`admin-btn ${isActive ? "admin-btn--primary" : "admin-btn--secondary"}`}
+                onClick={() => setRoleFilter(role)}
+              >
+                {role === "All" ? "Tất cả" : role}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="bg-white rounded p-8 overflow-x-auto">
+      <div className="admin-card" style={{ overflowX: "auto" }}>
         {loading ? (
-          <div className="text-center py-10">Loading accounts...</div>
+          <div style={{ padding: 24, textAlign: "center", color: "var(--color-text-muted)" }}>
+            Đang tải danh sách tài khoản...
+          </div>
         ) : (
-          <table className="w-full text-left">
+          <table className="admin-table">
             <thead>
-              <tr className="text-xs uppercase tracking-widest text-stone-500 border-b">
-                <th className="py-4">ID</th>
-                <th>Name</th>
+              <tr>
+                <th>ID</th>
+                <th>Tên</th>
                 <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th className="text-right">Actions</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th style={{ textAlign: "right" }}>Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {accounts.map((item) => (
-                <tr key={item.id} className="border-b last:border-0 hover:bg-[#f8f6ee]">
-                  <td className="py-4">#{item.id}</td>
+              {filtered.map((item) => (
+                <tr key={item.id}>
+                  <td>#{item.id}</td>
                   <td>{item.fullName}</td>
                   <td>{item.email}</td>
-                  <td>{getRoleName(item.role)}</td>
+                  <td>{roleLabels[item.role] || "Unknown"}</td>
                   <td>
-                    <span className={`px-2 py-1 rounded text-xs ${item.tutor?.isVerified ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
-                      {item.role === 2 ? (item.tutor?.isVerified ? "VERIFIED" : "PENDING") : "ACTIVE"}
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        padding: "6px 10px",
+                        borderRadius: 999,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        background: item.isActive ? "rgba(78, 160, 86, 0.12)" : "rgba(170, 86, 86, 0.12)",
+                        color: item.isActive ? "#2f7a3c" : "#9e4242",
+                      }}
+                    >
+                      {item.isActive ? "ACTIVE" : "SUSPENDED"}
                     </span>
                   </td>
-                  <td className="text-right">
-                    <button className="text-[#7b5800]">Edit</button>
+                  <td style={{ textAlign: "right" }}>
+                    <div style={{ display: "inline-flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn--secondary"
+                        onClick={() => setSelectedAccount({ ...item })}
+                      >
+                        Sửa
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn--secondary"
+                        onClick={() => handleToggleStatus(item)}
+                      >
+                        {item.isActive ? "Khóa" : "Mở khóa"}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: "center", color: "var(--color-text-muted)" }}>
+                    Không có dữ liệu phù hợp.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         )}
       </div>
-    </div>
+
+      {selectedAccount && (
+        <div className="admin-page__panel" onClick={() => setSelectedAccount(null)}>
+          <div
+            className="admin-card admin-page__panel-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="admin-page__header" style={{ marginBottom: 20 }}>
+              <h2>Chỉnh sửa tài khoản</h2>
+              <p>Chỉnh thông tin cơ bản và quyền truy cập của người dùng.</p>
+            </div>
+
+            <div className="admin-page__stack">
+              <input
+                className="admin-input"
+                value={selectedAccount.fullName || ""}
+                onChange={(e) => setSelectedAccount({ ...selectedAccount, fullName: e.target.value })}
+                placeholder="Họ và tên"
+              />
+              <input
+                className="admin-input"
+                value={selectedAccount.email || ""}
+                disabled
+                placeholder="Email"
+              />
+              <input
+                className="admin-input"
+                value={selectedAccount.phoneNumber || ""}
+                onChange={(e) => setSelectedAccount({ ...selectedAccount, phoneNumber: e.target.value })}
+                placeholder="Số điện thoại"
+              />
+              <input
+                className="admin-input"
+                value={selectedAccount.address || ""}
+                onChange={(e) => setSelectedAccount({ ...selectedAccount, address: e.target.value })}
+                placeholder="Địa chỉ"
+              />
+              <input
+                className="admin-input"
+                value={selectedAccount.avatarUrl || ""}
+                onChange={(e) => setSelectedAccount({ ...selectedAccount, avatarUrl: e.target.value })}
+                placeholder="Avatar URL"
+              />
+              <select
+                className="admin-select"
+                value={selectedAccount.role}
+                onChange={(e) => setSelectedAccount({ ...selectedAccount, role: Number(e.target.value) })}
+              >
+                <option value={1}>Student</option>
+                <option value={2}>Tutor</option>
+                <option value={3}>Admin</option>
+              </select>
+            </div>
+
+            <div className="admin-page__actions">
+              <button
+                type="button"
+                className="admin-btn admin-btn--secondary"
+                onClick={() => setSelectedAccount(null)}
+                disabled={saving}
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                className="admin-btn admin-btn--primary"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Đang lưu..." : "Lưu thay đổi"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
