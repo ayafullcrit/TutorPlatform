@@ -157,7 +157,7 @@
   font-size: 20px;
 }
 
-.tutor-card button {
+.public-page .tutor-card button {
   width: 100%;
   border: none;
   padding: 14px;
@@ -169,7 +169,7 @@
   transition: 0.25s;
 }
 
-.tutor-card button:hover {
+.public-page .tutor-card button:hover {
   background: #6b5f21;
 }
 

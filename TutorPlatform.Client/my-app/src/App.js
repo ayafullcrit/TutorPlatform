@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPasswordRequest from "./pages/ForgotPasswordRequest";
+import ForgotPasswordReset from "./pages/ForgotPasswordReset";
 import Tutors from "./pages/homepages/Tutors";
 import Classes from "./pages/homepages/Classes";
 import About from "./pages/homepages/About";
@@ -52,6 +54,8 @@ function App() {
         <Route path="/support" element={<Support />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPasswordRequest />} />
+        <Route path="/forgot-password/reset" element={<ForgotPasswordReset />} />
 
         {/* Admin */}
         <Route element={<AdminRoute />}>

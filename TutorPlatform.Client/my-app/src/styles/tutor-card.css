@@ -107,6 +107,9 @@
   background: var(--color-primary);
   color: #fff;
   padding: 12px 22px;
+  min-width: 130px;
+  width: auto;
+  flex: 0 0 auto;
   border-radius: 14px;
   cursor: pointer;
 }

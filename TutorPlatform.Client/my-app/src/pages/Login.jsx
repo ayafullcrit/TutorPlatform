@@ -95,12 +95,12 @@ export default function LoginSplit() {
                 </div>
 
                 <div className="text-right">
-                  <button
-                    type="button"
-                    className="text-[#fdfaf2] text-sm md:text-base hover:text-[#e2d5c1] italic transition-colors bg-none border-none cursor-pointer p-0"
+                  <Link
+                    to="/forgot-password"
+                    className="text-[#fdfaf2] text-sm md:text-base hover:text-[#e2d5c1] italic transition-colors"
                   >
                     Quên mật khẩu?
-                  </button>
+                  </Link>
                 </div>
 
                 {error && (
@@ -156,3 +156,5 @@ export default function LoginSplit() {
     </>
   );
 }
+
+
