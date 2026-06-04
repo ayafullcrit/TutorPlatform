@@ -10,6 +10,7 @@ namespace TutorPlatform.API.Models.DTOs.Responses.Class
         public int TutorUserId { get; set; }
         public string TutorName { get; set; }
         public string TutorAvatar { get; set; }
+        public string TutorAddress { get; set; }
         public double TutorRating { get; set; }
         public int TutorTotalReviews { get; set; }
 

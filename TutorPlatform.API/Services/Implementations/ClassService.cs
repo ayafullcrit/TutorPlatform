@@ -259,6 +259,12 @@ namespace TutorPlatform.API.Services.Implementations
                     query = query.Where(c => c.PricePerSession <= request.MaxPrice.Value);
                 }
 
+                if (!string.IsNullOrWhiteSpace(request.Address))
+                {
+                    var address = request.Address.Trim();
+                    query = query.Where(c => c.Tutor.User.Address == address);
+                }
+
                 var totalCount = await query.CountAsync();
                 //sort
                 query = request.SortBy?.ToLower() switch
@@ -372,6 +378,7 @@ namespace TutorPlatform.API.Services.Implementations
                 TutorUserId = classEntity.TutorId,
                 TutorName = classEntity.Tutor?.User?.FullName ?? "Unknown",
                 TutorAvatar = classEntity.Tutor?.User?.AvatarUrl,
+                TutorAddress = classEntity.Tutor?.User?.Address ?? string.Empty,
                 TutorRating = classEntity.Tutor?.Rating ?? 0,
                 TutorTotalReviews = classEntity.Tutor?.TotalReviews ?? 0,
 

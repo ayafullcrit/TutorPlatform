@@ -16,6 +16,8 @@ namespace TutorPlatform.API.Models.DTOs.Requests.Class
 
         public int? TutorId { get; set; }
 
+        public string? Address { get; set; }
+
         // Pagination
         public int Page { get; set; } = 1;
 

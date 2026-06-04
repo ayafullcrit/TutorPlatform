@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { getCurrentUser, getCurrentUserApi } from "../../services/authService";
 
 const menuItems = [
   { to: "/tutor/dashboard", label: "Tổng quan", icon: "dashboard" },
@@ -13,8 +15,31 @@ const menuItems = [
 
 export default function TutorSidebar() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const [user, setUser] = useState(getCurrentUser());
   const isVerified = Boolean(user?.isTutorVerified);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCurrentUser = async () => {
+      try {
+        const result = await getCurrentUserApi();
+        const currentUser = result?.data;
+        if (!mounted || !currentUser) return;
+
+        localStorage.setItem("user", JSON.stringify(currentUser));
+        setUser(currentUser);
+      } catch {
+        // Keep local fallback if API unavailable
+      }
+    };
+
+    loadCurrentUser();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
