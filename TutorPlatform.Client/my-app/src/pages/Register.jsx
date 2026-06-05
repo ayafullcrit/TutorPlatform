@@ -194,10 +194,10 @@ export default function Register() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">Lớp (6–12)</label>
+                      <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">Lớp (1–12)</label>
                       <select name="grade" value={formData.grade} onChange={handleInputChange} className="w-full px-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all text-[#5c4a3d]">
                         <option value="">Chọn lớp</option>
-                        {[6,7,8,9,10,11,12].map((g) => <option key={g} value={g}>Lớp {g}</option>)}
+                        {[1,2,3,4,5,6,7,8,9,10,11,12].map((g) => <option key={g} value={g}>Lớp {g}</option>)}
                       </select>
                     </div>
                   </div>

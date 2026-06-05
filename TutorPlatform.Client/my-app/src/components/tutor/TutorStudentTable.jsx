@@ -1,3 +1,14 @@
+const getInitials = (fullName = "") => {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[parts.length - 2][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  }
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+  return "HV";
+};
+
 export default function TutorStudentTable({
   students,
   searchTerm,
@@ -59,10 +70,13 @@ export default function TutorStudentTable({
               <tr key={item.id}>
                 <td>
                   <div className="tutor-student-table__person">
-                    <img
-                      src={`https://i.pravatar.cc/80?u=${item.name}`}
-                      alt={item.name}
-                    />
+                    <div
+                      className="tutor-student-table__avatar-fallback"
+                      aria-label={item.name}
+                      title={item.name}
+                    >
+                      {getInitials(item.name)}
+                    </div>
                     <strong>{item.name}</strong>
                   </div>
                 </td>

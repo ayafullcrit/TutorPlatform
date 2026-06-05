@@ -50,7 +50,7 @@ export default function Subjects() {
         <div>
           <h1 className="tutor-page__title">Danh sách môn học</h1>
           <p className="tutor-page__subtitle">
-            Các môn học hiện có trên hệ thống. Tạo lớp học để bắt đầu giảng dạy.
+            Các môn học hiện có trên hệ thống. Tạo môn dạy để bắt đầu giảng dạy.
           </p>
         </div>
       </div>
@@ -67,7 +67,7 @@ export default function Subjects() {
       {/* Summary */}
       <section className="tutor-subjects__summary">
         <div className="tutor-card tutor-subjects__summary-card">
-          <p>Tổng môn học</p>
+          <p>Tổng môn học trên hệ thống </p>
           <h3>{subjects.length}</h3>
         </div>
         <div className="tutor-card tutor-subjects__summary-card">
@@ -79,7 +79,7 @@ export default function Subjects() {
           <h3>{inactiveCount}</h3>
         </div>
         <div className="tutor-card tutor-subjects__summary-card">
-          <p>Tổng lớp đang mở</p>
+          <p>Tổng môn học đang dạy</p>
           <h3>{subjects.reduce((sum, s) => sum + (s.totalClasses ?? 0), 0)}</h3>
         </div>
       </section>
@@ -120,12 +120,12 @@ export default function Subjects() {
 
                 <div className="tutor-subject-card__info">
                   <div>
-                    <span>Lớp đang mở</span>
+                    <span>Môn đang mở</span>
                     <strong>{subject.totalClasses ?? 0}</strong>
                   </div>
                 </div>
 
-                {/* Gợi ý tạo lớp */}
+                {/* Gợi ý tạo môn dạy */}
                 <div className="tutor-subject-card__actions">
                   <button
                     className="tutor-btn tutor-btn--primary"
@@ -133,7 +133,7 @@ export default function Subjects() {
                     onClick={() => navigate("/tutor/classes", { state: { createClass: true, subjectId: subject.id } })}
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
-                    Tạo lớp môn này
+                    Tạo môn dạy này 
                   </button>
                 </div>
               </article>

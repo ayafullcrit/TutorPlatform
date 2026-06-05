@@ -6,21 +6,21 @@ const classes = [
   {
     title: "IELTS Intensive 6.5+",
     tutor: "Trần Thị B",
-    schedule: "T3 - T5 - T7",
+    evaluation: "5 sao",
     students: "6/10 học viên",
     price: "2.500.000đ/tháng",
   },
   {
     title: "Toán 12 luyện thi THPT",
     tutor: "Nguyễn Văn A",
-    schedule: "T2 - T4 - T6",
+    evaluation: "5 sao",
     students: "8/12 học viên",
     price: "1.800.000đ/tháng",
   },
   {
     title: "Java cơ bản đến nâng cao",
     tutor: "Lê Minh C",
-    schedule: "T7 - CN",
+    evaluation: "4.8 sao",
     students: "5/8 học viên",
     price: "2.000.000đ/tháng",
   },
@@ -33,7 +33,7 @@ const Classes = () => {
 
       <section className="classes-hero">
         <div>
-          <span className="public-badge">Lớp nhóm EduMatch</span>
+          <span className="public-badge">Môn giảng dạy ở EduMatch</span>
           <h1>Học cùng bạn bè, tiết kiệm hơn và hiệu quả hơn</h1>
           <p>
             Tham gia các lớp nhóm chất lượng cao với gia sư được xác thực,
@@ -43,8 +43,8 @@ const Classes = () => {
 
         <div className="class-stats">
           <div>
-            <h2>1500+</h2>
-            <p>Lớp đang mở</p>
+            <h2>50+</h2>
+            <p>Môn học đang mở</p>
           </div>
           <div>
             <h2>850+</h2>
@@ -58,7 +58,7 @@ const Classes = () => {
       </section>
 
       <section className="classes-section">
-        <h2>Lớp nhóm nổi bật</h2>
+        <h2>Môn học nổi bật</h2>
 
         <div className="class-grid">
           {classes.map((item, index) => (
@@ -66,10 +66,10 @@ const Classes = () => {
               <div className="class-tag">Đang tuyển học viên</div>
               <h3>{item.title}</h3>
               <p>👨‍🏫 Gia sư: {item.tutor}</p>
-              <p>📅 Lịch học: {item.schedule}</p>
-              <p>👥 Số lượng: {item.students}</p>
+              <p>📅 Đánh giá: {item.evaluation}</p>
+              <p>👥 Số học viên đăng ký học: {item.students}</p>
               <h4>{item.price}</h4>
-              <button>Xem chi tiết lớp</button>
+              <button>Xem chi tiết môn học</button>
             </div>
           ))}
         </div>

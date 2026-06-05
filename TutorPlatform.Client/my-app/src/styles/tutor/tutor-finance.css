@@ -50,6 +50,13 @@
   padding: 24px;
 }
 
+.tutor-transactions h3 {
+  margin: 0 0 18px;
+  font-size: 20px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
 .tutor-transaction {
   display: flex;
   align-items: center;
@@ -80,15 +87,30 @@
   flex: 1;
 }
 
+.tutor-transaction__info strong {
+  display: block;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 700;
+}
+
 .tutor-transaction__info span {
   display: block;
   color: var(--tutor-muted);
   font-size: 13px;
   margin-top: 4px;
+  line-height: 1.4;
 }
 
 .tutor-transaction__amount {
   text-align: right;
+}
+
+.tutor-transaction__amount strong {
+  display: block;
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 800;
 }
 
 .tutor-transaction__amount span {

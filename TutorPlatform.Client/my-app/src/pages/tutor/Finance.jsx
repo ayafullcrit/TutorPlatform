@@ -1,7 +1,34 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import TutorChartCard from "../../components/tutor/TutorChartCard";
 import TutorTransactionItem from "../../components/tutor/TutorTransactionItem";
 import { getWallet, withdrawBalance } from "../../services/transactionService";
+
+const formatCurrency = (amount = 0) =>
+  `${Number(amount || 0).toLocaleString("vi-VN")}đ`;
+
+const normalizeMojibake = (value = "") => {
+  const text = String(value ?? "").trim();
+
+  if (!/[ÃÂÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßáºá»á¼]/.test(text)) {
+    return text;
+  }
+
+  try {
+    return decodeURIComponent(escape(text));
+  } catch {
+    return text;
+  }
+};
+
+const formatTransactionName = (value = "") => {
+  const normalized = normalizeMojibake(value);
+
+  return normalized
+    .replace(/^Thu nháº­p tá»« lá»›p:\s*/i, "Thu nhập từ ")
+    .replace(/^Thu nháº­p tá»«:\s*/i, "Thu nhập từ ")
+    .replace(/^Thu nhập từ lớp:\s*/i, "Thu nhập từ ")
+    .replace(/^Thu nhập từ:\s*/i, "Thu nhập từ ");
+};
 
 export default function Finance() {
   const [wallet, setWallet] = useState(null);
@@ -36,15 +63,18 @@ export default function Finance() {
   const handleConfirmWithdraw = async (e) => {
     e.preventDefault();
     const amount = Number(withdrawAmount);
+
     if (!amount || amount < 10000) {
-      setWithdrawError("Số tiền rút tối thiểu là 10,000đ");
+      setWithdrawError("Số tiền rút tối thiểu là 10.000đ");
       return;
     }
+
     if (amount > 50000000) {
-      setWithdrawError("Số tiền rút tối đa là 50,000,000đ");
+      setWithdrawError("Số tiền rút tối đa là 50.000.000đ");
       return;
     }
-    if (amount > wallet.balance) {
+
+    if (amount > (wallet?.balance ?? 0)) {
       setWithdrawError("Số dư tài khoản không đủ");
       return;
     }
@@ -52,10 +82,12 @@ export default function Finance() {
     try {
       setSubmitting(true);
       const result = await withdrawBalance(amount);
+
       if (result.success) {
         alert("Gửi yêu cầu rút tiền thành công!");
         setShowWithdrawModal(false);
         setWithdrawAmount("");
+        setWithdrawError("");
         loadFinanceData();
       } else {
         setWithdrawError(result.message || "Rút tiền thất bại. Vui lòng thử lại.");
@@ -81,13 +113,15 @@ export default function Finance() {
       </div>
 
       {loading && !wallet ? (
-        <div style={{ textAlign: "center", padding: "40px" }}>Đang tải dữ liệu tài chính...</div>
+        <div style={{ textAlign: "center", padding: "40px" }}>
+          Đang tải dữ liệu tài chính...
+        </div>
       ) : (
         <>
           <section className="tutor-finance__summary">
             <div className="tutor-finance__balance">
               <p>Số dư hiện tại</p>
-              <h2>{wallet?.balance?.toLocaleString("vi-VN")}đ</h2>
+              <h2>{formatCurrency(wallet?.balance)}</h2>
               <div className="tutor-finance__actions">
                 <button onClick={handleWithdraw}>Rút tiền</button>
               </div>
@@ -96,15 +130,17 @@ export default function Finance() {
             <div className="tutor-finance__small-card tutor-card">
               <span className="material-symbols-outlined">trending_up</span>
               <p>Tổng thu nhập</p>
-              <h3>{wallet?.totalEarned?.toLocaleString("vi-VN")}đ</h3>
+              <h3>{formatCurrency(wallet?.totalEarned)}</h3>
               <small style={{ color: "var(--tutor-success)" }}>Đã quyết toán</small>
             </div>
 
             <div className="tutor-finance__small-card tutor-card">
               <span className="material-symbols-outlined">receipt_long</span>
               <p>Đã rút tiền</p>
-              <h3>{wallet?.totalWithdrawn?.toLocaleString("vi-VN")}đ</h3>
-              <small style={{ color: "var(--tutor-muted)" }}>Về tài khoản ngân hàng</small>
+              <h3>{formatCurrency(wallet?.totalWithdrawn)}</h3>
+              <small style={{ color: "var(--tutor-muted)" }}>
+                Về tài khoản ngân hàng
+              </small>
             </div>
           </section>
 
@@ -115,18 +151,22 @@ export default function Finance() {
               <h3>Giao dịch gần đây</h3>
               {wallet?.recentTransactions?.length > 0 ? (
                 wallet.recentTransactions.map((item) => (
-                  <TutorTransactionItem 
-                    key={item.id} 
+                  <TutorTransactionItem
+                    key={item.id}
                     item={{
-                      name: item.description,
+                      name: formatTransactionName(
+                        item.description || "Thu nhập từ lớp học"
+                      ),
                       amount: item.amount,
-                      date: item.timeAgo,
-                      status: item.typeText,
-                    }} 
+                      date: normalizeMojibake(item.timeAgo || item.createdAt || ""),
+                      status: normalizeMojibake(item.typeText || item.status || ""),
+                    }}
                   />
                 ))
               ) : (
-                <div style={{ padding: "20px", textAlign: "center", color: "#999" }}>
+                <div
+                  style={{ padding: "20px", textAlign: "center", color: "#999" }}
+                >
                   Không có giao dịch nào
                 </div>
               )}
@@ -135,14 +175,15 @@ export default function Finance() {
         </>
       )}
 
-      {/* Modal Rút Tiền */}
       {showWithdrawModal && (
         <div className="tutor-modal" style={{ display: "flex" }}>
           <div className="tutor-modal__content">
             <h2 style={{ marginBottom: "18px" }}>Rút tiền về tài khoản</h2>
             <form onSubmit={handleConfirmWithdraw}>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                <label style={{ fontWeight: "700" }}>Số tiền muốn rút (VNĐ)</label>
+                <label style={{ fontWeight: "700" }}>
+                  Số tiền muốn rút (VNĐ)
+                </label>
                 <input
                   type="number"
                   min="10000"
@@ -159,20 +200,35 @@ export default function Finance() {
                     padding: "12px 14px",
                     outline: "none",
                     fontSize: "15px",
-                    color: "var(--tutor-text)"
+                    color: "var(--tutor-text)",
                   }}
                   required
                 />
                 <span style={{ fontSize: "13px", color: "var(--tutor-muted)" }}>
-                  Số dư có thể rút: <strong>{wallet?.balance?.toLocaleString("vi-VN")}đ</strong>
+                  Số dư có thể rút: <strong>{formatCurrency(wallet?.balance)}</strong>
                 </span>
                 {withdrawError && (
-                  <span style={{ fontSize: "14px", color: "red", fontWeight: "600", marginTop: "4px" }}>
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      color: "red",
+                      fontWeight: "600",
+                      marginTop: "4px",
+                    }}
+                  >
                     {withdrawError}
                   </span>
                 )}
               </div>
-              <div className="tutor-modal__actions" style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "24px" }}>
+              <div
+                className="tutor-modal__actions"
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: "12px",
+                  marginTop: "24px",
+                }}
+              >
                 <button
                   type="button"
                   className="tutor-btn tutor-btn--ghost"
@@ -195,7 +251,7 @@ export default function Finance() {
                     borderRadius: "12px",
                     padding: "10px 20px",
                     cursor: "pointer",
-                    fontWeight: "600"
+                    fontWeight: "600",
                   }}
                   disabled={submitting}
                 >

@@ -68,7 +68,7 @@ const Home = () => {
             Gia sư nổi bật
           </button>
           <button style={styles.navLink} onClick={() => navigate("/classes")}>
-            Lớp nhóm
+            Môn giảng dạy
           </button>
           <button style={styles.navLink} onClick={() => navigate("/about")}>
             Giới thiệu
@@ -122,7 +122,7 @@ const Home = () => {
               className="home-hero-btn home-hero-btn--secondary"
               onClick={() => navigate("/classes")}
             >
-              Xem lớp nhóm
+              Môn giảng dạy
             </button>
           </div>
         </section>
