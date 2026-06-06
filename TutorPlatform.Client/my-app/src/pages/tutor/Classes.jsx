@@ -161,9 +161,9 @@ export default function Classes() {
     <div>
       <div className="tutor-page__header">
         <div>
-          <h1 className="tutor-page__title">Quản lý lớp học</h1>
+          <h1 className="tutor-page__title">Quản lý môn dạy</h1>
           <p className="tutor-page__subtitle">
-            Bạn đang có {classes.filter((c) => c.status === 2).length} lớp học đang hoạt động.
+            Bạn đang có {classes.filter((c) => c.status === 2).length} môn dạy đang hoạt động.
           </p>
         </div>
 
@@ -180,7 +180,7 @@ export default function Classes() {
           </select>
 
           <button className="tutor-btn tutor-btn--primary" onClick={() => setIsCreateOpen(true)}>
-            Tạo lớp mới
+            Tạo môn dạy mới
           </button>
         </div>
       </div>
@@ -200,7 +200,7 @@ export default function Classes() {
       )}
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "40px" }}>Đang tải lớp học...</div>
+        <div style={{ textAlign: "center", padding: "40px" }}>Đang tải môn dạy...</div>
       ) : (
         <div className="tutor-classes__grid">
           {filteredClasses.length > 0 ? (
@@ -213,7 +213,7 @@ export default function Classes() {
             ))
           ) : (
             <div style={{ gridColumn: "1/-1", textAlign: "center", padding: "40px", color: "#999" }}>
-              Không có lớp học nào
+              Không có môn dạy nào
             </div>
           )}
         </div>
@@ -222,7 +222,7 @@ export default function Classes() {
       {isCreateOpen && (
         <div className="tutor-modal">
           <div className="tutor-modal__content">
-            <h2>Tạo lớp mới</h2>
+            <h2>Tạo môn dạy mới</h2>
             <form onSubmit={handleCreateClass}>
               <label>Môn học</label>
               <select
@@ -239,11 +239,11 @@ export default function Classes() {
                 ))}
               </select>
 
-              <label>Tiêu đề lớp</label>
+              <label>Tiêu đề môn dạy</label>
               <input name="title" required placeholder="VD: Toán lớp 12 - Đại số" />
 
               <label>Mô tả</label>
-              <textarea name="description" rows={3} placeholder="Nội dung và mục tiêu lớp học..." />
+              <textarea name="description" rows={3} placeholder="Nội dung và mục tiêu môn học..." />
 
               <label>Khối lớp (1–12)</label>
               <select name="gradeLevel" required>
@@ -285,7 +285,7 @@ export default function Classes() {
                   Hủy
                 </button>
                 <button type="submit" className="tutor-btn tutor-btn--primary">
-                  Tạo lớp
+                  Tạo môn dạy mới
                 </button>
               </div>
             </form>
@@ -309,7 +309,7 @@ export default function Classes() {
                 Đóng
               </button>
               <button className="tutor-btn tutor-btn--danger" onClick={() => handleDeleteClass(selectedClass.id)}>
-                Xóa lớp
+                Xóa môn dạy này
               </button>
             </div>
           </div>

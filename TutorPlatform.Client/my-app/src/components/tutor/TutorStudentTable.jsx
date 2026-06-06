@@ -75,6 +75,7 @@ export default function TutorStudentTable({
               <tr key={item.id}>
                 <td>
                   <div className="tutor-student-table__person">
+                    {/* Giữ logic từ HEAD: ưu tiên avatar nếu có, fallback là initials */}
                     {getAvatarSrc({
                       avatarUrl: item.avatarUrl ?? item.AvatarUrl ?? item.avatar ?? item.Avatar ?? "",
                     }) ? (
@@ -85,7 +86,11 @@ export default function TutorStudentTable({
                         alt={item.name}
                       />
                     ) : (
-                      <div className="tutor-student-table__avatar-fallback">
+                      <div
+                        className="tutor-student-table__avatar-fallback"
+                        aria-label={item.name}
+                        title={item.name}
+                      >
                         {getInitials(item.name, "S")}
                       </div>
                     )}

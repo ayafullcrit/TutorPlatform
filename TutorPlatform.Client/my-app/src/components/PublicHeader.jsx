@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./PublicHeader.css";
 
@@ -15,7 +15,7 @@ const PublicHeader = () => {
       <nav className="home-nav">
         <button onClick={() => navigate("/")}>Trang chủ</button>
         <button onClick={() => navigate("/tutors")}>Gia sư nổi bật</button>
-        <button onClick={() => navigate("/classes")}>Lớp nhóm</button>
+        <button onClick={() => navigate("/classes")}>Môn giảng dạy</button>
         <button onClick={() => navigate("/about")}>Giới thiệu</button>
         <button onClick={() => navigate("/support")}>Hỗ trợ</button>
       </nav>

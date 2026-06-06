@@ -6,7 +6,7 @@ import { getTutorStats } from "../../services/dashboardService";
 
 export default function Dashboard() {
   const [tutorStats, setTutorStats] = useState([
-    { label: "Lớp đang dạy",       value: 0,    icon: "class" },
+    { label: "Nhóm đang dạy",       value: 0,    icon: "class" },
     { label: "Học viên",            value: 0,    icon: "person" },
     { label: "Thu nhập tháng",      value: "₫0", icon: "trending_up" },
     { label: "Đánh giá trung bình", value: 0,    icon: "star" },
