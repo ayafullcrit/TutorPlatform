@@ -87,7 +87,9 @@ export default function FindTutor() {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(9, 0, 0, 0);
-    setBookingForm({ startTime: tomorrow.toISOString().slice(0, 16), note: "" });
+    const tzOffset = tomorrow.getTimezoneOffset() * 60000;
+    const localISOTime = new Date(tomorrow.getTime() - tzOffset).toISOString().slice(0, 16);
+    setBookingForm({ startTime: localISOTime, note: "" });
     setShowModal(true);
   };
 

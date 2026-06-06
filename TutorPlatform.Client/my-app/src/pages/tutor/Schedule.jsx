@@ -6,6 +6,7 @@ import {
   completeBooking,
   cancelBookingByTutor
 } from "../../services/bookingService";
+import { getAvatarSrc, getInitials } from "../../utils/avatar";
 
 export default function Schedule() {
   const navigate = useNavigate();
@@ -192,10 +193,6 @@ export default function Schedule() {
   const formatDate = (startStr) => {
     const s = new Date(startStr);
     return s.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  };
-
-  const getAvatarUrl = (name) => {
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "Student")}&background=7C6E27&color=fff&bold=true`;
   };
 
   return (
@@ -435,14 +432,29 @@ export default function Schedule() {
               <div className="tutor-schedule__modal-section">
                 <h4>Học viên đăng ký</h4>
                 <div className="tutor-schedule__student-info" style={{ marginBottom: selectedBooking.note ? 14 : 0 }}>
-                  <img
-                    src={selectedBooking.studentAvatar || getAvatarUrl(selectedBooking.studentName)}
-                    alt={selectedBooking.studentName}
-                    className="tutor-schedule__student-avatar"
-                    onError={(e) => {
-                      e.target.src = getAvatarUrl(selectedBooking.studentName);
-                    }}
-                  />
+                  {getAvatarSrc({
+                    avatarUrl:
+                      selectedBooking.studentAvatar ??
+                      selectedBooking.studentAvatarUrl ??
+                      selectedBooking.avatarUrl ??
+                      "",
+                  }) ? (
+                    <img
+                      src={getAvatarSrc({
+                        avatarUrl:
+                          selectedBooking.studentAvatar ??
+                          selectedBooking.studentAvatarUrl ??
+                          selectedBooking.avatarUrl ??
+                          "",
+                      })}
+                      alt={selectedBooking.studentName}
+                      className="tutor-schedule__student-avatar"
+                    />
+                  ) : (
+                    <div className="tutor-schedule__student-avatar tutor-schedule__student-avatar--fallback">
+                      {getInitials(selectedBooking.studentName, "S")}
+                    </div>
+                  )}
                   <div className="tutor-schedule__student-meta">
                     <span className="tutor-schedule__student-name">{selectedBooking.studentName}</span>
                     <span className="tutor-schedule__student-sub">Học sinh đăng ký học</span>

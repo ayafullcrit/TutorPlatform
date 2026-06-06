@@ -331,6 +331,7 @@ namespace TutorPlatform.API.Services.Implementations
                 FullName = user.FullName,
                 PhoneNumber = user.PhoneNumber,
                 Avatar = user.AvatarUrl,
+                AvatarUrl = user.AvatarUrl,
                 Address = user.Address,
                 Role = user.Role,
                 Balance = user.Balance,

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Clock3, Mail, MapPin, Phone, Star, UserCircle2, XCircle } from "lucide-react";
 import { getPendingTutors, verifyTutor } from "../../services/tutorService";
+import { getAvatarSrc, getInitials } from "../../utils/avatar";
 
 const statusLabel = {
   0: "Pending",
@@ -88,11 +89,17 @@ export default function Verifications() {
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <img
-                        src={tutor.avatarUrl || "/images/avatars/default.png"}
-                        alt={tutor.fullName}
-                        className="w-12 h-12 rounded-full object-cover bg-stone-100"
-                      />
+                      {getAvatarSrc(tutor) ? (
+                        <img
+                          src={getAvatarSrc(tutor)}
+                          alt={tutor.fullName}
+                          className="w-12 h-12 rounded-full object-cover bg-stone-100"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-stone-200 text-stone-700 flex items-center justify-center font-bold">
+                          {getInitials(tutor.fullName, "T")}
+                        </div>
+                      )}
                       <div className="min-w-0">
                         <div className="font-semibold truncate">{tutor.fullName}</div>
                         <div className="text-sm text-stone-500 truncate">ID: {tutor.userId}</div>
@@ -121,11 +128,17 @@ export default function Verifications() {
               <div className="space-y-8">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <img
-                      src={current.avatarUrl || "/images/avatars/default.png"}
-                      alt={current.fullName}
-                      className="w-20 h-20 rounded-full object-cover bg-stone-100"
-                    />
+                    {getAvatarSrc(current) ? (
+                      <img
+                        src={getAvatarSrc(current)}
+                        alt={current.fullName}
+                        className="w-20 h-20 rounded-full object-cover bg-stone-100"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full bg-stone-200 text-stone-700 flex items-center justify-center font-bold text-xl">
+                        {getInitials(current.fullName, "T")}
+                      </div>
+                    )}
                     <div>
                       <h3 className="text-3xl font-serif text-[#1b1d0e]">{current.fullName}</h3>
                       <p className="text-stone-500">Tutor ID: {current.userId}</p>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getCurrentUser } from "../../services/authService";
-import { getProfile, updateProfile, updateTutorProfile } from "../../services/userService";
+import { getProfile, updateProfile, uploadAvatar } from "../../services/userService";
+import { applyUserAvatar, getAvatarSrc, getInitials, getUserAvatar, getUserFullName } from "../../utils/avatar";
 import "../../styles/student-dashboard.css";
 
 export default function Profile() {
@@ -9,11 +10,13 @@ export default function Profile() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [avatarError, setAvatarError] = useState(false);
   const [form, setForm] = useState({
     fullName: "",
     phoneNumber: "",
     address: "",
-    hourlyRate: "",
   });
 
   useEffect(() => {
@@ -36,16 +39,14 @@ export default function Profile() {
     }
   };
 
-  const getTutorHourlyRate = (user) =>
-    user?.tutor?.hourlyRate ?? user?.Tutor?.HourlyRate ?? user?.hourlyRate ?? 0;
-
   const openEdit = () => {
     setSaveError("");
+    setAvatarFile(null);
+    setAvatarPreview(getAvatarSrc(user));
     setForm({
       fullName: user?.fullName ?? user?.FullName ?? "",
       phoneNumber: user?.phoneNumber ?? user?.PhoneNumber ?? "",
       address: user?.address ?? user?.Address ?? "",
-      hourlyRate: getTutorHourlyRate(user).toString(),
     });
     setEditing(true);
   };
@@ -53,9 +54,28 @@ export default function Profile() {
   const closeEdit = () => {
     if (saving) return;
     setEditing(false);
+    setAvatarFile(null);
+    setAvatarPreview("");
   };
 
   const onChange = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
+
+  const onAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setSaveError("Vui lòng chọn file ảnh hợp lệ");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setSaveError("Ảnh đại diện không được vượt quá 5MB");
+      return;
+    }
+
+    setSaveError("");
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -63,31 +83,29 @@ export default function Profile() {
       setSaveError("");
       setSaving(true);
 
+      let avatarUrl = getUserAvatar(user);
+      if (avatarFile) {
+        const uploadResult = await uploadAvatar(avatarFile);
+        if (!uploadResult?.success) throw new Error(uploadResult?.message ?? "Tải ảnh đại diện thất bại");
+        avatarUrl = uploadResult?.data?.avatarUrl ?? avatarUrl;
+      }
+
       const profilePayload = {
         fullName: form.fullName,
         phoneNumber: form.phoneNumber,
         address: form.address,
-        avatarUrl: user?.avatarUrl ?? user?.AvatarUrl ?? "",
+        avatarUrl,
       };
       const res1 = await updateProfile(profilePayload);
       if (!res1?.success) throw new Error(res1?.message ?? "Cập nhật hồ sơ thất bại");
 
-      const rate = form.hourlyRate === "" ? 0 : Number(form.hourlyRate);
-      const res2 = await updateTutorProfile({
-        bio: "Tutor Profile", // Satisfy API validation for [Required] Bio field
-        education: "",
-        experience: "",
-        totalReviews: user?.tutor?.totalReviews ?? user?.Tutor?.TotalReviews ?? 0,
-        rating: user?.tutor?.rating ?? user?.Tutor?.Rating ?? 5.0,
-        hourlyRate: Number.isFinite(rate) ? rate : 0,
-        videoIntro: "",
-      });
-      if (!res2?.success) throw new Error(res2?.message ?? "Cập nhật thông tin gia sư thất bại");
-
-      const nextUser = res2?.data ?? res1?.data ?? user;
+      const nextUser = applyUserAvatar(res1?.data ?? user, avatarUrl);
       setUser(nextUser);
       localStorage.setItem("user", JSON.stringify(nextUser));
+      window.dispatchEvent(new Event("user:updated"));
       setEditing(false);
+      setAvatarFile(null);
+      setAvatarPreview("");
     } catch (err) {
       setSaveError(err?.message ?? "Có lỗi khi cập nhật hồ sơ");
     } finally {
@@ -98,7 +116,8 @@ export default function Profile() {
   if (loading && !user) return <div style={{ padding: 40, textAlign: "center" }}>Đang tải...</div>;
   if (!user) return <div style={{ padding: 40, textAlign: "center" }}>Vui lòng đăng nhập</div>;
 
-  const tutorHourlyRate = getTutorHourlyRate(user);
+  const fullName = getUserFullName(user);
+  const avatarSrc = getAvatarSrc(user);
 
   return (
     <div>
@@ -128,26 +147,42 @@ export default function Profile() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
-            <div
-              style={{
-                width: "92px",
-                height: "92px",
-                borderRadius: "24px",
-                background: "#fff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 32,
-                fontWeight: 800,
-                color: "#7C6E27",
-                border: "5px solid #fff",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              }}
-            >
-              {user.fullName?.[0] || "T"}
-            </div>
+            {avatarSrc && !avatarError ? (
+              <img
+                src={avatarSrc}
+                alt="Avatar gia sư"
+                onError={() => setAvatarError(true)}
+                style={{
+                  width: "92px",
+                  height: "92px",
+                  borderRadius: "24px",
+                  objectFit: "cover",
+                  border: "5px solid #fff",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "92px",
+                  height: "92px",
+                  borderRadius: "24px",
+                  background: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 32,
+                  fontWeight: 800,
+                  color: "#7C6E27",
+                  border: "5px solid #fff",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                }}
+              >
+                {getInitials(fullName, "T")}
+              </div>
+            )}
             <div>
-              <h2 style={{ margin: "18px 0 0", fontSize: "38px", fontWeight: 700 }}>{user.fullName}</h2>
+              <h2 style={{ margin: "18px 0 0", fontSize: "38px", fontWeight: 700 }}>{fullName}</h2>
               <p style={{ margin: "6px 0 0", color: "var(--tutor-primary)", fontWeight: 600 }}>
                 Gia sư · {user.email}
               </p>
@@ -172,7 +207,6 @@ export default function Profile() {
           <h3>Thông tin hệ thống</h3>
           <p><strong>Mã người dùng:</strong> #{user.id}</p>
           <p><strong>Vai trò:</strong> Gia sư</p>
-          <p><strong>Học phí:</strong> {tutorHourlyRate ? `${tutorHourlyRate.toLocaleString("vi-VN")} đ/giờ` : "Chưa cập nhật"}</p>
         </div>
       </div>
 
@@ -183,6 +217,36 @@ export default function Profile() {
             <p className="student-card__muted">Cập nhật thông tin cá nhân và thông tin gia sư.</p>
 
             <form className="student-form" onSubmit={handleSave}>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12 }}>
+                {avatarPreview ? (
+                  <img
+                    src={avatarPreview}
+                    alt="Xem trước ảnh đại diện"
+                    style={{ width: 72, height: 72, borderRadius: 18, objectFit: "cover", border: "1px solid #eee" }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 72,
+                      height: 72,
+                      borderRadius: 18,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "#fafaf2",
+                      color: "var(--tutor-primary)",
+                      fontWeight: 800,
+                    }}
+                  >
+                    {getInitials(form.fullName, "T")}
+                  </div>
+                )}
+                <div>
+                  <label htmlFor="avatarFile" style={{ marginBottom: 8 }}>Ảnh đại diện</label>
+                  <input id="avatarFile" type="file" accept="image/*" onChange={onAvatarChange} />
+                </div>
+              </div>
+
               <label htmlFor="fullName">Họ và tên</label>
               <input
                 id="fullName"
@@ -210,19 +274,7 @@ export default function Profile() {
                 placeholder="VD: Quận 1, TP.HCM"
               />
 
-              <hr style={{ border: 0, borderTop: "1px solid #eee", margin: "14px 0" }} />
 
-              <label htmlFor="hourlyRate">Học phí mỗi giờ (VNĐ)</label>
-              <input
-                id="hourlyRate"
-                className="student-input"
-                type="number"
-                min="0"
-                step="1000"
-                value={form.hourlyRate}
-                onChange={onChange("hourlyRate")}
-                placeholder="VD: 150000"
-              />
 
               {saveError ? <p style={{ color: "#b42318", marginTop: 10 }}>{saveError}</p> : null}
 
@@ -231,7 +283,7 @@ export default function Profile() {
                   Hủy
                 </button>
                 <button type="submit" className="tutor-btn tutor-btn--primary" disabled={saving}>
-                  {saving ? "Đang lưu..." : "Lưu thay đổi"}
+                  {saving ? "Đang xác nhận..." : "Xác nhận chỉnh sửa"}
                 </button>
               </div>
             </form>

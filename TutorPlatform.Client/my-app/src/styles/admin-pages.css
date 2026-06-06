@@ -519,6 +519,49 @@
   color: #fff;
 }
 
+.admin-topbar__profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(123, 88, 0, 0.12);
+}
+
+.admin-topbar__profile img,
+.admin-topbar__avatar-fallback {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.admin-topbar__avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #7b5800;
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.admin-topbar__name {
+  font-weight: 800;
+  color: #1b1d0e;
+  line-height: 1.2;
+}
+
+.admin-topbar__role {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: rgba(123, 88, 0, 0.7);
+}
+
 @media (max-width: 768px) {
   .admin-topbar {
     padding: 16px 18px;

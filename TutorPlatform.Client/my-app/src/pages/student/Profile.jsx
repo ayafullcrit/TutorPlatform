@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getCurrentUser } from "../../services/authService";
-import { getProfile, updateProfile, updateStudentProfile } from "../../services/userService";
+import { getProfile, updateProfile, updateStudentProfile, uploadAvatar } from "../../services/userService";
+import { applyUserAvatar, getAvatarSrc, getInitials, getUserAvatar, getUserFullName } from "../../utils/avatar";
 
 const getStudentSchool = (user) => user?.student?.school ?? user?.Student?.School ?? user?.school ?? "";
 const getStudentGrade = (user) =>
@@ -12,6 +13,9 @@ export default function Profile() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [avatarError, setAvatarError] = useState(false);
   const [form, setForm] = useState({
     fullName: "",
     phoneNumber: "",
@@ -42,6 +46,8 @@ export default function Profile() {
 
   const openEdit = () => {
     setSaveError("");
+    setAvatarFile(null);
+    setAvatarPreview(getAvatarSrc(user));
     setForm({
       fullName: user?.fullName ?? user?.FullName ?? "",
       phoneNumber: user?.phoneNumber ?? user?.PhoneNumber ?? "",
@@ -55,9 +61,28 @@ export default function Profile() {
   const closeEdit = () => {
     if (saving) return;
     setEditing(false);
+    setAvatarFile(null);
+    setAvatarPreview("");
   };
 
   const onChange = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
+
+  const onAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setSaveError("Vui lòng chọn file ảnh hợp lệ");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setSaveError("Ảnh đại diện không được vượt quá 5MB");
+      return;
+    }
+
+    setSaveError("");
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -65,11 +90,18 @@ export default function Profile() {
       setSaveError("");
       setSaving(true);
 
+      let avatarUrl = getUserAvatar(user);
+      if (avatarFile) {
+        const uploadResult = await uploadAvatar(avatarFile);
+        if (!uploadResult?.success) throw new Error(uploadResult?.message ?? "Tải ảnh đại diện thất bại");
+        avatarUrl = uploadResult?.data?.avatarUrl ?? avatarUrl;
+      }
+
       const profilePayload = {
         fullName: form.fullName,
         phoneNumber: form.phoneNumber,
         address: form.address,
-        avatarUrl: user?.avatarUrl ?? user?.AvatarUrl ?? "",
+        avatarUrl,
       };
       const res1 = await updateProfile(profilePayload);
       if (!res1?.success) throw new Error(res1?.message ?? "Cập nhật hồ sơ thất bại");
@@ -81,10 +113,13 @@ export default function Profile() {
       });
       if (!res2?.success) throw new Error(res2?.message ?? "Cập nhật thông tin học tập thất bại");
 
-      const nextUser = res2?.data ?? res1?.data ?? user;
+      const nextUser = applyUserAvatar(res2?.data ?? res1?.data ?? user, avatarUrl);
       setUser(nextUser);
       localStorage.setItem("user", JSON.stringify(nextUser));
+      window.dispatchEvent(new Event("user:updated"));
       setEditing(false);
+      setAvatarFile(null);
+      setAvatarPreview("");
     } catch (err) {
       setSaveError(err?.message ?? "Có lỗi khi cập nhật hồ sơ");
     } finally {
@@ -97,6 +132,8 @@ export default function Profile() {
 
   const studentSchool = getStudentSchool(user);
   const studentGrade = getStudentGrade(user);
+  const fullName = getUserFullName(user);
+  const avatarSrc = getAvatarSrc(user);
 
   return (
     <div className="student-profile">
@@ -125,26 +162,42 @@ export default function Profile() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
-            <div
-              style={{
-                width: "92px",
-                height: "92px",
-                borderRadius: "24px",
-                background: "#fff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 32,
-                fontWeight: 800,
-                color: "#7C6E27",
-                border: "5px solid #fff",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              }}
-            >
-              {user.fullName?.[0] || "S"}
-            </div>
+            {avatarSrc && !avatarError ? (
+              <img
+                src={avatarSrc}
+                alt="Avatar học viên"
+                onError={() => setAvatarError(true)}
+                style={{
+                  width: "92px",
+                  height: "92px",
+                  borderRadius: "24px",
+                  objectFit: "cover",
+                  border: "5px solid #fff",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "92px",
+                  height: "92px",
+                  borderRadius: "24px",
+                  background: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 32,
+                  fontWeight: 800,
+                  color: "#7C6E27",
+                  border: "5px solid #fff",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                }}
+              >
+                {getInitials(fullName, "S")}
+              </div>
+            )}
             <div>
-              <h2 style={{ margin: "18px 0 0", fontSize: "38px", fontWeight: 700 }}>{user.fullName}</h2>
+              <h2 style={{ margin: "18px 0 0", fontSize: "38px", fontWeight: 700 }}>{fullName}</h2>
               <p style={{ margin: "6px 0 0", color: "var(--color-primary)", fontWeight: 600 }}>
                 Học viên · {user.email}
               </p>
@@ -213,6 +266,36 @@ export default function Profile() {
             <p className="student-card__muted">Cập nhật thông tin cá nhân và thông tin học tập.</p>
 
             <form className="student-form" onSubmit={handleSave}>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12 }}>
+                {avatarPreview ? (
+                  <img
+                    src={avatarPreview}
+                    alt="Xem trước ảnh đại diện"
+                    style={{ width: 72, height: 72, borderRadius: 18, objectFit: "cover", border: "1px solid #eee" }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 72,
+                      height: 72,
+                      borderRadius: 18,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "#fafaf2",
+                      color: "var(--color-primary)",
+                      fontWeight: 800,
+                    }}
+                  >
+                    {getInitials(form.fullName, "S")}
+                  </div>
+                )}
+                <div>
+                  <label htmlFor="avatarFile" style={{ marginBottom: 8 }}>Ảnh đại diện</label>
+                  <input id="avatarFile" type="file" accept="image/*" onChange={onAvatarChange} />
+                </div>
+              </div>
+
               <label htmlFor="fullName">Họ và tên</label>
               <input
                 id="fullName"
@@ -270,7 +353,7 @@ export default function Profile() {
                   Hủy
                 </button>
                 <button type="submit" className="student-dashboard__primary-btn" disabled={saving}>
-                  {saving ? "Đang lưu..." : "Lưu thay đổi"}
+                  {saving ? "Đang xác nhận..." : "Xác nhận chỉnh sửa"}
                 </button>
               </div>
             </form>
@@ -280,4 +363,3 @@ export default function Profile() {
     </div>
   );
 }
-

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ErrorState from "../../components/student/ErrorState";
 import { getMyTutors, requestRemoveTutor } from "../../services/studentService";
+import { getAvatarSrc } from "../../utils/avatar";
 
 const statusLabels = {
   active: ["Đang học", "student-badge student-badge--success"],
@@ -13,19 +14,30 @@ const statusLabels = {
 const formatCurrency = (amount) =>
   `${Number(amount ?? 0).toLocaleString("vi-VN")}đ`;
 
-const mapTutor = (item) => ({
-  tutorUserId: item.tutorUserId ?? item.TutorUserId ?? item.id,
-  name: item.tutorName ?? item.TutorName ?? item.name ?? "",
-  avatar: item.tutorAvatar ?? item.TutorAvatar ?? item.avatar ?? "",
-  subject: item.subject ?? item.Subject ?? "",
-  city: item.city ?? item.City ?? "",
-  price: item.pricePerSession ?? item.PricePerSession ?? item.price ?? 0,
-  rating: item.rating ?? item.Rating ?? 0,
-  nextLesson: item.nextLesson ?? item.NextLesson ?? "--",
-  status: item.status ?? item.Status ?? "active",
-  leaveReason: item.leaveReason ?? item.LeaveReason ?? "",
-  latestBookingId: item.latestBookingId ?? item.LatestBookingId ?? item.bookingId,
-});
+const mapTutor = (item) => {
+  const rawAvatar =
+    item.tutorAvatar ??
+    item.TutorAvatar ??
+    item.avatarUrl ??
+    item.AvatarUrl ??
+    item.avatar ??
+    item.Avatar ??
+    "";
+
+  return {
+    tutorUserId: item.tutorUserId ?? item.TutorUserId ?? item.id,
+    name: item.tutorName ?? item.TutorName ?? item.name ?? "",
+    avatar: getAvatarSrc({ avatarUrl: rawAvatar }) || rawAvatar,
+    subject: item.subject ?? item.Subject ?? "",
+    city: item.city ?? item.City ?? "",
+    price: item.pricePerSession ?? item.PricePerSession ?? item.price ?? 0,
+    rating: item.rating ?? item.Rating ?? 0,
+    nextLesson: item.nextLesson ?? item.NextLesson ?? "--",
+    status: item.status ?? item.Status ?? "active",
+    leaveReason: item.leaveReason ?? item.LeaveReason ?? "",
+    latestBookingId: item.latestBookingId ?? item.LatestBookingId ?? item.bookingId,
+  };
+};
 
 export default function MyTutors() {
   const [tutors, setTutors] = useState([]);

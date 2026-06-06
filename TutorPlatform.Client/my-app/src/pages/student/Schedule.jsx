@@ -40,10 +40,47 @@ export default function Schedule() {
     }
   };
 
-  // Helper: Lấy các booking trong một ngày cụ thể (giả lập lịch tháng hiện tại)
-  const getBookingsForDay = (dayNum) => {
-    return bookings.filter(b => new Date(b.startTime).getDate() === dayNum);
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+
+  // Lấy các booking trong một ngày cụ thể
+  const getBookingsForDate = (date) => {
+    if (!date) return [];
+    return bookings.filter(b => {
+      const bDate = new Date(b.startTime);
+      return bDate.getDate() === date.getDate() && 
+             bDate.getMonth() === date.getMonth() && 
+             bDate.getFullYear() === date.getFullYear();
+    });
   };
+
+  const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
+  const getFirstDayOffset = (y, m) => {
+    const day = new Date(y, m, 1).getDay();
+    return day === 0 ? 6 : day - 1;
+  };
+
+  const calendarCells = [];
+  const daysCount = getDaysInMonth(currentYear, currentMonth);
+  const startOffset = getFirstDayOffset(currentYear, currentMonth);
+
+  // Thêm khoảng trống tháng trước
+  for (let i = 0; i < startOffset; i++) {
+    calendarCells.push(null);
+  }
+
+  // Thêm ngày tháng hiện tại
+  for (let d = 1; d <= daysCount; d++) {
+    calendarCells.push(new Date(currentYear, currentMonth, d));
+  }
+
+  // Padding tháng sau cho đủ dòng
+  const totalCells = calendarCells.length <= 35 ? 35 : 42;
+  const padCount = totalCells - calendarCells.length;
+  for (let d = 0; d < padCount; d++) {
+    calendarCells.push(null);
+  }
 
   return (
     <div>
@@ -51,7 +88,7 @@ export default function Schedule() {
         <div>
           <h1 className="student-dashboard__heading">Lịch trình học tập</h1>
           <p className="student-dashboard__subtext">
-            Xem và quản lý các buổi học của bạn.
+            Tháng {currentMonth + 1}/{currentYear} - Xem và quản lý các buổi học của bạn.
           </p>
         </div>
       </div>
@@ -79,9 +116,12 @@ export default function Schedule() {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
-            {Array.from({ length: 35 }).map((_, i) => {
-              const dayNum = i - 3; // Giả sử tháng bắt đầu từ thứ 5 (index 3)
-              const dayBookings = dayNum > 0 && dayNum <= 31 ? getBookingsForDay(dayNum) : [];
+            {calendarCells.map((dateObj, i) => {
+              const isToday = dateObj && 
+                dateObj.getDate() === today.getDate() && 
+                dateObj.getMonth() === today.getMonth();
+              
+              const dayBookings = getBookingsForDate(dateObj);
               
               return (
                 <div
@@ -93,11 +133,11 @@ export default function Schedule() {
                     padding: "10px",
                     color: "var(--color-text-muted)",
                     fontSize: "13px",
-                    background: dayNum === new Date().getDate() ? "#fffef0" : "transparent"
+                    background: isToday ? "#fffef0" : "transparent"
                   }}
                 >
-                  <span style={{ fontWeight: dayNum === new Date().getDate() ? 700 : 400 }}>
-                    {dayNum > 0 && dayNum <= 31 ? dayNum : ""}
+                  <span style={{ fontWeight: isToday ? 700 : 400 }}>
+                    {dateObj ? dateObj.getDate() : ""}
                   </span>
                   
                   {dayBookings.map(b => (

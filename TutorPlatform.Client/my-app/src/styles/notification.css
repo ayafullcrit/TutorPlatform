@@ -1,0 +1,224 @@
+/* ====================================================
+   NOTIFICATION DROPDOWN — shared component styles
+   ==================================================== */
+
+/* Wrapper xác định vị trí reference cho dropdown */
+.notif-wrap {
+  position: relative;
+}
+
+/* Bell button */
+.notif-bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.notif-bell:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+.notif-bell .material-symbols-outlined {
+  font-size: 22px;
+}
+
+/* Badge đỏ số chưa đọc */
+.notif-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 99px;
+  background: #e53935;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Panel dropdown */
+.notif-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 360px;
+  max-height: 480px;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.16);
+  z-index: 999;
+  overflow: hidden;
+  animation: notif-slide-in 0.18s ease;
+}
+
+@keyframes notif-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.notif-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+.notif-panel__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a2e;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.notif-panel__count {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fce8e6;
+  color: #e53935;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+.notif-panel__readall {
+  border: none;
+  background: none;
+  font-size: 12px;
+  color: #5b8dee;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.notif-panel__readall:hover {
+  background: #eef3ff;
+}
+
+/* Body — scrollable list */
+.notif-panel__body {
+  overflow-y: auto;
+  flex: 1;
+}
+.notif-panel__body::-webkit-scrollbar { width: 4px; }
+.notif-panel__body::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 4px; }
+
+/* Empty state */
+.notif-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 20px;
+  color: #9e9e9e;
+  font-size: 14px;
+}
+
+/* Notification item */
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+  border-bottom: 1px solid #f7f7f7;
+}
+.notif-item:last-child {
+  border-bottom: none;
+}
+.notif-item:hover {
+  background: #f9f9fb;
+}
+.notif-item--unread {
+  background: #f0f5ff;
+}
+.notif-item--unread:hover {
+  background: #e6eeff;
+}
+
+/* Blue dot cho chưa đọc */
+.notif-item--unread::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5b8dee;
+}
+
+.notif-item__icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+}
+.notif-item__content {
+  flex: 1;
+  min-width: 0;
+}
+.notif-item__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.notif-item__msg {
+  font-size: 12px;
+  color: #5f6368;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.notif-item__time {
+  font-size: 11px;
+  color: #9e9e9e;
+  margin-top: 4px;
+}
+
+/* Delete button */
+.notif-item__del {
+  border: none;
+  background: none;
+  color: #bdbdbd;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+.notif-item__del:hover {
+  color: #e53935;
+  background: #fce8e6;
+}
+
+/* Dark topbar variants — override bell bg */
+.student-topbar .notif-bell,
+.tutor-topbar .notif-bell {
+  background: transparent;
+}

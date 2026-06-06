@@ -307,6 +307,12 @@
   border-radius: 50%;
   object-fit: cover;
   background: var(--tutor-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--tutor-primary);
+  font-weight: 800;
 }
 
 .tutor-schedule__student-meta {

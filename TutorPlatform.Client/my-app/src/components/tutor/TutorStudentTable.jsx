@@ -1,9 +1,14 @@
+import { getAvatarSrc, getInitials } from "../../utils/avatar";
+
 export default function TutorStudentTable({
   students,
   searchTerm,
   setSearchTerm,
   statusFilter,
   setStatusFilter,
+  classFilter,
+  setClassFilter,
+  uniqueClasses,
   onViewStudent,
 }) {
   const statusMap = {
@@ -36,6 +41,17 @@ export default function TutorStudentTable({
           <option value="pending">Chờ lịch</option>
           <option value="suspended">Tạm dừng</option>
         </select>
+
+        <select
+          className="tutor-student-table__filter"
+          value={classFilter}
+          onChange={(e) => setClassFilter(e.target.value)}
+        >
+          <option value="all">Tất cả lớp</option>
+          {uniqueClasses && uniqueClasses.map(cls => (
+            <option key={cls} value={cls}>{cls}</option>
+          ))}
+        </select>
       </div>
 
       <table>
@@ -59,10 +75,20 @@ export default function TutorStudentTable({
               <tr key={item.id}>
                 <td>
                   <div className="tutor-student-table__person">
-                    <img
-                      src={`https://i.pravatar.cc/80?u=${item.name}`}
-                      alt={item.name}
-                    />
+                    {getAvatarSrc({
+                      avatarUrl: item.avatarUrl ?? item.AvatarUrl ?? item.avatar ?? item.Avatar ?? "",
+                    }) ? (
+                      <img
+                        src={getAvatarSrc({
+                          avatarUrl: item.avatarUrl ?? item.AvatarUrl ?? item.avatar ?? item.Avatar ?? "",
+                        })}
+                        alt={item.name}
+                      />
+                    ) : (
+                      <div className="tutor-student-table__avatar-fallback">
+                        {getInitials(item.name, "S")}
+                      </div>
+                    )}
                     <strong>{item.name}</strong>
                   </div>
                 </td>

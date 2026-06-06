@@ -1,21 +1,13 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getCurrentUser, getCurrentUserApi } from "../../services/authService";
+import { getAvatarSrc, getInitials, getUserFullName } from "../../utils/avatar";
+import NotificationDropdown from "../shared/NotificationDropdown";
+import "../../styles/notification.css";
 
 const mockTutorProfile = {
   fullName: "Tran Minh Thang",
-  avatar: "",
+  avatarSrc: "",
   badge: "GIA SU KIM CUONG",
-};
-
-const getInitials = (fullName = "") => {
-  const parts = fullName.trim().split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) {
-    return `${parts[parts.length - 2][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-  }
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-  return "GS";
 };
 
 export default function TutorTopbar() {
@@ -23,14 +15,18 @@ export default function TutorTopbar() {
   const [avatarError, setAvatarError] = useState(false);
 
   useEffect(() => {
-    const localUser = getCurrentUser();
-    if (localUser) {
+    const applyUser = (user) => {
+      if (!user) return;
+      setAvatarError(false);
       setProfile((prev) => ({
         ...prev,
-        fullName: localUser.fullName || prev.fullName,
-        avatar: localUser.avatar || prev.avatar,
+        fullName: getUserFullName(user, prev.fullName),
+        avatarSrc: getAvatarSrc(user),
       }));
-    }
+    };
+
+    const localUser = getCurrentUser();
+    applyUser(localUser);
 
     const loadProfile = async () => {
       try {
@@ -39,18 +35,19 @@ export default function TutorTopbar() {
         if (!user) return;
 
         localStorage.setItem("user", JSON.stringify(user));
-        setProfile((prev) => ({
-          ...prev,
-          fullName: user.fullName || prev.fullName,
-          avatar: user.avatar || prev.avatar,
-        }));
+        applyUser(user);
       } catch (error) {
         // Fallback mock data when API is unavailable
         console.warn("Using mock topbar profile:", error?.message);
       }
     };
 
+    const handleUserUpdated = () => applyUser(getCurrentUser());
+
     loadProfile();
+    window.addEventListener("user:updated", handleUserUpdated);
+
+    return () => window.removeEventListener("user:updated", handleUserUpdated);
   }, []);
 
   return (
@@ -61,20 +58,18 @@ export default function TutorTopbar() {
       </div>
 
       <div className="tutor-topbar__actions">
-        <button className="tutor-topbar__icon-btn">
-          <span className="material-symbols-outlined">notifications</span>
-        </button>
+        <NotificationDropdown />
 
         <div className="tutor-topbar__profile">
-          {profile.avatar && !avatarError ? (
+          {profile.avatarSrc && !avatarError ? (
             <img
-              src={profile.avatar}
+              src={profile.avatarSrc}
               alt="Tutor avatar"
               onError={() => setAvatarError(true)}
             />
           ) : (
             <div className="tutor-topbar__avatar-fallback">
-              {getInitials(profile.fullName)}
+              {getInitials(profile.fullName, "GS")}
             </div>
           )}
           <div>

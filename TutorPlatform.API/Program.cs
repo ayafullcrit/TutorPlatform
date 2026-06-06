@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Security.Claims;
 using TutorPlatform.API.Data;
 using TutorPlatform.API.Services.Helper;
 using TutorPlatform.API.Services.Implementations;
@@ -68,6 +69,23 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"],
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero // No tolerance for expired tokens
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
+        {
+            var db = context.HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+            var userIdStr = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdStr, out int userId))
+            {
+                var isActive = await db.Users.Where(u => u.Id == userId).Select(u => u.IsActive).FirstOrDefaultAsync();
+                if (!isActive)
+                {
+                    context.Fail("Tài khoản đã bị khóa");
+                }
+            }
+        }
     };
 });
 
@@ -173,6 +191,8 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseCors("AllowReactApp");
 
