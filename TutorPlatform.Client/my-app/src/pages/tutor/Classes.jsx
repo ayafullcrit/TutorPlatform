@@ -2,11 +2,22 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import TutorClassCard from "../../components/tutor/TutorClassCard";
 import { getCurrentUser, getCurrentUserApi } from "../../services/authService";
-import { getMyClasses, createClass, deleteClass } from "../../services/classService";
+import { getMyClasses, createClass, deleteClass, updateClass } from "../../services/classService";
 import { getAllSubjects } from "../../services/subjectService";
 
-// ClassStatus enum: Draft=1, Active=2, Completed=3, Cancelled=4, Inactive=5
 const CLASS_STATUS_TEXT = { 1: "Nháp", 2: "Đang học", 3: "Hoàn thành", 4: "Đã hủy", 5: "Không hoạt động" };
+
+const getInitialEditForm = () => ({
+  subjectId: "",
+  title: "",
+  description: "",
+  grade: 1,
+  pricePerSession: "",
+  durationMinutes: "",
+  totalSessions: "",
+  maxStudents: "",
+  status: 2,
+});
 
 export default function Classes() {
   const location = useLocation();
@@ -17,8 +28,12 @@ export default function Classes() {
   const [loading, setLoading] = useState(true);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
+  const [editingClass, setEditingClass] = useState(null);
+  const [editForm, setEditForm] = useState(getInitialEditForm());
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
   const [preselectedSubjectId, setPreselectedSubjectId] = useState("");
 
   const isVerified = Boolean(user?.isTutorVerified);
@@ -84,29 +99,32 @@ export default function Classes() {
     }
   };
 
-  // ClassStatus: Active=2 theo enum
   const filteredClasses =
-    statusFilter === "all" ? classes : classes.filter((c) => c.status === parseInt(statusFilter));
+    statusFilter === "all" ? classes : classes.filter((c) => c.status === parseInt(statusFilter, 10));
 
   const handleCreateClass = async (e) => {
     e.preventDefault();
     const form = e.target;
     try {
+      setError(null);
+      setSuccessMessage("");
+
       const classData = {
-        subjectId: parseInt(form.subjectId.value),
+        subjectId: parseInt(form.subjectId.value, 10),
         title: form.title.value,
         description: form.description.value,
-        gradeLevel: parseInt(form.gradeLevel.value),
+        gradeLevel: parseInt(form.gradeLevel.value, 10),
         thumbnailUrl: "",
         pricePerSession: parseFloat(form.pricePerSession.value),
-        durationMinutes: parseInt(form.durationMinutes.value),
-        totalSessions: parseInt(form.totalSessions.value),
-        maxStudents: parseInt(form.maxStudents.value),
+        durationMinutes: parseInt(form.durationMinutes.value, 10),
+        totalSessions: parseInt(form.totalSessions.value, 10),
+        maxStudents: parseInt(form.maxStudents.value, 10),
       };
 
       const result = await createClass(classData);
       if (result?.success && result.data) {
         setClasses([result.data, ...classes]);
+        setSuccessMessage("Tạo môn dạy thành công.");
         setIsCreateOpen(false);
         setPreselectedSubjectId("");
         form.reset();
@@ -125,9 +143,76 @@ export default function Classes() {
       await deleteClass(classId);
       setClasses(classes.filter((c) => c.id !== classId));
       setSelectedClass(null);
+      setEditingClass(null);
+      setSuccessMessage("Đã xóa môn dạy.");
     } catch (err) {
       console.error("Failed to delete class:", err);
       setError("Không thể xóa lớp học");
+    }
+  };
+
+  const openEditModal = (classItem) => {
+    setError(null);
+    setSuccessMessage("");
+    setSelectedClass(null);
+    setEditingClass(classItem);
+    setEditForm({
+      subjectId: classItem.subjectId?.toString() ?? "",
+      title: classItem.title ?? "",
+      description: classItem.description ?? "",
+      grade: classItem.grade ?? 1,
+      pricePerSession: classItem.pricePerSession ?? "",
+      durationMinutes: classItem.durationMinutes ?? "",
+      totalSessions: classItem.totalSessions ?? "",
+      maxStudents: classItem.maxStudents ?? "",
+      status: classItem.status ?? 2,
+    });
+  };
+
+  const closeEditModal = () => {
+    if (isSavingEdit) return;
+    setEditingClass(null);
+    setEditForm(getInitialEditForm());
+  };
+
+  const handleEditFormChange = (field, value) => {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleUpdateClass = async (e) => {
+    e.preventDefault();
+    if (!editingClass) return;
+
+    try {
+      setIsSavingEdit(true);
+      setError(null);
+      setSuccessMessage("");
+
+      const payload = {
+        subjectId: parseInt(editForm.subjectId, 10),
+        title: editForm.title.trim(),
+        description: editForm.description.trim(),
+        thumbnailUrl: editingClass.thumbnailUrl ?? "",
+        pricePerSession: parseFloat(editForm.pricePerSession),
+        durationMinutes: parseInt(editForm.durationMinutes, 10),
+        totalSessions: parseInt(editForm.totalSessions, 10),
+        maxStudents: parseInt(editForm.maxStudents, 10),
+        status: parseInt(editForm.status, 10),
+      };
+
+      const result = await updateClass(editingClass.id, payload);
+      if (result?.success && result.data) {
+        setClasses((prev) => prev.map((item) => (item.id === editingClass.id ? result.data : item)));
+        setSuccessMessage("Cập nhật môn dạy thành công.");
+        closeEditModal();
+      } else {
+        setError(result?.message || "Không thể cập nhật môn dạy");
+      }
+    } catch (err) {
+      console.error("Failed to update class:", err);
+      setError(err.response?.data?.message || "Không thể cập nhật môn dạy");
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -136,7 +221,7 @@ export default function Classes() {
     subject: c.subjectName,
     status: c.status === 2 ? "active" : "inactive",
     students: `${c.currentStudents}/${c.maxStudents} học viên`,
-    time: `${c.durationMinutes} phút/buổi · ${c.totalSessions ?? "?"} buổi`,
+    time: `${c.durationMinutes} phút/buổi · ${c.totalSessions ?? "?"} buổi/tuần`,
   });
 
   if (!isVerified) {
@@ -199,6 +284,20 @@ export default function Classes() {
         </div>
       )}
 
+      {successMessage && (
+        <div
+          style={{
+            padding: "12px",
+            backgroundColor: "#e8f5e9",
+            color: "#2e7d32",
+            borderRadius: "4px",
+            marginBottom: "20px",
+          }}
+        >
+          {successMessage}
+        </div>
+      )}
+
       {loading ? (
         <div style={{ textAlign: "center", padding: "40px" }}>Đang tải môn dạy...</div>
       ) : (
@@ -209,6 +308,7 @@ export default function Classes() {
                 key={item.id}
                 item={mapClassToCardItem(item)}
                 onViewDetail={() => setSelectedClass(item)}
+                onEdit={() => openEditModal(item)}
               />
             ))
           ) : (
@@ -245,7 +345,7 @@ export default function Classes() {
               <label>Mô tả</label>
               <textarea name="description" rows={3} placeholder="Nội dung và mục tiêu môn học..." />
 
-              <label>Khối lớp (1–12)</label>
+              <label>Khối lớp (1-12)</label>
               <select name="gradeLevel" required>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((g) => (
                   <option key={g} value={g}>
@@ -264,8 +364,8 @@ export default function Classes() {
                   <input name="durationMinutes" type="number" min="30" required placeholder="VD: 90" />
                 </div>
                 <div>
-                  <label>Tổng số buổi</label>
-                  <input name="totalSessions" type="number" min="1" required placeholder="VD: 20" />
+                  <label>Tổng số buổi / tuần</label>
+                  <input name="totalSessions" type="number" min="1" max="7" required placeholder="VD: 2" />
                 </div>
                 <div>
                   <label>Học viên tối đa</label>
@@ -293,6 +393,112 @@ export default function Classes() {
         </div>
       )}
 
+      {editingClass && (
+        <div className="tutor-modal" onClick={closeEditModal}>
+          <div className="tutor-modal__content" onClick={(e) => e.stopPropagation()}>
+            <h2>Chỉnh sửa môn dạy</h2>
+            <form onSubmit={handleUpdateClass}>
+              <label>Môn học</label>
+              <select
+                value={editForm.subjectId}
+                onChange={(e) => handleEditFormChange("subjectId", e.target.value)}
+                required
+              >
+                <option value="">-- Chọn môn học --</option>
+                {subjects.map((subject) => (
+                  <option key={subject.id} value={subject.id}>
+                    {subject.name}
+                  </option>
+                ))}
+              </select>
+
+              <label>Tiêu đề môn dạy</label>
+              <input
+                value={editForm.title}
+                onChange={(e) => handleEditFormChange("title", e.target.value)}
+                required
+                placeholder="VD: Toán lớp 12 - Đại số"
+              />
+
+              <label>Mô tả</label>
+              <textarea
+                rows={3}
+                value={editForm.description}
+                onChange={(e) => handleEditFormChange("description", e.target.value)}
+                placeholder="Nội dung và mục tiêu môn học..."
+              />
+
+              <label>Trạng thái</label>
+              <select value={editForm.status} onChange={(e) => handleEditFormChange("status", e.target.value)}>
+                <option value={2}>Đang học</option>
+                <option value={1}>Nháp</option>
+                <option value={5}>Không hoạt động</option>
+                <option value={3}>Hoàn thành</option>
+                <option value={4}>Đã hủy</option>
+              </select>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <label>Khối lớp</label>
+                  <input value={`Lớp ${editForm.grade}`} disabled />
+                </div>
+                <div>
+                  <label>Giá/buổi (VNĐ)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editForm.pricePerSession}
+                    onChange={(e) => handleEditFormChange("pricePerSession", e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Thời lượng (phút)</label>
+                  <input
+                    type="number"
+                    min="30"
+                    value={editForm.durationMinutes}
+                    onChange={(e) => handleEditFormChange("durationMinutes", e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Tổng số buổi / tuần</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="7"
+                    value={editForm.totalSessions}
+                    onChange={(e) => handleEditFormChange("totalSessions", e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Học viên tối đa</label>
+                  <input
+                    type="number"
+                    min={editingClass.currentStudents || 1}
+                    max="50"
+                    value={editForm.maxStudents}
+                    onChange={(e) => handleEditFormChange("maxStudents", e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="tutor-modal__actions">
+                <button type="button" className="tutor-btn tutor-btn--ghost" onClick={closeEditModal} disabled={isSavingEdit}>
+                  Hủy
+                </button>
+                <button type="submit" className="tutor-btn tutor-btn--primary" disabled={isSavingEdit}>
+                  {isSavingEdit ? "Đang lưu..." : "Lưu thay đổi"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {selectedClass && (
         <div className="tutor-modal">
           <div className="tutor-modal__content">
@@ -307,6 +513,9 @@ export default function Classes() {
             <div className="tutor-modal__actions">
               <button className="tutor-btn tutor-btn--ghost" onClick={() => setSelectedClass(null)}>
                 Đóng
+              </button>
+              <button className="tutor-btn tutor-btn--primary" onClick={() => openEditModal(selectedClass)}>
+                Chỉnh sửa
               </button>
               <button className="tutor-btn tutor-btn--danger" onClick={() => handleDeleteClass(selectedClass.id)}>
                 Xóa môn dạy này

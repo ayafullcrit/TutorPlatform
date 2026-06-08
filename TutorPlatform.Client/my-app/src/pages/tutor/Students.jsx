@@ -109,11 +109,11 @@ export default function Students() {
   };
 
   const handleDeleteStudent = async (student) => {
-    if (!window.confirm("Bạn có chắc muốn hủy lớp học với học viên này?")) return;
+    if (!window.confirm("Bạn có chắc muốn hủy buổi học với học viên này?")) return;
     try {
       const result = await cancelBookingByTutor(student.id);
       if (result.success) {
-        alert("Đã hủy lớp học.");
+        alert("Đã hủy buổi học.");
         loadBookings();
         setSelectedStudent(null);
       }
@@ -257,7 +257,7 @@ export default function Students() {
                 className="tutor-btn tutor-btn--danger"
                 onClick={() => handleDeleteStudent(selectedStudent)}
               >
-                Hủy lớp
+                Hủy buổi học
               </button>
             </div>
           </div>
