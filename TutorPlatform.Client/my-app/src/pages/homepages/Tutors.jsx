@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PublicHeader from "../../components/PublicHeader";
+import { getAvatarSrc, getInitials } from "../../utils/avatar";
 import "./Tutors.css";
 
 const tutors = [
@@ -132,7 +133,11 @@ const Tutors = () => {
           {tutors.map((tutor) => (
             <div className="tutor-card" key={tutor.id}>
               <div className="tutor-card-top">
-                <div className="tutor-avatar">{tutor.name.charAt(0)}</div>
+                {getAvatarSrc(tutor) ? (
+                  <img className="tutor-avatar tutor-avatar--image" src={getAvatarSrc(tutor)} alt={tutor.name} />
+                ) : (
+                  <div className="tutor-avatar">{getInitials(tutor.name, "T")}</div>
+                )}
                 <span className="tutor-badge">{tutor.badge}</span>
               </div>
 
@@ -174,9 +179,11 @@ const Tutors = () => {
             </button>
 
             <div className="tutor-modal-header">
-              <div className="tutor-modal-avatar">
-                {selectedTutor.name.charAt(0)}
-              </div>
+              {getAvatarSrc(selectedTutor) ? (
+                <img className="tutor-modal-avatar tutor-avatar--image" src={getAvatarSrc(selectedTutor)} alt={selectedTutor.name} />
+              ) : (
+                <div className="tutor-modal-avatar">{getInitials(selectedTutor.name, "T")}</div>
+              )}
 
               <div className="tutor-modal-title">
                 <span className="tutor-badge">{selectedTutor.badge}</span>

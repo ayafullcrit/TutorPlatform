@@ -1,4 +1,5 @@
 import api from "./api";
+import { applyUserAvatar } from "../utils/avatar";
 
 // Backend trả về: { success, message, data: { token, expiresAt, user: { id, role (int), ... } } }
 // UserRole enum: Student=1, Tutor=2, Admin=3
@@ -9,9 +10,10 @@ export const loginApi = async (loginData) => {
 
     if (response.data.success) {
       const { token, user } = response.data.data; // data.data = AuthResponse
+      const normalizedUser = applyUserAvatar(user, user?.avatarUrl ?? user?.AvatarUrl ?? user?.avatar ?? user?.Avatar ?? "");
       localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      return { token, user };
+      localStorage.setItem("user", JSON.stringify(normalizedUser));
+      return { token, user: normalizedUser };
     }
 
     throw new Error(response.data.message || "Đăng nhập thất bại");

@@ -1,15 +1,19 @@
 import React from "react";
+import { getAvatarSrc, getInitials } from "../../utils/avatar";
 
 export default function TutorReviewCard({ review }) {
   const { studentName, rating, comment, timeAgo, studentAvatar, classTitle } = review;
+  const avatarSrc = getAvatarSrc({ avatarUrl: studentAvatar });
 
   return (
     <div className="tutor-card tutor-review-card">
       <div className="tutor-review-card__avatar">
-        {studentAvatar ? (
-          <img src={studentAvatar} alt={studentName} />
+        {avatarSrc ? (
+          <img src={avatarSrc} alt={studentName} />
         ) : (
-          <span className="material-symbols-outlined">person</span>
+          <span className="tutor-review-card__avatar-fallback">
+            {getInitials(studentName, "S")}
+          </span>
         )}
       </div>
       

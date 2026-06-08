@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:5102/api";
+export const API_BASE_URL = "http://localhost:5102/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -33,7 +33,12 @@ api.interceptors.response.use(
       // Handle unauthorized (e.g., logout user)
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      // window.location.href = "/login";
+      
+      // Chuyển hướng về trang đăng nhập nếu token hết hạn hoặc tài khoản bị khóa
+      if (window.location.pathname !== "/login") {
+        alert("Phiên đăng nhập hết hạn hoặc tài khoản đã bị khóa. Vui lòng đăng nhập lại.");
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

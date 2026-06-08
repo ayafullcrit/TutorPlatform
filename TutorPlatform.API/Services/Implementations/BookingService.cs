@@ -242,6 +242,24 @@ namespace TutorPlatform.API.Services.Implementations
                 // 5. Tính EndTime dựa trên DurationInMinutes
                 var endTime = request.StartTime.AddMinutes(classEntity.DurationInMinutes);
 
+                // 5.1. Kiểm tra trùng lịch học viên
+                var isStudentBusy = await _context.Bookings.AnyAsync(b =>
+                    b.StudentId == studentUserId &&
+                    (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed) &&
+                    b.StartTime < endTime && b.EndTime > request.StartTime);
+
+                if (isStudentBusy)
+                    return Fail<BookingResponse>("Bạn đã có lịch học khác trong khoảng thời gian này");
+
+                // 5.2. Kiểm tra trùng lịch gia sư
+                var isTutorBusy = await _context.Bookings.AnyAsync(b =>
+                    b.TutorId == classEntity.TutorId &&
+                    (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed) &&
+                    b.StartTime < endTime && b.EndTime > request.StartTime);
+
+                if (isTutorBusy)
+                    return Fail<BookingResponse>("Gia sư đã có lịch dạy khác trong khoảng thời gian này");
+
                 // 6. Tạo booking
                 var booking = new Booking
                 {
@@ -688,9 +706,9 @@ namespace TutorPlatform.API.Services.Implementations
                 PricePerSession = booking.Class?.PricePerSession ?? 0,
                 DurationMinutes = booking.Class?.DurationInMinutes ?? 0,
 
-                BookingDate = booking.BookingDate,
-                StartTime = booking.StartTime,
-                EndTime = booking.EndTime,
+                BookingDate = DateTime.SpecifyKind(booking.BookingDate, DateTimeKind.Utc),
+                StartTime = DateTime.SpecifyKind(booking.StartTime, DateTimeKind.Utc),
+                EndTime = DateTime.SpecifyKind(booking.EndTime, DateTimeKind.Utc),
                 Note = booking.Note,
 
                 Status = booking.Status,

@@ -1,13 +1,14 @@
 import LazyAvatar from "./LazyAvatar";
+import { getAvatarSrc } from "../../utils/avatar";
 
 export default function TutorCard({ tutor }) {
   return (
     <article className="tutor-card">
       <div className="tutor-card__top">
         <LazyAvatar
-          src={tutor.avatar}
+          src={getAvatarSrc(tutor) || tutor.avatarUrl || tutor.avatar}
           alt={tutor.name}
-          fallback="/assets/images/avatar-placeholder.png"
+          fallback="/anonymous.jpg"
         />
 
         <div className="tutor-card__main">

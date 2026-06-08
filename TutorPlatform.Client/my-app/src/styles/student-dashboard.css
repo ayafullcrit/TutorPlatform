@@ -575,6 +575,8 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   padding: 22px 22px 18px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
 }
 
 .student-modal__content h2 {
@@ -586,6 +588,11 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--color-surface) 20%);
 }
 
 @media (max-width: 768px) {

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getAdminUsers, toggleUserStatus, updateAdminUser } from "../../services/userService";
+import { getAvatarSrc, getInitials } from "../../utils/avatar";
 
 const roles = ["All", "Tutor", "Student", "Admin"];
 
@@ -111,6 +112,7 @@ export default function Accounts() {
             <thead>
               <tr>
                 <th>ID</th>
+                <th>Ảnh</th>
                 <th>Tên</th>
                 <th>Email</th>
                 <th>Vai trò</th>
@@ -122,6 +124,32 @@ export default function Accounts() {
               {filtered.map((item) => (
                 <tr key={item.id}>
                   <td>#{item.id}</td>
+                  <td>
+                    {getAvatarSrc(item) ? (
+                      <img
+                        src={getAvatarSrc(item)}
+                        alt={item.fullName}
+                        style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover" }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: "50%",
+                          background: "#f3f0df",
+                          color: "#7b5800",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: 800,
+                          fontSize: 12,
+                        }}
+                      >
+                        {getInitials(item.fullName, "U")}
+                      </div>
+                    )}
+                  </td>
                   <td>{item.fullName}</td>
                   <td>{item.email}</td>
                   <td>{roleLabels[item.role] || "Unknown"}</td>
@@ -162,7 +190,7 @@ export default function Accounts() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: "center", color: "var(--color-text-muted)" }}>
+                  <td colSpan={7} style={{ textAlign: "center", color: "var(--color-text-muted)" }}>
                     Không có dữ liệu phù hợp.
                   </td>
                 </tr>
@@ -184,6 +212,33 @@ export default function Accounts() {
             </div>
 
             <div className="admin-page__stack">
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                {getAvatarSrc(selectedAccount) ? (
+                  <img
+                    src={getAvatarSrc(selectedAccount)}
+                    alt={selectedAccount.fullName}
+                    style={{ width: 64, height: 64, borderRadius: "50%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: "50%",
+                      background: "#f3f0df",
+                      color: "#7b5800",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: 800,
+                    }}
+                  >
+                    {getInitials(selectedAccount.fullName, "U")}
+                  </div>
+                )}
+                <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>Avatar hiện tại</div>
+              </div>
+
               <input
                 className="admin-input"
                 value={selectedAccount.fullName || ""}

@@ -13,6 +13,7 @@ export default function Students() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [classFilter, setClassFilter] = useState("all");
 
   const [selectedStudent, setSelectedStudent] = useState(null);
 
@@ -66,6 +67,8 @@ export default function Students() {
     }
   };
 
+  const uniqueClasses = Array.from(new Set(students.map(s => s.subject)));
+
   const filteredStudents = students.filter((student) => {
     const matchSearch =
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -74,7 +77,10 @@ export default function Students() {
     const matchStatus =
       statusFilter === "all" || student.status === statusFilter;
 
-    return matchSearch && matchStatus;
+    const matchClass =
+      classFilter === "all" || student.subject === classFilter;
+
+    return matchSearch && matchStatus && matchClass;
   });
 
 
@@ -187,6 +193,9 @@ export default function Students() {
           setSearchTerm={setSearchTerm}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
+          classFilter={classFilter}
+          setClassFilter={setClassFilter}
+          uniqueClasses={uniqueClasses}
           onViewStudent={setSelectedStudent}
         />
       ) : (
