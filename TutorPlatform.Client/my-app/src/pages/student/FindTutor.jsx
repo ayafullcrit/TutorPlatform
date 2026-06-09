@@ -7,15 +7,15 @@ import { getAllSubjects } from "../../services/subjectService";
 import { enrollClass } from "../../services/bookingService";
 
 const provinces = [
-  "An Giang","Bà Rịa - Vũng Tàu","Bắc Giang","Bắc Kạn","Bạc Liêu","Bắc Ninh","Bến Tre",
-  "Bình Dương","Bình Định","Bình Phước","Bình Thuận","Cà Mau","Cần Thơ","Cao Bằng",
-  "Đà Nẵng","Đắk Lắk","Đắk Nông","Điện Biên","Đồng Nai","Đồng Tháp","Gia Lai",
-  "Hà Giang","Hà Nam","Hà Nội","Hà Tĩnh","Hải Dương","Hải Phòng","Hậu Giang",
-  "Hòa Bình","Hưng Yên","Khánh Hòa","Kiên Giang","Kon Tum","Lai Châu","Lâm Đồng",
-  "Lạng Sơn","Lào Cai","Long An","Nam Định","Nghệ An","Ninh Bình","Ninh Thuận",
-  "Phú Thọ","Phú Yên","Quảng Bình","Quảng Nam","Quảng Ngãi","Quảng Ninh","Quảng Trị",
-  "Sóc Trăng","Sơn La","Tây Ninh","Thái Bình","Thái Nguyên","Thanh Hóa","Thừa Thiên Huế",
-  "Tiền Giang","TP. Hồ Chí Minh","Trà Vinh","Tuyên Quang","Vĩnh Long","Vĩnh Phúc","Yên Bái"
+  "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", "Bến Tre",
+  "Bình Dương", "Bình Định", "Bình Phước", "Bình Thuận", "Cà Mau", "Cần Thơ", "Cao Bằng",
+  "Đà Nẵng", "Đắk Lắk", "Đắk Nông", "Điện Biên", "Đồng Nai", "Đồng Tháp", "Gia Lai",
+  "Hà Giang", "Hà Nam", "Hà Nội", "Hà Tĩnh", "Hải Dương", "Hải Phòng", "Hậu Giang",
+  "Hòa Bình", "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng",
+  "Lạng Sơn", "Lào Cai", "Long An", "Nam Định", "Nghệ An", "Ninh Bình", "Ninh Thuận",
+  "Phú Thọ", "Phú Yên", "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị",
+  "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế",
+  "Tiền Giang", "TP. Hồ Chí Minh", "Trà Vinh", "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái",
 ];
 
 export default function FindTutor() {
@@ -61,7 +61,7 @@ export default function FindTutor() {
     setStatus("loading");
     try {
       const params = Object.fromEntries(
-        Object.entries(filters).filter(([, v]) => v !== "" && v !== null && v !== undefined)
+        Object.entries(filters).filter(([, value]) => value !== "" && value !== null && value !== undefined)
       );
 
       const result = await searchClasses(params);
@@ -139,8 +139,8 @@ export default function FindTutor() {
           style={{ padding: "8px 14px", borderRadius: 999, border: "1px solid #d1c9b4", background: "#fafaf2" }}
         >
           <option value="">Tất cả môn học</option>
-          {subjects.map((s) => (
-            <option key={s.id} value={s.id}>{s.name}</option>
+          {subjects.map((subject) => (
+            <option key={subject.id} value={subject.id}>{subject.name}</option>
           ))}
         </select>
 
@@ -150,8 +150,8 @@ export default function FindTutor() {
           style={{ padding: "8px 14px", borderRadius: 999, border: "1px solid #d1c9b4", background: "#fafaf2" }}
         >
           <option value="">Tất cả khối lớp</option>
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((g) => (
-            <option key={g} value={g}>Lớp {g}</option>
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((grade) => (
+            <option key={grade} value={grade}>Lớp {grade}</option>
           ))}
         </select>
 
@@ -187,21 +187,40 @@ export default function FindTutor() {
       )}
 
       {showModal && (
-        <div className="modal-overlay" style={{
-          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-          background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center",
-          justifyContent: "center", zIndex: 1000, padding: 20
-        }}>
-          <div className="modal-content" style={{
-            background: "#fff", padding: 24, borderRadius: 20,
-            maxWidth: 450, width: "100%", position: "relative"
-          }}>
+        <div
+          className="modal-overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: 20,
+          }}
+        >
+          <div
+            className="modal-content"
+            style={{
+              background: "#fff",
+              padding: 24,
+              borderRadius: 20,
+              maxWidth: 450,
+              width: "100%",
+              position: "relative",
+            }}
+          >
             <h2 style={{ marginBottom: 16 }}>Xác nhận đặt lịch</h2>
             {selectedClass && (
               <div style={{ marginBottom: 20, padding: 16, background: "#f9f9f0", borderRadius: 12 }}>
                 <p><strong>Lớp:</strong> {selectedClass.title}</p>
                 <p><strong>Gia sư:</strong> {selectedClass.tutorName}</p>
                 <p><strong>Học phí:</strong> {selectedClass.pricePerSession?.toLocaleString("vi-VN")}đ/buổi</p>
+                <p><strong>Số buổi/tuần:</strong> {selectedClass.totalSessions ?? "Chưa cập nhật"}</p>
                 <p><strong>Tỉnh/thành:</strong> {selectedClass.tutorAddress || selectedClass.address || "Không rõ"}</p>
               </div>
             )}
@@ -231,9 +250,14 @@ export default function FindTutor() {
                   type="submit"
                   disabled={isSubmitting}
                   style={{
-                    flex: 1, padding: 12, borderRadius: 99, border: "none",
-                    background: "var(--color-primary, #7C6E27)", color: "#fff",
-                    fontWeight: 600, opacity: isSubmitting ? 0.7 : 1
+                    flex: 1,
+                    padding: 12,
+                    borderRadius: 99,
+                    border: "none",
+                    background: "var(--color-primary, #7C6E27)",
+                    color: "#fff",
+                    fontWeight: 600,
+                    opacity: isSubmitting ? 0.7 : 1,
                   }}
                 >
                   {isSubmitting ? "Đang xử lý..." : "Đăng ký lớp học"}
@@ -252,12 +276,20 @@ function ClassCard({ cls, onBook }) {
     <article className="tutor-card" style={{ cursor: "default" }}>
       <div className="tutor-card__top">
         <div className="lazy-avatar">
-          <div style={{
-            width: 56, height: 56, borderRadius: 14,
-            background: "linear-gradient(135deg, #b0a18e, #d4c5b0)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#fff", fontSize: 22, fontWeight: 700,
-          }}>
+          <div
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 14,
+              background: "linear-gradient(135deg, #b0a18e, #d4c5b0)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#fff",
+              fontSize: 22,
+              fontWeight: 700,
+            }}
+          >
             {cls.subjectName?.[0] ?? "?"}
           </div>
         </div>
@@ -280,7 +312,7 @@ function ClassCard({ cls, onBook }) {
 
       <p className="tutor-card__desc" style={{ fontSize: 13, marginTop: 8, color: "#666" }}>
         Gia sư: <strong>{cls.tutorName}</strong> · {cls.durationMinutes} phút/buổi ·{" "}
-        {cls.currentStudents}/{cls.maxStudents} học viên
+        {cls.totalSessions ?? "?"} buổi/tuần · {cls.currentStudents}/{cls.maxStudents} học viên nhận dạy
       </p>
 
       <div className="tutor-card__bottom">

@@ -1,4 +1,4 @@
-export default function TutorClassCard({ item, onViewDetail }) {
+export default function TutorClassCard({ item, onViewDetail, onEdit }) {
   const isActive = item.status === "active";
 
   return (
@@ -12,7 +12,7 @@ export default function TutorClassCard({ item, onViewDetail }) {
           {isActive ? "Đang học" : "Chờ mở lớp"}
         </span>
 
-        <button className="tutor-class-card__menu">
+        <button className="tutor-class-card__menu" type="button" onClick={onEdit} aria-label={`Chỉnh sửa ${item.title}`}>
           <span className="material-symbols-outlined">more_vert</span>
         </button>
       </div>

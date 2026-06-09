@@ -139,7 +139,17 @@ export default function Students() {
   };
 
   const handleDeleteStudent = async (student) => {
-    alert("Tính năng ngừng lớp của học viên đang phát triển.");
+    if (!window.confirm("Bạn có chắc muốn hủy buổi học với học viên này?")) return;
+    try {
+      const result = await cancelBookingByTutor(student.id);
+      if (result.success) {
+        alert("Đã hủy buổi học.");
+        loadBookings();
+        setSelectedStudent(null);
+      }
+    } catch (err) {
+      alert("Lỗi: " + (err.response?.data?.message || err.message));
+    }
   };
   
   const handleCompleteStudent = async (student) => {
