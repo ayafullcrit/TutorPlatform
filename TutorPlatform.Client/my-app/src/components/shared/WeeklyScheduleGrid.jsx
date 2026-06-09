@@ -73,22 +73,26 @@ export default function WeeklyScheduleGrid({
     });
   }, [weekStart]);
 
-  // ── Tập hợp slots rảnh (student mode) ──
-  const { availableSet, slotMap } = useMemo(() => {
-    if (mode !== "student") return { availableSet: new Set(), slotMap: {} };
-    const set = new Set();
-    const map = {};
-    availableSlots.forEach((slot) => {
-      const d = new Date(slot.startTime);
-      const jsDow = d.getDay();
-      const hour = d.getHours();
-      const key = `${jsDow}:${hour}`;
-      set.add(key);
-      map[key] = slot;
-    });
-    return { availableSet: set, slotMap: map };
-  }, [availableSlots, mode]);
+const VN_OFFSET_MS = 7 * 60 * 60 * 1000; 
 
+function toVnDate(utcIsoString) {
+  return new Date(new Date(utcIsoString).getTime() + VN_OFFSET_MS);
+}
+
+const { availableSet, slotMap } = useMemo(() => {
+  if (mode !== "student") return { availableSet: new Set(), slotMap: {} };
+  const set = new Set();
+  const map = {};
+  availableSlots.forEach((slot) => {
+    const d = toVnDate(slot.startTime);  
+    const jsDow = d.getUTCDay();        
+    const hour = d.getUTCHours();
+    const key = `${jsDow}:${hour}`;
+    set.add(key);
+    map[key] = slot;
+  });
+  return { availableSet: set, slotMap: map };
+}, [availableSlots, mode]);
   // ── Xác định class CSS của mỗi ô ──
   const getSlotClass = (jsDow, hour) => {
     const key = `${jsDow}:${hour}`;
@@ -118,12 +122,12 @@ export default function WeeklyScheduleGrid({
   };
 
   const getSlotTitle = (jsDow, hour) => {
-    const key = `${jsDow}:${hour}`;
-    if (mode === "student") {
+     const key = `${jsDow}:${hour}`;
+     if (mode === "student") {
       if (availableSet.has(key)) {
-        const slot = slotMap[key];
-        const e = new Date(slot.endTime);
-        const endStr = `${pad(e.getHours())}:${pad(e.getMinutes())}`;
+      const slot = slotMap[key];
+      const e = toVnDate(slot.endTime);           
+      const endStr = `${pad(e.getUTCHours())}:${pad(e.getUTCMinutes())}`;
         if (selectedSlot?.startTime === slot?.startTime)
           return `Đang chọn: ${fmtHour(hour)} – ${endStr}`;
         return `Chọn giờ: ${fmtHour(hour)} – ${endStr}`;

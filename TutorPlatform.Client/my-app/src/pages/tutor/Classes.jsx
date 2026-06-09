@@ -223,7 +223,6 @@ export default function Classes() {
     status: c.status === 2 ? "active" : "inactive",
     students: `${c.currentStudents}/${c.maxStudents} học viên`,
     time: `${c.durationMinutes} phút/buổi · ${c.sessionsPerWeek ?? 1} buổi/tuần`,
-be341c0a3b3a02a184397c3a194377ea2c
   });
 
   if (!isVerified) {

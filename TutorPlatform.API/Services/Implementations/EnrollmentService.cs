@@ -47,7 +47,7 @@ namespace TutorPlatform.API.Services.Implementations
 
                 // Kiểm tra đã enroll chưa
                 var existing = await _context.ClassEnrollments.FirstOrDefaultAsync(e =>
-                    e.StudentId == studentUserId && e.ClassId == request.ClassId && 
+                    e.StudentId == studentUserId && e.ClassId == request.ClassId &&
                     (e.Status == EnrollmentStatus.Active || e.Status == EnrollmentStatus.Pending));
                 if (existing != null) return Fail<ClassEnrollmentResponse>("Bạn đã gửi yêu cầu hoặc đang học lớp này rồi");
 
@@ -495,36 +495,49 @@ namespace TutorPlatform.API.Services.Implementations
                     .FirstOrDefaultAsync(c => c.Id == classId);
                 if (cls == null) return Fail<List<AvailableSlotResponse>>("Lớp học không tồn tại");
 
-                var weekEnd = weekStart.Date.AddDays(7);
+                // Đảm bảo weekStart là ngày đầu tuần (Monday), ở dạng Date (00:00:00), kind = Unspecified/Local
+                var weekStartDate = weekStart.Date;
+                var weekEndDate = weekStartDate.AddDays(7);
+
                 var tutorId = cls.TutorId;
                 var duration = cls.DurationInMinutes;
 
-                // Lấy tất cả booking của tutor trong tuần
-                var busySlots = await _context.Bookings
+                // Lấy busy slots của tutor trong tuần — DB lưu UTC
+                var busySlotsUtc = await _context.Bookings
                     .Where(b => b.TutorId == tutorId &&
                                 (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed) &&
-                                b.StartTime >= weekStart && b.StartTime < weekEnd)
+                                b.StartTime < weekEndDate.ToUniversalTime() &&
+                                b.EndTime > weekStartDate.ToUniversalTime())
                     .Select(b => new { b.StartTime, b.EndTime })
                     .ToListAsync();
+
+                // Chuyển busy slots về giờ địa phương để so sánh
+                var busySlotsLocal = busySlotsUtc.Select(b => new
+                {
+                    StartLocal = b.StartTime.ToLocalTime(),
+                    EndLocal = b.EndTime.ToLocalTime()
+                }).ToList();
 
                 // Lấy availability đã khai báo của gia sư
                 var declaredAvailability = await _context.TutorAvailabilities
                     .Where(a => a.TutorId == tutorId)
                     .ToListAsync();
 
+                var now = DateTime.Now; // giờ local
+                var minBookingTime = now.AddHours(1);
+
                 var slots = new List<AvailableSlotResponse>();
 
                 for (int day = 0; day < 7; day++)
                 {
-                    var date = weekStart.Date.AddDays(day);
+                    var date = weekStartDate.AddDays(day);
                     var dayOfWeek = date.DayOfWeek;
 
-                    // Xác định khung giờ làm việc cho ngày này
+                    // Xác định khung giờ làm việc cho ngày này (giờ địa phương)
                     List<(TimeSpan start, TimeSpan end)> workingRanges;
 
                     if (declaredAvailability.Any())
                     {
-                        // Dùng lịch gia sư đã khai báo
                         workingRanges = declaredAvailability
                             .Where(a => a.DayOfWeek == dayOfWeek)
                             .Select(a => (a.StartTime, a.EndTime))
@@ -534,43 +547,41 @@ namespace TutorPlatform.API.Services.Implementations
                     {
                         // Mặc định: 7h–22h
                         workingRanges = new List<(TimeSpan, TimeSpan)>
-                        {
-                            (new TimeSpan(7, 0, 0), new TimeSpan(22, 0, 0))
-                        };
+                {
+                    (new TimeSpan(7, 0, 0), new TimeSpan(22, 0, 0))
+                };
                     }
 
                     foreach (var (rangeStart, rangeEnd) in workingRanges)
                     {
-                        var current = date.Add(rangeStart);
-                        var rangeEndDt = date.Add(rangeEnd);
+                        // current là giờ địa phương
+                        var current = date + rangeStart;
+                        var rangeEndDt = date + rangeEnd;
 
                         while (current.AddMinutes(duration) <= rangeEndDt)
                         {
                             var slotEnd = current.AddMinutes(duration);
-                            var currentLocal = DateTime.SpecifyKind(current, DateTimeKind.Local);
-                            var slotEndLocal = DateTime.SpecifyKind(slotEnd, DateTimeKind.Local);
-                            var currentUtc = currentLocal.ToUniversalTime();
-                            var slotEndUtc = slotEndLocal.ToUniversalTime();
 
-                            // Chỉ show slot trong tương lai (ít nhất 1h từ bây giờ)
-                            if (currentUtc > DateTime.UtcNow.AddHours(1))
+                            // Chỉ show slot trong tương lai (ít nhất 1h)
+                            if (current > minBookingTime)
                             {
-                                // Kiểm tra xem slot này có bị trùng không (so sánh bằng giờ UTC)
-                                bool isBusy = busySlots.Any(b =>
-                                    b.StartTime < slotEndUtc && b.EndTime > currentUtc);
+                                // Kiểm tra trùng với busy slots (so sánh local với local)
+                                bool isBusy = busySlotsLocal.Any(b =>
+                                    b.StartLocal < slotEnd && b.EndLocal > current);
 
                                 if (!isBusy)
                                 {
+                                    // Trả về UTC để client xử lý đúng timezone
                                     slots.Add(new AvailableSlotResponse
                                     {
-                                        StartTime = currentUtc,
-                                        EndTime = slotEndUtc,
+                                        StartTime = DateTime.SpecifyKind(current.ToUniversalTime(), DateTimeKind.Utc),
+                                        EndTime = DateTime.SpecifyKind(slotEnd.ToUniversalTime(), DateTimeKind.Utc),
                                         IsAvailable = true
                                     });
                                 }
                             }
 
-                            current = current.AddMinutes(60);
+                            current = current.AddMinutes(60); // mỗi slot 1 tiếng
                         }
                     }
                 }
