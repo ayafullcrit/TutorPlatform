@@ -1,17 +1,16 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ErrorState from "../../components/student/ErrorState";
 import WeeklyScheduleGrid from "../../components/shared/WeeklyScheduleGrid";
 import {
+  getAvailableSlots,
   getMyEnrollments,
   leaveClass,
   scheduleSession,
-  getAvailableSlots,
 } from "../../services/bookingService";
 
 const formatCurrency = (amount) =>
   `${Number(amount ?? 0).toLocaleString("vi-VN")}đ`;
 
-/** Trả về ngày thứ 2 của tuần chứa `date` */
 function getMonday(date) {
   const d = new Date(date);
   const day = d.getDay();
@@ -21,43 +20,17 @@ function getMonday(date) {
   return d;
 }
 
-/** Thêm/bớt số ngày vào một Date */
 function addDays(date, days) {
   const d = new Date(date);
   d.setDate(d.getDate() + days);
   return d;
 }
 
-const normalizeTutorData = (item) => {
-  const rawAvatar = item.avatarUrl ?? item.AvatarUrl ?? item.avatar ?? item.Avatar;
-  return {
-    tutorUserId: item.tutorUserId ?? item.TutorUserId ?? item.id,
-    name: item.tutorName ?? item.TutorName ?? item.name ?? "",
-    avatar: getAvatarSrc({ avatarUrl: rawAvatar }) || rawAvatar,
-    subject:
-      item.classTitle ??
-      item.ClassTitle ??
-      item.teachingSubjects ??
-      item.TeachingSubjects ??
-      item.subject ??
-      item.Subject ??
-      "Chưa cập nhật",
-    city: item.city ?? item.City ?? "",
-    price: item.pricePerSession ?? item.PricePerSession ?? item.price ?? 0,
-    rating: item.rating ?? item.Rating ?? 0,
-    nextLesson: item.nextLesson ?? item.NextLesson ?? "--",
-    status: item.status ?? item.Status ?? "active",
-    leaveReason: item.leaveReason ?? item.LeaveReason ?? "",
-    latestBookingId: item.latestBookingId ?? item.LatestBookingId ?? item.bookingId,
-  };
-};
-
 export default function MyTutors() {
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
-  // ── Schedule modal state ──
   const [selectedEnrollment, setSelectedEnrollment] = useState(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [availableSlots, setAvailableSlots] = useState([]);
@@ -68,10 +41,8 @@ export default function MyTutors() {
     getMonday(new Date())
   );
 
-  // ── Leave modal state ──
   const [showLeaveModal, setShowLeaveModal] = useState(false);
 
-  // ── Load enrollments ──
   const loadEnrollments = async () => {
     try {
       setLoadError(false);
@@ -90,28 +61,26 @@ export default function MyTutors() {
     loadEnrollments();
   }, []);
 
-  // ── Load slots for current week ──
-  const loadSlots = useCallback(
-    async (enrollment, weekStart) => {
-      if (!enrollment) return;
-      setSlotsLoading(true);
-      setAvailableSlots([]);
-      setSelectedSlot(null);
-      try {
-        const weekStartStr = weekStart.toISOString().split("T")[0];
-        const res = await getAvailableSlots(enrollment.classId, weekStartStr);
-        if (res.success) setAvailableSlots(res.data || []);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setSlotsLoading(false);
-      }
-    },
-    []
-  );
+  const loadSlots = useCallback(async (enrollment, weekStart) => {
+    if (!enrollment) return;
+    setSlotsLoading(true);
+    setAvailableSlots([]);
+    setSelectedSlot(null);
 
-  // ── Open schedule modal ──
-  const openScheduleModal = async (enrollment) => {
+    try {
+      const weekStartStr = weekStart.toISOString().split("T")[0];
+      const res = await getAvailableSlots(enrollment.classId, weekStartStr);
+      if (res?.success) {
+        setAvailableSlots(res.data || []);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSlotsLoading(false);
+    }
+  }, []);
+
+  const openScheduleModal = (enrollment) => {
     const monday = getMonday(new Date());
     setSelectedEnrollment(enrollment);
     setCurrentWeekStart(monday);
@@ -119,7 +88,6 @@ export default function MyTutors() {
     loadSlots(enrollment, monday);
   };
 
-  // ── Week navigation ──
   const handlePrevWeek = () => {
     const newWeek = addDays(currentWeekStart, -7);
     setCurrentWeekStart(newWeek);
@@ -132,9 +100,9 @@ export default function MyTutors() {
     loadSlots(selectedEnrollment, newWeek);
   };
 
-  // ── Confirm booking ──
   const handleScheduleSubmit = async () => {
     if (!selectedEnrollment || !selectedSlot) return;
+
     try {
       setIsSubmitting(true);
       const res = await scheduleSession({
@@ -142,21 +110,21 @@ export default function MyTutors() {
         startTime: selectedSlot.startTime,
         note: "",
       });
-      if (res.success) {
+
+      if (res?.success) {
         alert("Đặt buổi học thành công!");
         setShowScheduleModal(false);
         loadEnrollments();
       } else {
-        alert(res.message || "Có lỗi xảy ra");
+        alert(res?.message || "Có lỗi xảy ra");
       }
-    } catch (e) {
-      alert(e.response?.data?.message || "Lỗi kết nối máy chủ");
+    } catch (error) {
+      alert(error.response?.data?.message || "Lỗi kết nối máy chủ");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // ── Leave class ──
   const openLeaveModal = (enrollment) => {
     setSelectedEnrollment(enrollment);
     setShowLeaveModal(true);
@@ -164,15 +132,17 @@ export default function MyTutors() {
 
   const confirmLeaveClass = async () => {
     if (!selectedEnrollment) return;
+
     try {
       setIsSubmitting(true);
       const res = await leaveClass(selectedEnrollment.enrollmentId);
-      if (res.success) {
+
+      if (res?.success) {
         alert("Đã rời lớp thành công!");
         setShowLeaveModal(false);
         loadEnrollments();
       } else {
-        alert(res.message || "Có lỗi xảy ra");
+        alert(res?.message || "Có lỗi xảy ra");
       }
     } catch {
       alert("Lỗi kết nối máy chủ");
@@ -181,17 +151,21 @@ export default function MyTutors() {
     }
   };
 
-  // ── Format selected slot label ──
   const formatSlotLabel = (slot) => {
     if (!slot) return "";
-    const s = new Date(slot.startTime);
-    const e = new Date(slot.endTime);
+
+    const start = new Date(slot.startTime);
+    const end = new Date(slot.endTime);
     const dayNames = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
-    const pad = (n) => String(n).padStart(2, "0");
-    return `${dayNames[s.getDay()]}, ${pad(s.getDate())}/${pad(s.getMonth() + 1)} • ${pad(s.getHours())}:${pad(s.getMinutes())} – ${pad(e.getHours())}:${pad(e.getMinutes())}`;
+    const pad = (value) => String(value).padStart(2, "0");
+
+    return `${dayNames[start.getDay()]}, ${pad(start.getDate())}/${pad(
+      start.getMonth() + 1
+    )} • ${pad(start.getHours())}:${pad(start.getMinutes())} - ${pad(
+      end.getHours()
+    )}:${pad(end.getMinutes())}`;
   };
 
-  // ── Render ──
   return (
     <div>
       <div className="student-dashboard__hero">
@@ -215,7 +189,9 @@ export default function MyTutors() {
         </div>
       ) : enrollments.length === 0 ? (
         <div className="student-state">
-          <span className="material-symbols-outlined student-state__icon">school</span>
+          <span className="material-symbols-outlined student-state__icon">
+            school
+          </span>
           <h3 className="student-state__title">Bạn chưa đăng ký lớp nào</h3>
           <p className="student-state__text">
             Hãy tìm và đăng ký lớp học với gia sư.
@@ -225,6 +201,7 @@ export default function MyTutors() {
         <div className="student-list-grid">
           {enrollments.map((enrollment) => {
             const isPending = enrollment.status === 3;
+
             return (
               <article
                 className="student-card student-management-card"
@@ -232,16 +209,14 @@ export default function MyTutors() {
               >
                 <div className="student-management-card__header">
                   <div>
-<<<<<<< HEAD
-                    <p className="student-card__muted">Môn đang học: {tutor.subject}</p>
-                    <h3 className="student-card__title">{tutor.name}</h3>
-=======
                     <p className="student-card__muted">
                       {enrollment.subjectName} (Lớp {enrollment.grade})
                     </p>
-                    <h3 className="student-card__title">{enrollment.tutorName}</h3>
->>>>>>> 7021915ec616441fc2ea7c72f3eb8fbcb8b8a2c6
+                    <h3 className="student-card__title">
+                      {enrollment.tutorName}
+                    </h3>
                   </div>
+
                   {isPending && (
                     <span
                       className="student-badge student-badge--pending"
@@ -265,11 +240,9 @@ export default function MyTutors() {
                   </p>
                   <p>
                     <span>Học phí</span>
-<<<<<<< HEAD
-                    <strong>{formatCurrency(tutor.price)}/giờ</strong>
-=======
-                    <strong>{formatCurrency(enrollment.pricePerSession)}/buổi</strong>
->>>>>>> 7021915ec616441fc2ea7c72f3eb8fbcb8b8a2c6
+                    <strong>
+                      {formatCurrency(enrollment.pricePerSession)}/buổi
+                    </strong>
                   </p>
                   <p>
                     <span>Số buổi/tuần</span>
@@ -304,6 +277,7 @@ export default function MyTutors() {
                         : "Đặt buổi học"}
                     </button>
                   )}
+
                   <button
                     className="student-secondary-btn"
                     style={{ flex: 1, padding: "8px 12px", fontSize: "14px" }}
@@ -318,7 +292,6 @@ export default function MyTutors() {
         </div>
       )}
 
-      {/* ── SCHEDULE MODAL ── */}
       {showScheduleModal && (
         <div
           style={{
@@ -345,7 +318,6 @@ export default function MyTutors() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal header */}
             <div
               style={{
                 padding: "20px 24px 16px",
@@ -359,11 +331,18 @@ export default function MyTutors() {
                 <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 800 }}>
                   Đặt lịch học
                 </h2>
-                <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#6B6B6B" }}>
+                <p
+                  style={{
+                    margin: "4px 0 0",
+                    fontSize: "13px",
+                    color: "#6B6B6B",
+                  }}
+                >
                   {selectedEnrollment?.classTitle} •{" "}
                   {selectedEnrollment?.tutorName}
                 </p>
               </div>
+
               <button
                 type="button"
                 onClick={() => setShowScheduleModal(false)}
@@ -380,7 +359,6 @@ export default function MyTutors() {
               </button>
             </div>
 
-            {/* Modal body */}
             <div style={{ padding: "20px 24px" }}>
               {slotsLoading ? (
                 <div
@@ -392,7 +370,11 @@ export default function MyTutors() {
                 >
                   <span
                     className="material-symbols-outlined student-reviews__spin"
-                    style={{ fontSize: "32px", display: "block", marginBottom: "8px" }}
+                    style={{
+                      fontSize: "32px",
+                      display: "block",
+                      marginBottom: "8px",
+                    }}
                   >
                     progress_activity
                   </span>
@@ -410,7 +392,6 @@ export default function MyTutors() {
                 />
               )}
 
-              {/* Selected slot preview */}
               {selectedSlot && (
                 <div
                   style={{
@@ -427,7 +408,10 @@ export default function MyTutors() {
                     color: "#7C6E27",
                   }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: "20px" }}
+                  >
                     event_available
                   </span>
                   Đã chọn: {formatSlotLabel(selectedSlot)}
@@ -446,7 +430,12 @@ export default function MyTutors() {
                 >
                   <span
                     className="material-symbols-outlined"
-                    style={{ fontSize: "36px", display: "block", marginBottom: "8px", color: "#E3DEC6" }}
+                    style={{
+                      fontSize: "36px",
+                      display: "block",
+                      marginBottom: "8px",
+                      color: "#E3DEC6",
+                    }}
                   >
                     event_busy
                   </span>
@@ -457,7 +446,6 @@ export default function MyTutors() {
               )}
             </div>
 
-            {/* Modal footer */}
             <div
               style={{
                 padding: "16px 24px 20px",
@@ -490,11 +478,14 @@ export default function MyTutors() {
                   padding: "10px 28px",
                   borderRadius: "99px",
                   border: "none",
-                  background: selectedSlot ? "var(--color-primary, #7C6E27)" : "#ccc",
+                  background: selectedSlot
+                    ? "var(--color-primary, #7C6E27)"
+                    : "#ccc",
                   color: "#fff",
                   fontWeight: 700,
                   fontSize: "14px",
-                  cursor: isSubmitting || !selectedSlot ? "not-allowed" : "pointer",
+                  cursor:
+                    isSubmitting || !selectedSlot ? "not-allowed" : "pointer",
                   opacity: isSubmitting ? 0.7 : 1,
                   transition: "background 0.2s",
                 }}
@@ -506,7 +497,6 @@ export default function MyTutors() {
         </div>
       )}
 
-      {/* ── LEAVE MODAL ── */}
       {showLeaveModal && (
         <div
           style={{
