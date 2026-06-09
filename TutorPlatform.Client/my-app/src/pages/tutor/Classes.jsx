@@ -100,7 +100,7 @@ export default function Classes() {
         thumbnailUrl: "",
         pricePerSession: parseFloat(form.pricePerSession.value),
         durationMinutes: parseInt(form.durationMinutes.value),
-        totalSessions: parseInt(form.totalSessions.value),
+        sessionsPerWeek: parseInt(form.sessionsPerWeek.value),
         maxStudents: parseInt(form.maxStudents.value),
       };
 
@@ -136,7 +136,7 @@ export default function Classes() {
     subject: c.subjectName,
     status: c.status === 2 ? "active" : "inactive",
     students: `${c.currentStudents}/${c.maxStudents} học viên`,
-    time: `${c.durationMinutes} phút/buổi · ${c.totalSessions ?? "?"} buổi`,
+    time: `${c.durationMinutes} phút/buổi · ${c.sessionsPerWeek ?? 1} buổi/tuần`,
   });
 
   if (!isVerified) {
@@ -264,8 +264,8 @@ export default function Classes() {
                   <input name="durationMinutes" type="number" min="30" required placeholder="VD: 90" />
                 </div>
                 <div>
-                  <label>Tổng số buổi</label>
-                  <input name="totalSessions" type="number" min="1" required placeholder="VD: 20" />
+                  <label>Số buổi/tuần</label>
+                  <input name="sessionsPerWeek" type="number" min="1" max="7" required placeholder="VD: 3" />
                 </div>
                 <div>
                   <label>Học viên tối đa</label>

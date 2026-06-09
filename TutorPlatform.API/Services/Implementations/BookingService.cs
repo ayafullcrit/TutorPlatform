@@ -190,7 +190,7 @@ namespace TutorPlatform.API.Services.Implementations
         }
 
         private static string FormatLessonTime(DateTime utcStartTime) =>
-            utcStartTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+            DateTime.SpecifyKind(utcStartTime, DateTimeKind.Utc).ToLocalTime().ToString("dd/MM/yyyy HH:mm");
         // ============================================
         // STUDENT: Tạo booking mới
         // ============================================
@@ -530,6 +530,9 @@ namespace TutorPlatform.API.Services.Implementations
 
                 if (booking.Status != BookingStatus.Confirmed)
                     return Fail<BookingResponse>("Chỉ có thể hoàn thành booking đã được xác nhận");
+
+                if (DateTime.UtcNow < booking.EndTime)
+                    return Fail<BookingResponse>("Chỉ có thể hoàn thành buổi dạy sau khi thời gian buổi học kết thúc");
 
                 booking.Status = BookingStatus.Completed;
 

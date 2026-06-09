@@ -16,11 +16,13 @@ namespace TutorPlatform.API.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly INotificationService _notificationService;
+        private readonly ITutorAvailabilityService _tutorAvailabilityService;
 
-        public TutorsController(ApplicationDbContext context, INotificationService notificationService)
+        public TutorsController(ApplicationDbContext context, INotificationService notificationService, ITutorAvailabilityService tutorAvailabilityService)
         {
             _context = context;
             _notificationService = notificationService;
+            _tutorAvailabilityService = tutorAvailabilityService;
         }
 
         [HttpGet("pending-verification")]
@@ -146,6 +148,37 @@ namespace TutorPlatform.API.Controllers
                 tutor.VerificationStatus,
                 tutor.IsVerified
             }, "Cập nhật xác minh gia sư thành công"));
+        }
+
+        [HttpGet("availability")]
+        public async Task<IActionResult> GetMyAvailability()
+        {
+            var userId = GetCurrentUserId();
+            var result = await _tutorAvailabilityService.GetAvailabilityAsync(userId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPost("availability")]
+        public async Task<IActionResult> SetMyAvailability([FromBody] SetAvailabilityRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var userId = GetCurrentUserId();
+            var result = await _tutorAvailabilityService.SetAvailabilityAsync(userId, request);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpDelete("availability/{id}")]
+        public async Task<IActionResult> DeleteAvailabilitySlot(int id)
+        {
+            var userId = GetCurrentUserId();
+            var result = await _tutorAvailabilityService.DeleteSlotAsync(userId, id);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        private int GetCurrentUserId()
+        {
+            var claim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            return int.Parse(claim!.Value);
         }
     }
 }

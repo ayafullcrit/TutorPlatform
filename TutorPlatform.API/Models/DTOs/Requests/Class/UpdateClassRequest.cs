@@ -25,6 +25,9 @@ namespace TutorPlatform.API.Models.DTOs.Requests.Class
         [Range(1, 50)]
         public int MaxStudents { get; set; }
 
+        [Range(1, 7)]
+        public int SessionsPerWeek { get; set; } = 1;
+
       //  [Required]
         public ClassStatus Status { get; set; }
     }

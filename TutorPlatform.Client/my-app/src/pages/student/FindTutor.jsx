@@ -4,7 +4,7 @@ import EmptyState from "../../components/student/EmptyState";
 import ErrorState from "../../components/student/ErrorState";
 import { searchClasses } from "../../services/classService";
 import { getAllSubjects } from "../../services/subjectService";
-import { createBooking } from "../../services/bookingService";
+import { enrollClass } from "../../services/bookingService";
 
 const provinces = [
   "An Giang","Bà Rịa - Vũng Tàu","Bắc Giang","Bắc Kạn","Bạc Liêu","Bắc Ninh","Bến Tre",
@@ -37,7 +37,7 @@ export default function FindTutor() {
 
   const [showModal, setShowModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
-  const [bookingForm, setBookingForm] = useState({ startTime: "", note: "" });
+  const [bookingForm, setBookingForm] = useState({ note: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -84,12 +84,7 @@ export default function FindTutor() {
 
   const openBookingModal = (cls) => {
     setSelectedClass(cls);
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(9, 0, 0, 0);
-    const tzOffset = tomorrow.getTimezoneOffset() * 60000;
-    const localISOTime = new Date(tomorrow.getTime() - tzOffset).toISOString().slice(0, 16);
-    setBookingForm({ startTime: localISOTime, note: "" });
+    setBookingForm({ note: "" });
     setShowModal(true);
   };
 
@@ -99,14 +94,13 @@ export default function FindTutor() {
 
     try {
       setIsSubmitting(true);
-      const result = await createBooking({
+      const result = await enrollClass({
         classId: selectedClass.id,
-        startTime: new Date(bookingForm.startTime).toISOString(),
         note: bookingForm.note,
       });
 
       if (result.success) {
-        alert(result.message || "Đặt lịch thành công!");
+        alert(result.message || "Đăng ký lớp thành công!");
         setShowModal(false);
         loadClasses();
       } else {
@@ -213,16 +207,7 @@ export default function FindTutor() {
             )}
 
             <form onSubmit={handleBookingSubmit}>
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>Thời gian bắt đầu học:</label>
-                <input
-                  type="datetime-local"
-                  required
-                  value={bookingForm.startTime}
-                  onChange={(e) => setBookingForm({ ...bookingForm, startTime: e.target.value })}
-                  style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
-                />
-              </div>
+
 
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>Ghi chú cho gia sư:</label>
@@ -251,7 +236,7 @@ export default function FindTutor() {
                     fontWeight: 600, opacity: isSubmitting ? 0.7 : 1
                   }}
                 >
-                  {isSubmitting ? "Đang xử lý..." : "Xác nhận & Thanh toán"}
+                  {isSubmitting ? "Đang xử lý..." : "Đăng ký lớp học"}
                 </button>
               </div>
             </form>

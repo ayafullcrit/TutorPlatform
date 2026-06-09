@@ -4,7 +4,6 @@ import { getCurrentUser, getCurrentUserApi } from "../../services/authService";
 
 const menuItems = [
   { to: "/tutor/dashboard", label: "Tổng quan", icon: "dashboard" },
-  { to: "/tutor/subjects", label: "Môn học", icon: "subject" },
   { to: "/tutor/classes", label: "Các Môn dạy", icon: "menu_book" },
   { to: "/tutor/students", label: "Học viên", icon: "groups" },
   { to: "/tutor/schedule", label: "Lịch trình", icon: "calendar_month" },

@@ -115,7 +115,7 @@ export default function Schedule() {
             ))}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gridAutoRows: "140px" }}>
             {calendarCells.map((dateObj, i) => {
               const isToday = dateObj && 
                 dateObj.getDate() === today.getDate() && 
@@ -127,7 +127,11 @@ export default function Schedule() {
                 <div
                   key={i}
                   style={{
-                    minHeight: "140px",
+                    height: "140px",
+                    minHeight: 0,
+                    boxSizing: "border-box",
+                    overflowX: "hidden",
+                    overflowY: "auto",
                     borderRight: "1px solid var(--color-border)",
                     borderBottom: "1px solid var(--color-border)",
                     padding: "10px",
