@@ -179,6 +179,7 @@ using (var scope = app.Services.CreateScope())
     if (app.Environment.IsDevelopment())
     {
         await TutorPlatform.API.Data.SeedData.RuntimeAdminSeeder.EnsureAdminUserAsync(db);
+        await TutorPlatform.API.Data.SeedData.RuntimeDemoSeeder.EnsureDemoDataAsync(db);
     }
 }
 

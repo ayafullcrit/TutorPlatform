@@ -38,7 +38,7 @@ const Home = () => {
     },
     {
       number: realStats ? `${realStats.totalClasses}+` : "1500+",
-      title: "Lớp nhóm",
+      title: "Môn dạy ",
       borderColor: "#E39A39",
       icon: "🏫",
     },
