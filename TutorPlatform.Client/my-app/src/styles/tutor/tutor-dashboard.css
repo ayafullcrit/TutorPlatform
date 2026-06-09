@@ -116,23 +116,47 @@
 }
 
 .tutor-upcoming__date {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  min-width: 72px;
+  min-height: 72px;
   border-radius: 14px;
   background: rgba(124, 110, 39, 0.12);
   color: var(--tutor-primary);
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 6px;
+  text-align: center;
   font-weight: 800;
+  line-height: 1.1;
+}
+
+.tutor-upcoming__date-day {
+  font-size: 28px;
+}
+
+.tutor-upcoming__date-month {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tutor-upcoming__content {
+  min-width: 0;
+  flex: 1;
 }
 
 .tutor-upcoming__subject {
   font-weight: 800;
+  line-height: 1.35;
 }
 
 .tutor-upcoming__time {
   color: var(--tutor-muted);
   font-size: 14px;
+  line-height: 1.45;
+  word-break: break-word;
 }
 
 @media (max-width: 1100px) {
@@ -142,5 +166,25 @@
 
   .tutor-dashboard__grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .tutor-upcoming__item {
+    align-items: flex-start;
+  }
+
+  .tutor-upcoming__date {
+    width: 64px;
+    min-width: 64px;
+    min-height: 64px;
+  }
+
+  .tutor-upcoming__date-day {
+    font-size: 24px;
+  }
+
+  .tutor-upcoming__date-month {
+    font-size: 11px;
   }
 }

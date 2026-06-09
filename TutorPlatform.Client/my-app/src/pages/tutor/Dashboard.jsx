@@ -19,6 +19,15 @@ export default function Dashboard() {
     loadDashboardData();
   }, []);
 
+  const getUpcomingDateParts = (dateValue) => {
+    const [day = "", month = "", year = ""] = String(dateValue).split("/");
+
+    return {
+      day,
+      monthYear: month && year ? `${month}/${year}` : dateValue,
+    };
+  };
+
   const loadDashboardData = async () => {
     try {
       setLoading(true);
@@ -166,10 +175,16 @@ export default function Dashboard() {
             {loading ? (
               <div style={{ padding: "20px", textAlign: "center" }}>Đang tải...</div>
             ) : upcomingLessons.length > 0 ? (
-              upcomingLessons.map((item, idx) => (
+              upcomingLessons.map((item, idx) => {
+                const dateParts = getUpcomingDateParts(item.date);
+
+                return (
                 <div className="tutor-upcoming__item" key={idx}>
-                  <div className="tutor-upcoming__date">{item.date}</div>
-                  <div>
+                  <div className="tutor-upcoming__date">
+                    <span className="tutor-upcoming__date-day">{dateParts.day}</span>
+                    <span className="tutor-upcoming__date-month">{dateParts.monthYear}</span>
+                  </div>
+                  <div className="tutor-upcoming__content">
                     <div className="tutor-upcoming__subject">{item.subject}</div>
                     <div className="tutor-upcoming__time">
                       {item.time}
@@ -181,7 +196,8 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
-              ))
+                );
+              })
             ) : (
               <div style={{ padding: "20px", textAlign: "center", color: "#999" }}>
                 Không có lịch dạy sắp tới

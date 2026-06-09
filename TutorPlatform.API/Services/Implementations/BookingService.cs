@@ -70,6 +70,24 @@ namespace TutorPlatform.API.Services.Implementations
                     .Select(g => new { TutorId = g.Key, Avg = g.Average(x => (double)x.Rating) })
                     .ToDictionaryAsync(x => x.TutorId, x => x.Avg);
 
+                var tutorSubjects = await _context.Classes
+                    .Where(c => tutorIds.Contains(c.TutorId))
+                    .Include(c => c.Subject)
+                    .GroupBy(c => c.TutorId)
+                    .Select(g => new
+                    {
+                        TutorId = g.Key,
+                        Subjects = g
+                            .Select(x => x.Subject.Name)
+                            .Distinct()
+                            .OrderBy(name => name)
+                            .ToList()
+                    })
+                    .ToDictionaryAsync(
+                        x => x.TutorId,
+                        x => string.Join(", ", x.Subjects)
+                    );
+
                 var result = bookings
                     .GroupBy(b => b.TutorId)
                     .Select(g =>
@@ -89,6 +107,10 @@ namespace TutorPlatform.API.Services.Implementations
                             TutorName = latestBooking.Tutor?.User?.FullName ?? string.Empty,
                             TutorAvatar = latestBooking.Tutor?.User?.AvatarUrl ?? string.Empty,
                             Subject = latestBooking.Class?.Subject?.Name ?? string.Empty,
+                            ClassTitle = latestBooking.Class?.Title ?? string.Empty,
+                            TeachingSubjects = tutorSubjects.TryGetValue(latestBooking.TutorId, out var teachingSubjects)
+                                ? teachingSubjects
+                                : latestBooking.Class?.Subject?.Name ?? string.Empty,
                             City = latestBooking.Tutor?.User?.Address ?? string.Empty,
                             PricePerSession = latestBooking.Class?.PricePerSession ?? 0,
                             Rating = ratings.TryGetValue(latestBooking.TutorId, out var avg) ? Math.Round(avg, 1) : 0,
@@ -149,12 +171,24 @@ namespace TutorPlatform.API.Services.Implementations
                     .Where(r => r.TutorId == booking.TutorId)
                     .AverageAsync(r => (double?)r.Rating) ?? 0;
 
+                var teachingSubjects = await _context.Classes
+                    .Where(c => c.TutorId == booking.TutorId)
+                    .Include(c => c.Subject)
+                    .Select(c => c.Subject.Name)
+                    .Distinct()
+                    .OrderBy(name => name)
+                    .ToListAsync();
+
                 var response = new MyTutorResponse
                 {
                     TutorUserId = booking.TutorId,
                     TutorName = booking.Tutor?.User?.FullName ?? string.Empty,
                     TutorAvatar = booking.Tutor?.User?.AvatarUrl ?? string.Empty,
                     Subject = booking.Class?.Subject?.Name ?? string.Empty,
+                    ClassTitle = booking.Class?.Title ?? string.Empty,
+                    TeachingSubjects = teachingSubjects.Count > 0
+                        ? string.Join(", ", teachingSubjects)
+                        : booking.Class?.Subject?.Name ?? string.Empty,
                     City = booking.Tutor?.User?.Address ?? string.Empty,
                     PricePerSession = booking.Class?.PricePerSession ?? 0,
                     Rating = Math.Round(avgRating, 1),

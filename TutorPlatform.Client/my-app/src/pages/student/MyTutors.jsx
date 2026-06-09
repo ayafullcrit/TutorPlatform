@@ -28,7 +28,14 @@ const mapTutor = (item) => {
     tutorUserId: item.tutorUserId ?? item.TutorUserId ?? item.id,
     name: item.tutorName ?? item.TutorName ?? item.name ?? "",
     avatar: getAvatarSrc({ avatarUrl: rawAvatar }) || rawAvatar,
-    subject: item.subject ?? item.Subject ?? "",
+    subject:
+      item.classTitle ??
+      item.ClassTitle ??
+      item.teachingSubjects ??
+      item.TeachingSubjects ??
+      item.subject ??
+      item.Subject ??
+      "Chưa cập nhật",
     city: item.city ?? item.City ?? "",
     price: item.pricePerSession ?? item.PricePerSession ?? item.price ?? 0,
     rating: item.rating ?? item.Rating ?? 0,
@@ -142,7 +149,7 @@ export default function MyTutors() {
               >
                 <div className="student-management-card__header">
                   <div>
-                    <p className="student-card__muted">{tutor.subject}</p>
+                    <p className="student-card__muted">Môn đang học: {tutor.subject}</p>
                     <h3 className="student-card__title">{tutor.name}</h3>
                   </div>
                   <span className={statusClass}>{statusText}</span>
@@ -155,7 +162,7 @@ export default function MyTutors() {
                   </p>
                   <p>
                     <span>Học phí</span>
-                    <strong>{formatCurrency(tutor.price)}/gio</strong>
+                    <strong>{formatCurrency(tutor.price)}/giờ</strong>
                   </p>
                   <p>
                     <span>Đánh giá</span>
