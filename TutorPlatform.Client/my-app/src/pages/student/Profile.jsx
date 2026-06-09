@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getCurrentUser } from "../../services/authService";
 import { getProfile, updateProfile, updateStudentProfile, uploadAvatar } from "../../services/userService";
 import { applyUserAvatar, getAvatarSrc, getInitials, getUserAvatar, getUserFullName } from "../../utils/avatar";
+import { WARDS } from "../../constants/wards";
 
 const getStudentSchool = (user) => user?.student?.school ?? user?.Student?.School ?? user?.school ?? "";
 const getStudentGrade = (user) =>
@@ -220,7 +221,7 @@ export default function Profile() {
             <strong>Số điện thoại:</strong> {user.phoneNumber || "Chưa cập nhật"}
           </p>
           <p>
-            <strong>Địa chỉ:</strong> {user.address || "Chưa cập nhật"}
+            <strong>Phường:</strong> {user.address || "Chưa cập nhật"}
           </p>
         </div>
 
@@ -314,14 +315,20 @@ export default function Profile() {
                 placeholder="VD: 0123456789"
               />
 
-              <label htmlFor="address">Địa chỉ</label>
-              <input
+              <label htmlFor="address">Phường</label>
+              <select
                 id="address"
                 className="student-input"
                 value={form.address}
                 onChange={onChange("address")}
-                placeholder="VD: Quận 1, TP.HCM"
-              />
+              >
+                <option value="">Chọn phường</option>
+                {WARDS.map((ward) => (
+                  <option key={ward} value={ward}>
+                    {ward}
+                  </option>
+                ))}
+              </select>
 
               <hr style={{ border: 0, borderTop: "1px solid #eee", margin: "14px 0" }} />
 

@@ -3,6 +3,7 @@ import { getCurrentUser } from "../../services/authService";
 import { getProfile, updateProfile, uploadAvatar } from "../../services/userService";
 import { applyUserAvatar, getAvatarSrc, getInitials, getUserAvatar, getUserFullName } from "../../utils/avatar";
 import "../../styles/student-dashboard.css";
+import { WARDS } from "../../constants/wards";
 
 export default function Profile() {
   const [user, setUser] = useState(getCurrentUser());
@@ -200,7 +201,7 @@ export default function Profile() {
           <h3>Thông tin liên hệ</h3>
           <p><strong>Email:</strong> {user.email}</p>
           <p><strong>Số điện thoại:</strong> {user.phoneNumber || "Chưa cập nhật"}</p>
-          <p><strong>Địa chỉ:</strong> {user.address || "Chưa cập nhật"}</p>
+          <p><strong>Phường:</strong> {user.address || "Chưa cập nhật"}</p>
         </div>
 
         <div className="tutor-card" style={{ padding: 26 }}>
@@ -265,14 +266,20 @@ export default function Profile() {
                 placeholder="VD: 0123456789"
               />
 
-              <label htmlFor="address">Địa chỉ</label>
-              <input
+              <label htmlFor="address">Phường</label>
+              <select
                 id="address"
                 className="student-input"
                 value={form.address}
                 onChange={onChange("address")}
-                placeholder="VD: Quận 1, TP.HCM"
-              />
+              >
+                <option value="">Chọn phường</option>
+                {WARDS.map((ward) => (
+                  <option key={ward} value={ward}>
+                    {ward}
+                  </option>
+                ))}
+              </select>
 
 
 

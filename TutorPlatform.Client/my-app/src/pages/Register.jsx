@@ -1,22 +1,18 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Paperclip, User, Phone, Mail, Edit3,
-  Users, BookOpen, GraduationCap, Lock,
+  Paperclip,
+  User,
+  Phone,
+  Mail,
+  Edit3,
+  Users,
+  BookOpen,
+  GraduationCap,
+  Lock,
 } from "lucide-react";
 import { registerApi } from "../services/authService";
-
-const provinces = [
-  "An Giang","Bà Rịa - Vũng Tàu","Bắc Giang","Bắc Kạn","Bạc Liêu","Bắc Ninh","Bến Tre",
-  "Bình Dương","Bình Định","Bình Phước","Bình Thuận","Cà Mau","Cần Thơ","Cao Bằng",
-  "Đà Nẵng","Đắk Lắk","Đắk Nông","Điện Biên","Đồng Nai","Đồng Tháp","Gia Lai",
-  "Hà Giang","Hà Nam","Hà Nội","Hà Tĩnh","Hải Dương","Hải Phòng","Hậu Giang",
-  "Hòa Bình","Hưng Yên","Khánh Hòa","Kiên Giang","Kon Tum","Lai Châu","Lâm Đồng",
-  "Lạng Sơn","Lào Cai","Long An","Nam Định","Nghệ An","Ninh Bình","Ninh Thuận",
-  "Phú Thọ","Phú Yên","Quảng Bình","Quảng Nam","Quảng Ngãi","Quảng Ninh","Quảng Trị",
-  "Sóc Trăng","Sơn La","Tây Ninh","Thái Bình","Thái Nguyên","Thanh Hóa","Thừa Thiên Huế",
-  "Tiền Giang","TP. Hồ Chí Minh","Trà Vinh","Tuyên Quang","Vĩnh Long","Vĩnh Phúc","Yên Bái"
-];
+import { WARDS } from "../constants/wards";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -57,7 +53,10 @@ export default function Register() {
         fullName: formData.fullName,
         phoneNumber: formData.phoneNumber,
         role: mappedRole,
-        grade: role === "hoc-vien" && formData.grade ? parseInt(formData.grade, 10) : null,
+        grade:
+          role === "hoc-vien" && formData.grade
+            ? parseInt(formData.grade, 10)
+            : null,
         school: role === "hoc-vien" ? formData.school : null,
         address: role === "gia-su" ? formData.address : null,
       };
@@ -78,15 +77,18 @@ export default function Register() {
       if (Array.isArray(apiErrors)) {
         normalizedErrors = apiErrors.join(" | ");
       } else if (apiErrors && typeof apiErrors === "object") {
-        normalizedErrors = Object.values(apiErrors).flat().filter(Boolean).join(" | ");
+        normalizedErrors = Object.values(apiErrors)
+          .flat()
+          .filter(Boolean)
+          .join(" | ");
       }
 
       setError(
         normalizedErrors ||
-        responseData?.message ||
-        responseData?.title ||
-        err.message ||
-        "Đăng ký thất bại"
+          responseData?.message ||
+          responseData?.title ||
+          err.message ||
+          "Đăng ký thất bại"
       );
     } finally {
       setLoading(false);
@@ -110,23 +112,36 @@ export default function Register() {
               <GraduationCap size={300} strokeWidth={0.5} />
             </div>
             <div className="relative z-10">
-              <Paperclip size={32} className="text-[#e2d5c1] mb-8 transform -rotate-45" strokeWidth={1.5} />
+              <Paperclip
+                size={32}
+                className="text-[#e2d5c1] mb-8 transform -rotate-45"
+                strokeWidth={1.5}
+              />
               <h1 className="font-title text-4xl lg:text-5xl font-bold leading-tight mb-6 tracking-wide">
                 Kiến tạo tương lai <br />
                 <span className="italic font-normal">cùng giáo dục.</span>
               </h1>
               <p className="text-xl italic opacity-90 leading-relaxed border-l-2 border-[#e2d5c1] pl-4">
-                Hệ thống hỗ trợ kết nối và quản lý gia sư, học viên trong một không gian học tập hiện đại.
+                Hệ thống hỗ trợ kết nối và quản lý gia sư, học viên trong một
+                không gian học tập hiện đại.
               </p>
             </div>
             <div className="relative z-10 mt-16 lg:mt-0 space-y-6">
               <div className="flex items-center gap-4">
                 <div className="flex -space-x-3">
-                  <div className="w-10 h-10 rounded-full border-2 border-[#b0a18e] bg-[#d3c4ad] flex items-center justify-center text-[#5c4a3d]"><User size={20} /></div>
-                  <div className="w-10 h-10 rounded-full border-2 border-[#b0a18e] bg-[#fdfaf2] flex items-center justify-center text-[#5c4a3d]"><GraduationCap size={20} /></div>
-                  <div className="w-10 h-10 rounded-full border-2 border-[#b0a18e] bg-[#e2d5c1] flex items-center justify-center text-[#5c4a3d] font-bold text-xs">+2k</div>
+                  <div className="w-10 h-10 rounded-full border-2 border-[#b0a18e] bg-[#d3c4ad] flex items-center justify-center text-[#5c4a3d]">
+                    <User size={20} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full border-2 border-[#b0a18e] bg-[#fdfaf2] flex items-center justify-center text-[#5c4a3d]">
+                    <GraduationCap size={20} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full border-2 border-[#b0a18e] bg-[#e2d5c1] flex items-center justify-center text-[#5c4a3d] font-bold text-xs">
+                    +2k
+                  </div>
                 </div>
-                <p className="font-title font-bold text-sm tracking-wider uppercase opacity-90">Gia nhập cộng đồng tri thức</p>
+                <p className="font-title font-bold text-sm tracking-wider uppercase opacity-90">
+                  Gia nhập cộng đồng tri thức
+                </p>
               </div>
               <div className="flex items-center gap-2 opacity-90 text-sm font-bold tracking-wider uppercase">
                 <Users size={18} />
@@ -141,63 +156,155 @@ export default function Register() {
                 <h2 className="font-title text-3xl lg:text-4xl font-bold text-[#5c4a3d] mb-2 uppercase tracking-wide">
                   Đăng ký tài khoản
                 </h2>
-                <p className="text-[#8c7355] text-xl italic">Bắt đầu hành trình của bạn ngay hôm nay.</p>
+                <p className="text-[#8c7355] text-xl italic">
+                  Bắt đầu hành trình của bạn ngay hôm nay.
+                </p>
               </div>
 
               <form onSubmit={handleRegister} className="space-y-6">
                 <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">Vai trò của bạn</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">
+                    Vai trò của bạn
+                  </label>
                   <div className="flex justify-center gap-4">
-                    <button type="button" onClick={() => setRole("gia-su")} className={`w-40 flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all ${role === "gia-su" ? "bg-[#8c7355] border-[#8c7355] text-[#fdfaf2] shadow-md -translate-y-1" : "bg-transparent border-[#d3c4ad] text-[#8c7355] hover:bg-[#f6efe1]"}`}>
-                      <BookOpen size={24} className="mb-1" strokeWidth={role === "gia-su" ? 2 : 1.5} />
-                      <span className="text-sm font-bold font-title">Gia sư</span>
+                    <button
+                      type="button"
+                      onClick={() => setRole("gia-su")}
+                      className={`w-40 flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all ${
+                        role === "gia-su"
+                          ? "bg-[#8c7355] border-[#8c7355] text-[#fdfaf2] shadow-md -translate-y-1"
+                          : "bg-transparent border-[#d3c4ad] text-[#8c7355] hover:bg-[#f6efe1]"
+                      }`}
+                    >
+                      <BookOpen
+                        size={24}
+                        className="mb-1"
+                        strokeWidth={role === "gia-su" ? 2 : 1.5}
+                      />
+                      <span className="text-sm font-bold font-title">
+                        Gia sư
+                      </span>
                     </button>
-                    <button type="button" onClick={() => setRole("hoc-vien")} className={`w-40 flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all ${role === "hoc-vien" ? "bg-[#8c7355] border-[#8c7355] text-[#fdfaf2] shadow-md -translate-y-1" : "bg-transparent border-[#d3c4ad] text-[#8c7355] hover:bg-[#f6efe1]"}`}>
-                      <GraduationCap size={24} className="mb-1" strokeWidth={role === "hoc-vien" ? 2 : 1.5} />
-                      <span className="text-sm font-bold font-title">Học viên</span>
+                    <button
+                      type="button"
+                      onClick={() => setRole("hoc-vien")}
+                      className={`w-40 flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all ${
+                        role === "hoc-vien"
+                          ? "bg-[#8c7355] border-[#8c7355] text-[#fdfaf2] shadow-md -translate-y-1"
+                          : "bg-transparent border-[#d3c4ad] text-[#8c7355] hover:bg-[#f6efe1]"
+                      }`}
+                    >
+                      <GraduationCap
+                        size={24}
+                        className="mb-1"
+                        strokeWidth={role === "hoc-vien" ? 2 : 1.5}
+                      />
+                      <span className="text-sm font-bold font-title">
+                        Học viên
+                      </span>
                     </button>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">Họ và tên</label>
+                    <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">
+                      Họ và tên
+                    </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><User size={18} className="text-[#a08a71]" /></div>
-                      <input type="text" name="fullName" required value={formData.fullName} onChange={handleInputChange} placeholder="Nguyễn Văn A" className="w-full pl-11 pr-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all placeholder-[#c2b29e]" />
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <User size={18} className="text-[#a08a71]" />
+                      </div>
+                      <input
+                        type="text"
+                        name="fullName"
+                        required
+                        value={formData.fullName}
+                        onChange={handleInputChange}
+                        placeholder="Nguyễn Văn A"
+                        className="w-full pl-11 pr-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all placeholder-[#c2b29e]"
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">Số điện thoại</label>
+                    <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">
+                      Số điện thoại
+                    </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Phone size={18} className="text-[#a08a71]" /></div>
-                      <input type="tel" name="phoneNumber" required value={formData.phoneNumber} onChange={handleInputChange} placeholder="090 123 4567" className="w-full pl-11 pr-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all placeholder-[#c2b29e]" />
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <Phone size={18} className="text-[#a08a71]" />
+                      </div>
+                      <input
+                        type="tel"
+                        name="phoneNumber"
+                        required
+                        value={formData.phoneNumber}
+                        onChange={handleInputChange}
+                        placeholder="090 123 4567"
+                        className="w-full pl-11 pr-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all placeholder-[#c2b29e]"
+                      />
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">Email</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">
+                    Email
+                  </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Mail size={18} className="text-[#a08a71]" /></div>
-                    <input type="email" name="email" required value={formData.email} onChange={handleInputChange} placeholder="example@email.com" className="w-full pl-11 pr-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all placeholder-[#c2b29e]" />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail size={18} className="text-[#a08a71]" />
+                    </div>
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="example@email.com"
+                      className="w-full pl-11 pr-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all placeholder-[#c2b29e]"
+                    />
                   </div>
                 </div>
 
                 {role === "hoc-vien" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">Trường học</label>
+                      <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">
+                        Trường học
+                      </label>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><GraduationCap size={18} className="text-[#a08a71]" /></div>
-                        <input type="text" name="school" value={formData.school} onChange={handleInputChange} placeholder="Tên trường" className="w-full pl-11 pr-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all placeholder-[#c2b29e]" />
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <GraduationCap size={18} className="text-[#a08a71]" />
+                        </div>
+                        <input
+                          type="text"
+                          name="school"
+                          required
+                          value={formData.school}
+                          onChange={handleInputChange}
+                          placeholder="Tên trường"
+                          className="w-full pl-11 pr-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all placeholder-[#c2b29e]"
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">Lớp (1–12)</label>
-                      <select name="grade" value={formData.grade} onChange={handleInputChange} className="w-full px-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all text-[#5c4a3d]">
+                      <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">
+                        Lớp (1–12)
+                      </label>
+                      <select
+                        name="grade"
+                        required
+                        value={formData.grade}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all text-[#5c4a3d]"
+                      >
                         <option value="">Chọn lớp</option>
-                        {[1,2,3,4,5,6,7,8,9,10,11,12].map((g) => <option key={g} value={g}>Lớp {g}</option>)}
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((g) => (
+                          <option key={g} value={g}>
+                            Lớp {g}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -205,42 +312,92 @@ export default function Register() {
 
                 {role === "gia-su" && (
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">Tỉnh / Thành hiện tại</label>
-                    <select name="address" required value={formData.address} onChange={handleInputChange} className="w-full px-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all text-[#5c4a3d]">
-                      <option value="">Chọn tỉnh/thành</option>
-                      {provinces.map((province) => <option key={province} value={province}>{province}</option>)}
+                    <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">
+                      Phường hiện tại
+                    </label>
+                    <select
+                      name="address"
+                      required
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all text-[#5c4a3d]"
+                    >
+                      <option value="">Chọn phường</option>
+                      {WARDS.map((ward) => (
+                        <option key={ward} value={ward}>
+                          {ward}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">Mật khẩu</label>
+                    <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">
+                      Mật khẩu
+                    </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Lock size={18} className="text-[#a08a71]" /></div>
-                      <input type="password" name="password" required value={formData.password} onChange={handleInputChange} placeholder="Tối thiểu 6 ký tự" className="w-full pl-11 pr-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all placeholder-[#c2b29e]" />
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <Lock size={18} className="text-[#a08a71]" />
+                      </div>
+                      <input
+                        type="password"
+                        name="password"
+                        required
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        placeholder="Tối thiểu 6 ký tự"
+                        className="w-full pl-11 pr-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all placeholder-[#c2b29e]"
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">Xác nhận mật khẩu</label>
+                    <label className="text-xs font-bold uppercase tracking-widest text-[#8c7355]">
+                      Xác nhận mật khẩu
+                    </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Lock size={18} className="text-[#a08a71]" /></div>
-                      <input type="password" name="confirmPassword" required value={formData.confirmPassword} onChange={handleInputChange} placeholder="Nhập lại mật khẩu" className="w-full pl-11 pr-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all placeholder-[#c2b29e]" />
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <Lock size={18} className="text-[#a08a71]" />
+                      </div>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        required
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        placeholder="Nhập lại mật khẩu"
+                        className="w-full pl-11 pr-4 py-3 bg-[#f6efe1] border border-[#d3c4ad] rounded-full text-lg focus:outline-none focus:border-[#a08a71] focus:ring-1 focus:ring-[#a08a71] transition-all placeholder-[#c2b29e]"
+                      />
                     </div>
                   </div>
                 </div>
 
-                {error && <p className="text-red-600 bg-red-100 px-4 py-2 rounded-xl text-center text-sm">{error}</p>}
+                {error && (
+                  <p className="text-red-600 bg-red-100 px-4 py-2 rounded-xl text-center text-sm">
+                    {error}
+                  </p>
+                )}
 
-                <button type="submit" disabled={loading} className="w-full mt-6 py-4 bg-[#8c7355] hover:bg-[#725c42] text-[#fdfaf2] text-xl font-title font-bold rounded-full transition-colors shadow-lg flex justify-center items-center gap-2 group disabled:opacity-60 disabled:cursor-not-allowed">
-                  <Edit3 size={20} className="group-hover:rotate-12 transition-transform" />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-6 py-4 bg-[#8c7355] hover:bg-[#725c42] text-[#fdfaf2] text-xl font-title font-bold rounded-full transition-colors shadow-lg flex justify-center items-center gap-2 group disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <Edit3
+                    size={20}
+                    className="group-hover:rotate-12 transition-transform"
+                  />
                   {loading ? "Đang đăng ký..." : "Tạo tài khoản ngay"}
                 </button>
               </form>
 
               <div className="mt-6 text-center text-[#8c7355] text-lg">
                 Đã có tài khoản?{" "}
-                <Link to="/login" className="font-bold underline decoration-2 underline-offset-4 hover:text-[#5c4a3d] transition-colors">
+                <Link
+                  to="/login"
+                  className="font-bold underline decoration-2 underline-offset-4 hover:text-[#5c4a3d] transition-colors"
+                >
                   Đăng nhập
                 </Link>
               </div>

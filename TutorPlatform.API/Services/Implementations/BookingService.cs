@@ -111,7 +111,7 @@ namespace TutorPlatform.API.Services.Implementations
                             TeachingSubjects = tutorSubjects.TryGetValue(latestBooking.TutorId, out var teachingSubjects)
                                 ? teachingSubjects
                                 : latestBooking.Class?.Subject?.Name ?? string.Empty,
-                            City = latestBooking.Tutor?.User?.Address ?? string.Empty,
+                            Ward = latestBooking.Tutor?.User?.Address ?? string.Empty,
                             PricePerSession = latestBooking.Class?.PricePerSession ?? 0,
                             Rating = ratings.TryGetValue(latestBooking.TutorId, out var avg) ? Math.Round(avg, 1) : 0,
                             NextLesson = next == null ? "--" : FormatLessonTime(next.StartTime),
@@ -189,7 +189,7 @@ namespace TutorPlatform.API.Services.Implementations
                     TeachingSubjects = teachingSubjects.Count > 0
                         ? string.Join(", ", teachingSubjects)
                         : booking.Class?.Subject?.Name ?? string.Empty,
-                    City = booking.Tutor?.User?.Address ?? string.Empty,
+                    Ward = booking.Tutor?.User?.Address ?? string.Empty,
                     PricePerSession = booking.Class?.PricePerSession ?? 0,
                     Rating = Math.Round(avgRating, 1),
                     NextLesson = "--",

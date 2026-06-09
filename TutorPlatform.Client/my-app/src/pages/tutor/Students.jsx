@@ -1,71 +1,79 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import TutorStudentTable from "../../components/tutor/TutorStudentTable";
 import TutorRequestCard from "../../components/tutor/TutorRequestCard";
-import { getTutorEnrollments, approveEnrollment, rejectEnrollment, removeStudent } from "../../services/bookingService";
-import { getAvatarSrc } from "../../utils/avatar";
+import {
+  approveEnrollment,
+  getTutorEnrollments,
+  rejectEnrollment,
+  removeStudent,
+} from "../../services/bookingService";
+
+const formatSchool = (school) => {
+  const normalized = school?.trim();
+  return normalized || "Học viên chưa cập nhật trường";
+};
+
+const formatGradeLevel = (gradeLevel) => {
+  const value = Number(gradeLevel) || 0;
+  return value > 0 ? `Lớp ${value}` : "Học viên chưa cập nhật khối lớp";
+};
 
 export default function Students() {
-  const [tab, setTab] = useState("requests"); // Default to requests
-
+  const [tab, setTab] = useState("requests");
   const [students, setStudents] = useState([]);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [classFilter, setClassFilter] = useState("all");
-
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedRequest, setSelectedRequest] = useState(null);
 
-  useEffect(() => {
-    loadEnrollments(true);
-    const interval = setInterval(() => {
-      loadEnrollments(false);
-    }, 5000); // Poll every 5 seconds for real-time updates
-    return () => clearInterval(interval);
-  }, [tab]);
-
-  const loadEnrollments = async (showSpinner = true) => {
+  const loadEnrollments = useCallback(async (showSpinner = true) => {
     try {
       if (showSpinner) setLoading(true);
       setError(null);
-      const result = await getTutorEnrollments();
-      if (result?.success && result.data) {
-        const allEnrollments = result.data;
-        
-        // EnrollmentStatus: Active = 1, Pending = 3
-        const activeStudents = allEnrollments
-          .filter(e => e.status === 1)
-          .map(e => ({
-            id: e.enrollmentId,
-            name: e.studentName || "Học viên",
-            className: e.classTitle || "Chưa rõ",
-            subject: e.subjectName || "Chưa rõ",
-            status: "active",
-            next: e.nextSessionTime || "Chưa có lịch",
-            userId: e.studentUserId,
-          }));
-          
-        const pendingRequests = allEnrollments
-          .filter(e => e.status === 3)
-          .map(e => ({
-            id: e.enrollmentId,
-            name: e.studentName || "Học viên mới",
-            subject: e.classTitle || "Đăng ký lớp",
-            time: new Date(e.enrolledAt).toLocaleString("vi-VN"),
-            note: "Muốn đăng ký vào lớp học."
-          }));
 
-        setStudents(activeStudents);
-        setRequests(pendingRequests);
-        
-        // Auto switch tab if requests exist (only switch on initial load/action)
-        if (showSpinner) {
-          if (pendingRequests.length > 0 && tab === "list") {
-              setTab("requests");
-          } else if (pendingRequests.length === 0 && tab === "requests") {
-              setTab("list");
-          }
+      const result = await getTutorEnrollments();
+      if (!result?.success || !result.data) return;
+
+      const allEnrollments = result.data;
+
+      const activeStudents = allEnrollments
+        .filter((e) => e.status === 1)
+        .map((e) => ({
+          id: e.enrollmentId,
+          name: e.studentName || "Học viên",
+          className: e.classTitle || "Chưa rõ",
+          subject: e.subjectName || "Chưa rõ",
+          status: "active",
+          next: e.nextSessionTime || "Chưa có lịch",
+          userId: e.studentUserId,
+          school: formatSchool(e.studentSchool),
+          gradeLabel: formatGradeLevel(e.studentGradeLevel),
+        }));
+
+      const pendingRequests = allEnrollments
+        .filter((e) => e.status === 3)
+        .map((e) => ({
+          id: e.enrollmentId,
+          name: e.studentName || "Học viên mới",
+          subject: e.classTitle || "Đăng ký lớp",
+          time: new Date(e.enrolledAt).toLocaleString("vi-VN"),
+          note: "Muốn đăng ký vào lớp học.",
+          school: formatSchool(e.studentSchool),
+          gradeLabel: formatGradeLevel(e.studentGradeLevel),
+          studentClass: e.classTitle || "Chưa rõ",
+        }));
+
+      setStudents(activeStudents);
+      setRequests(pendingRequests);
+
+      if (showSpinner) {
+        if (pendingRequests.length > 0 && tab === "list") {
+          setTab("requests");
+        } else if (pendingRequests.length === 0 && tab === "requests") {
+          setTab("list");
         }
       }
     } catch (err) {
@@ -74,9 +82,20 @@ export default function Students() {
     } finally {
       if (showSpinner) setLoading(false);
     }
-  };
+  }, [tab]);
 
-  const uniqueClasses = Array.from(new Set(students.map(s => s.className).filter(Boolean)));
+  useEffect(() => {
+    loadEnrollments(true);
+    const interval = setInterval(() => {
+      loadEnrollments(false);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [loadEnrollments]);
+
+  const uniqueClasses = Array.from(
+    new Set(students.map((student) => student.className).filter(Boolean))
+  );
 
   const filteredStudents = students.filter((student) => {
     const matchSearch =
@@ -94,36 +113,50 @@ export default function Students() {
       const result = await approveEnrollment(request.id);
       if (result.success) {
         alert("Đã phê duyệt học viên vào lớp!");
+        setSelectedRequest(null);
         loadEnrollments();
       } else {
         alert(result.message || "Không thể phê duyệt");
       }
     } catch (err) {
-      alert("Lỗi khi phê duyệt: " + (err.response?.data?.message || err.message));
+      alert(
+        "Lỗi khi phê duyệt: " +
+          (err.response?.data?.message || err.message)
+      );
     }
   };
 
   const handleRejectRequest = async (request) => {
-    if (!window.confirm("Bạn có chắc muốn từ chối yêu cầu đăng ký lớp này?")) return;
+    if (!window.confirm("Bạn có chắc muốn từ chối yêu cầu đăng ký lớp này?")) {
+      return;
+    }
+
     try {
       const result = await rejectEnrollment(request.id);
       if (result.success) {
         alert("Đã từ chối yêu cầu.");
+        setSelectedRequest(null);
         loadEnrollments();
       } else {
         alert(result.message || "Không thể từ chối");
       }
     } catch (err) {
-      alert("Lỗi khi từ chối: " + (err.response?.data?.message || err.message));
+      alert(
+        "Lỗi khi từ chối: " +
+          (err.response?.data?.message || err.message)
+      );
     }
   };
 
-  const handlePauseStudent = (student) => {
-    alert("Tính năng đang phát triển.");
-  };
-
   const handleRemoveStudent = async (student) => {
-    if (!window.confirm(`Bạn có chắc muốn xóa "${student.name}" khỏi lớp "${student.className}"? Tiền các buổi chưa học sẽ được hoàn lại cho học viên.`)) return;
+    if (
+      !window.confirm(
+        `Bạn có chắc muốn xóa "${student.name}" khỏi lớp "${student.className}"? Tiền các buổi chưa học sẽ được hoàn lại cho học viên.`
+      )
+    ) {
+      return;
+    }
+
     try {
       const result = await removeStudent(student.id);
       if (result.success) {
@@ -134,28 +167,12 @@ export default function Students() {
         alert(result.message || "Không thể xóa học viên");
       }
     } catch (err) {
-      alert("Lỗi khi xóa học viên: " + (err.response?.data?.message || err.message));
+      alert(
+        "Lỗi khi xóa học viên: " +
+          (err.response?.data?.message || err.message)
+      );
     }
   };
-
-  const handleDeleteStudent = async (student) => {
-    if (!window.confirm("Bạn có chắc muốn hủy buổi học với học viên này?")) return;
-    try {
-      const result = await cancelBookingByTutor(student.id);
-      if (result.success) {
-        alert("Đã hủy buổi học.");
-        loadBookings();
-        setSelectedStudent(null);
-      }
-    } catch (err) {
-      alert("Lỗi: " + (err.response?.data?.message || err.message));
-    }
-  };
-  
-  const handleCompleteStudent = async (student) => {
-    alert("Để hoàn thành buổi học, hãy vào menu Lịch Dạy.");
-  };
-
 
   return (
     <div>
@@ -168,9 +185,7 @@ export default function Students() {
         </div>
       </div>
 
-      {error && (
-        <div style={{ color: "red", marginBottom: 20 }}>{error}</div>
-      )}
+      {error && <div style={{ color: "red", marginBottom: 20 }}>{error}</div>}
 
       <div className="tutor-students__tabs">
         <button
@@ -224,6 +239,7 @@ export default function Students() {
               <TutorRequestCard
                 key={item.id}
                 item={item}
+                onViewInfo={() => setSelectedRequest(item)}
                 onApprove={() => handleApproveRequest(item)}
                 onReject={() => handleRejectRequest(item)}
               />
@@ -241,7 +257,14 @@ export default function Students() {
               <strong>Lớp học:</strong> {selectedStudent.className}
             </p>
             <p>
-              <strong>Trạng thái:</strong> {selectedStudent.status === "active" ? "Đang học" : "Đã hoàn thành"}
+              <strong>Trường:</strong> {selectedStudent.school}
+            </p>
+            <p>
+              <strong>Khối lớp học viên:</strong> {selectedStudent.gradeLabel}
+            </p>
+            <p>
+              <strong>Trạng thái:</strong>{" "}
+              {selectedStudent.status === "active" ? "Đang học" : "Đã hoàn thành"}
             </p>
             <p>
               <strong>Lịch học gần nhất:</strong> {selectedStudent.next}
@@ -260,6 +283,57 @@ export default function Students() {
                 onClick={() => handleRemoveStudent(selectedStudent)}
               >
                 Xóa học viên
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedRequest && (
+        <div className="tutor-modal" onClick={() => setSelectedRequest(null)}>
+          <div
+            className="tutor-modal__content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>Thông tin học viên đăng ký</h2>
+
+            <p>
+              <strong>Họ và tên:</strong> {selectedRequest.name}
+            </p>
+            <p>
+              <strong>Lớp đăng ký:</strong> {selectedRequest.studentClass}
+            </p>
+            <p>
+              <strong>Trường:</strong> {selectedRequest.school}
+            </p>
+            <p>
+              <strong>Khối lớp học viên:</strong> {selectedRequest.gradeLabel}
+            </p>
+            <p>
+              <strong>Thời gian đăng ký:</strong> {selectedRequest.time}
+            </p>
+            <p>
+              <strong>Ghi chú:</strong> {selectedRequest.note}
+            </p>
+
+            <div className="tutor-modal__actions">
+              <button
+                className="tutor-btn tutor-btn--ghost"
+                onClick={() => setSelectedRequest(null)}
+              >
+                Đóng
+              </button>
+              <button
+                className="tutor-btn tutor-btn--primary"
+                onClick={() => handleApproveRequest(selectedRequest)}
+              >
+                Chấp nhận
+              </button>
+              <button
+                className="tutor-btn tutor-btn--danger"
+                onClick={() => handleRejectRequest(selectedRequest)}
+              >
+                Từ chối
               </button>
             </div>
           </div>

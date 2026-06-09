@@ -5,18 +5,7 @@ import ErrorState from "../../components/student/ErrorState";
 import { searchClasses } from "../../services/classService";
 import { getAllSubjects } from "../../services/subjectService";
 import { enrollClass } from "../../services/bookingService";
-
-const provinces = [
-  "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", "Bến Tre",
-  "Bình Dương", "Bình Định", "Bình Phước", "Bình Thuận", "Cà Mau", "Cần Thơ", "Cao Bằng",
-  "Đà Nẵng", "Đắk Lắk", "Đắk Nông", "Điện Biên", "Đồng Nai", "Đồng Tháp", "Gia Lai",
-  "Hà Giang", "Hà Nam", "Hà Nội", "Hà Tĩnh", "Hải Dương", "Hải Phòng", "Hậu Giang",
-  "Hòa Bình", "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng",
-  "Lạng Sơn", "Lào Cai", "Long An", "Nam Định", "Nghệ An", "Ninh Bình", "Ninh Thuận",
-  "Phú Thọ", "Phú Yên", "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị",
-  "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế",
-  "Tiền Giang", "TP. Hồ Chí Minh", "Trà Vinh", "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái",
-];
+import { WARDS } from "../../constants/wards";
 
 export default function FindTutor() {
   const [classes, setClasses] = useState([]);
@@ -61,7 +50,9 @@ export default function FindTutor() {
     setStatus("loading");
     try {
       const params = Object.fromEntries(
-        Object.entries(filters).filter(([, value]) => value !== "" && value !== null && value !== undefined)
+        Object.entries(filters).filter(
+          ([, value]) => value !== "" && value !== null && value !== undefined
+        )
       );
 
       const result = await searchClasses(params);
@@ -119,50 +110,79 @@ export default function FindTutor() {
         <div>
           <h1 className="student-dashboard__heading">Tìm gia sư</h1>
           <p className="student-dashboard__subtext">
-            Tìm kiếm theo từ khóa, môn học, khối lớp và thêm lọc theo tỉnh/thành.
+            Tìm kiếm theo từ khóa, môn học, khối lớp và thêm lọc theo phường.
           </p>
         </div>
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 24 }}>
+      <div
+        style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 24 }}
+      >
         <input
           type="text"
           placeholder="Tìm kiếm theo từ khóa..."
           value={filters.keyword}
           onChange={(e) => handleFilterChange("keyword", e.target.value)}
-          style={{ flex: "1 1 200px", padding: "8px 14px", borderRadius: 999, border: "1px solid #d1c9b4", background: "#fafaf2" }}
+          style={{
+            flex: "1 1 200px",
+            padding: "8px 14px",
+            borderRadius: 999,
+            border: "1px solid #d1c9b4",
+            background: "#fafaf2",
+          }}
         />
 
         <select
           value={filters.subjectId}
           onChange={(e) => handleFilterChange("subjectId", e.target.value)}
-          style={{ padding: "8px 14px", borderRadius: 999, border: "1px solid #d1c9b4", background: "#fafaf2" }}
+          style={{
+            padding: "8px 14px",
+            borderRadius: 999,
+            border: "1px solid #d1c9b4",
+            background: "#fafaf2",
+          }}
         >
           <option value="">Tất cả môn học</option>
           {subjects.map((subject) => (
-            <option key={subject.id} value={subject.id}>{subject.name}</option>
+            <option key={subject.id} value={subject.id}>
+              {subject.name}
+            </option>
           ))}
         </select>
 
         <select
           value={filters.grade}
           onChange={(e) => handleFilterChange("grade", e.target.value)}
-          style={{ padding: "8px 14px", borderRadius: 999, border: "1px solid #d1c9b4", background: "#fafaf2" }}
+          style={{
+            padding: "8px 14px",
+            borderRadius: 999,
+            border: "1px solid #d1c9b4",
+            background: "#fafaf2",
+          }}
         >
           <option value="">Tất cả khối lớp</option>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((grade) => (
-            <option key={grade} value={grade}>Lớp {grade}</option>
+            <option key={grade} value={grade}>
+              Lớp {grade}
+            </option>
           ))}
         </select>
 
         <select
           value={filters.address}
           onChange={(e) => handleFilterChange("address", e.target.value)}
-          style={{ padding: "8px 14px", borderRadius: 999, border: "1px solid #d1c9b4", background: "#fafaf2" }}
+          style={{
+            padding: "8px 14px",
+            borderRadius: 999,
+            border: "1px solid #d1c9b4",
+            background: "#fafaf2",
+          }}
         >
-          <option value="">Tìm theo tỉnh/thành</option>
-          {provinces.map((province) => (
-            <option key={province} value={province}>{province}</option>
+          <option value="">Tìm theo phường</option>
+          {WARDS.map((ward) => (
+            <option key={ward} value={ward}>
+              {ward}
+            </option>
           ))}
         </select>
       </div>
@@ -216,25 +236,58 @@ export default function FindTutor() {
           >
             <h2 style={{ marginBottom: 16 }}>Xác nhận đặt lịch</h2>
             {selectedClass && (
-              <div style={{ marginBottom: 20, padding: 16, background: "#f9f9f0", borderRadius: 12 }}>
-                <p><strong>Lớp:</strong> {selectedClass.title}</p>
-                <p><strong>Gia sư:</strong> {selectedClass.tutorName}</p>
-                <p><strong>Học phí:</strong> {selectedClass.pricePerSession?.toLocaleString("vi-VN")}đ/buổi</p>
-                <p><strong>Số buổi/tuần:</strong> {selectedClass.totalSessions ?? "Chưa cập nhật"}</p>
-                <p><strong>Tỉnh/thành:</strong> {selectedClass.tutorAddress || selectedClass.address || "Không rõ"}</p>
+              <div
+                style={{
+                  marginBottom: 20,
+                  padding: 16,
+                  background: "#f9f9f0",
+                  borderRadius: 12,
+                }}
+              >
+                <p>
+                  <strong>Lớp:</strong> {selectedClass.title}
+                </p>
+                <p>
+                  <strong>Gia sư:</strong> {selectedClass.tutorName}
+                </p>
+                <p>
+                  <strong>Học phí:</strong>{" "}
+                  {selectedClass.pricePerSession?.toLocaleString("vi-VN")}đ/buổi
+                </p>
+                <p>
+                  <strong>Số buổi/tuần:</strong>{" "}
+                  {selectedClass.sessionsPerWeek ?? "Chưa cập nhật"}
+                </p>
+                <p>
+                  <strong>Phường:</strong>{" "}
+                  {selectedClass.tutorWard ||
+                    selectedClass.tutorAddress ||
+                    selectedClass.address ||
+                    "Không rõ"}
+                </p>
               </div>
             )}
 
             <form onSubmit={handleBookingSubmit}>
-
-
               <div style={{ marginBottom: 20 }}>
-                <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>Ghi chú cho gia sư:</label>
+                <label
+                  style={{ display: "block", marginBottom: 6, fontWeight: 600 }}
+                >
+                  Ghi chú cho gia sư:
+                </label>
                 <textarea
                   placeholder="Yêu cầu riêng, trình độ hiện tại..."
                   value={bookingForm.note}
-                  onChange={(e) => setBookingForm({ ...bookingForm, note: e.target.value })}
-                  style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ddd", minHeight: 80 }}
+                  onChange={(e) =>
+                    setBookingForm({ ...bookingForm, note: e.target.value })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: 10,
+                    borderRadius: 8,
+                    border: "1px solid #ddd",
+                    minHeight: 80,
+                  }}
                 />
               </div>
 
@@ -242,7 +295,13 @@ export default function FindTutor() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  style={{ flex: 1, padding: 12, borderRadius: 99, border: "1px solid #ddd", background: "#fff" }}
+                  style={{
+                    flex: 1,
+                    padding: 12,
+                    borderRadius: 99,
+                    border: "1px solid #ddd",
+                    background: "#fff",
+                  }}
                 >
                   Hủy
                 </button>
@@ -299,8 +358,12 @@ function ClassCard({ cls, onBook }) {
 
           <div className="tutor-card__rating">
             <span className="material-symbols-outlined tutor-card__star">star</span>
-            <span className="tutor-card__rating-value">{cls.tutorRating?.toFixed(1) ?? "--"}</span>
-            <span className="tutor-card__reviews">({cls.tutorTotalReviews ?? 0} đánh giá)</span>
+            <span className="tutor-card__rating-value">
+              {cls.tutorRating?.toFixed(1) ?? "--"}
+            </span>
+            <span className="tutor-card__reviews">
+              ({cls.tutorTotalReviews ?? 0} đánh giá)
+            </span>
           </div>
 
           <div className="tutor-card__tags">
@@ -310,9 +373,13 @@ function ClassCard({ cls, onBook }) {
         </div>
       </div>
 
-      <p className="tutor-card__desc" style={{ fontSize: 13, marginTop: 8, color: "#666" }}>
+      <p
+        className="tutor-card__desc"
+        style={{ fontSize: 13, marginTop: 8, color: "#666" }}
+      >
         Gia sư: <strong>{cls.tutorName}</strong> · {cls.durationMinutes} phút/buổi ·{" "}
-        {cls.totalSessions ?? "?"} buổi/tuần · {cls.currentStudents}/{cls.maxStudents} học viên nhận dạy
+        {cls.sessionsPerWeek ?? "?"} buổi/tuần · {cls.currentStudents}/
+        {cls.maxStudents} học viên nhận dạy
       </p>
 
       <div className="tutor-card__bottom">

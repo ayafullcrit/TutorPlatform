@@ -14,7 +14,7 @@ const getInitialEditForm = () => ({
   grade: 1,
   pricePerSession: "",
   durationMinutes: "",
-  totalSessions: "",
+  sessionsPerWeek: "",
   maxStudents: "",
   status: 2,
 });
@@ -164,7 +164,7 @@ export default function Classes() {
       grade: classItem.grade ?? 1,
       pricePerSession: classItem.pricePerSession ?? "",
       durationMinutes: classItem.durationMinutes ?? "",
-      totalSessions: classItem.totalSessions ?? "",
+      sessionsPerWeek: classItem.sessionsPerWeek ?? "",
       maxStudents: classItem.maxStudents ?? "",
       status: classItem.status ?? 2,
     });
@@ -196,7 +196,8 @@ export default function Classes() {
         thumbnailUrl: editingClass.thumbnailUrl ?? "",
         pricePerSession: parseFloat(editForm.pricePerSession),
         durationMinutes: parseInt(editForm.durationMinutes, 10),
-        totalSessions: parseInt(editForm.totalSessions, 10),
+        sessionsPerWeek: parseInt(editForm.sessionsPerWeek, 10),
+        totalSessions: editingClass.totalSessions ?? null,
         maxStudents: parseInt(editForm.maxStudents, 10),
         status: parseInt(editForm.status, 10),
       };
@@ -470,8 +471,8 @@ export default function Classes() {
                     type="number"
                     min="1"
                     max="7"
-                    value={editForm.totalSessions}
-                    onChange={(e) => handleEditFormChange("totalSessions", e.target.value)}
+                    value={editForm.sessionsPerWeek}
+                    onChange={(e) => handleEditFormChange("sessionsPerWeek", e.target.value)}
                     required
                   />
                 </div>
@@ -509,6 +510,7 @@ export default function Classes() {
             <p><strong>Khối lớp:</strong> {selectedClass.grade}</p>
             <p><strong>Giá/buổi:</strong> {selectedClass.pricePerSession?.toLocaleString("vi-VN")} VNĐ</p>
             <p><strong>Thời lượng:</strong> {selectedClass.durationMinutes} phút</p>
+            <p><strong>Số buổi/tuần:</strong> {selectedClass.sessionsPerWeek ?? 1}</p>
             <p><strong>Học viên:</strong> {selectedClass.currentStudents}/{selectedClass.maxStudents}</p>
             <p><strong>Trạng thái:</strong> {CLASS_STATUS_TEXT[selectedClass.status] ?? selectedClass.statusText}</p>
 

@@ -13,12 +13,14 @@ namespace TutorPlatform.API.Models.DTOs.Responses.Booking
         public int TutorUserId { get; set; }
         public string TutorName { get; set; } = "";
         public string TutorAvatar { get; set; } = "";
-        public string City { get; set; } = "";
+        public string Ward { get; set; } = "";
         public double TutorRating { get; set; }
 
         public int StudentUserId { get; set; }
         public string StudentName { get; set; } = "";
         public string StudentAvatar { get; set; } = "";
+        public string StudentSchool { get; set; } = "";
+        public int StudentGradeLevel { get; set; }
 
         public decimal PricePerSession { get; set; }
         public int DurationMinutes { get; set; }

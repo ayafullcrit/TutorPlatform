@@ -381,6 +381,7 @@ namespace TutorPlatform.API.Services.Implementations
                 TutorName = classEntity.Tutor?.User?.FullName ?? "Unknown",
                 TutorAvatar = classEntity.Tutor?.User?.AvatarUrl,
                 TutorAddress = classEntity.Tutor?.User?.Address ?? string.Empty,
+                TutorWard = classEntity.Tutor?.User?.Address ?? string.Empty,
                 TutorRating = classEntity.Tutor?.Rating ?? 0,
                 TutorTotalReviews = classEntity.Tutor?.TotalReviews ?? 0,
 
@@ -399,6 +400,7 @@ namespace TutorPlatform.API.Services.Implementations
                 PricePerSession = classEntity.PricePerSession,
                 DurationMinutes = classEntity.DurationInMinutes,
                 TotalSessions = classEntity.TotalSessions,
+                SessionsPerWeek = classEntity.SessionsPerWeek,
 
                 // Capacity
                 MaxStudents = classEntity.MaxStudents,

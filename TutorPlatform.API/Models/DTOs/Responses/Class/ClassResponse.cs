@@ -11,6 +11,7 @@ namespace TutorPlatform.API.Models.DTOs.Responses.Class
         public string TutorName { get; set; }
         public string TutorAvatar { get; set; }
         public string TutorAddress { get; set; }
+        public string TutorWard { get; set; }
         public double TutorRating { get; set; }
         public int TutorTotalReviews { get; set; }
 
@@ -29,6 +30,7 @@ namespace TutorPlatform.API.Models.DTOs.Responses.Class
         public decimal PricePerSession { get; set; }
         public int DurationMinutes { get; set; }
         public int? TotalSessions { get; set; }
+        public int SessionsPerWeek { get; set; }
 
         // Capacity
         public int MaxStudents { get; set; }

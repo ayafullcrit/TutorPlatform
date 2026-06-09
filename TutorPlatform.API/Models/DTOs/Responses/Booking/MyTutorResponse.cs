@@ -8,7 +8,7 @@ namespace TutorPlatform.API.Models.DTOs.Responses.Booking
         public string Subject { get; set; } = string.Empty;
         public string ClassTitle { get; set; } = string.Empty;
         public string TeachingSubjects { get; set; } = string.Empty;
-        public string City { get; set; } = string.Empty;
+        public string Ward { get; set; } = string.Empty;
         public decimal PricePerSession { get; set; }
         public double Rating { get; set; }
         public string? NextLesson { get; set; }

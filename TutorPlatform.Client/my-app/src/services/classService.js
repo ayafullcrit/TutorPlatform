@@ -38,7 +38,7 @@ export const getClassesBySubject = async (subjectId) => {
 
 // Tạo lớp học mới (chỉ gia sư)
 // CreateClassRequest: subjectId, title, description, gradeLevel, thumbnailUrl,
-//                     pricePerSession, durationMinutes, totalSessions, maxStudents
+//                     pricePerSession, durationMinutes, sessionsPerWeek, maxStudents
 export const createClass = async (classData) => {
   const response = await api.post("/classes", classData);
   return response.data;
@@ -46,7 +46,7 @@ export const createClass = async (classData) => {
 
 // Cập nhật lớp học (chỉ gia sư sở hữu)
 // UpdateClassRequest: subjectId, title, description, durationMinutes, thumbnailUrl,
-//                     pricePerSession, totalSessions, maxStudents, status
+//                     pricePerSession, sessionsPerWeek, maxStudents, status
 export const updateClass = async (id, classData) => {
   const response = await api.put(`/classes/${id}`, classData);
   return response.data;

@@ -29,12 +29,12 @@ namespace TutorPlatform.API.Models.DTOs.Requests.Auth
         [Required(ErrorMessage = "Vai trò là bắt buộc")]
         public UserRole Role { get; set; }
 
-        [Range(6, 12, ErrorMessage = "Khối lớp phải từ 6-12")]
+        [Range(1, 12, ErrorMessage = "Khối lớp phải từ 1-12")]
         public int? Grade { get; set; }
 
         public string? School { get; set; }
 
-        [StringLength(100, ErrorMessage = "Tỉnh/thành không được quá 100 ký tự")]
+        [StringLength(100, ErrorMessage = "Phường không được quá 100 ký tự")]
         public string? Address { get; set; }
     }
 }

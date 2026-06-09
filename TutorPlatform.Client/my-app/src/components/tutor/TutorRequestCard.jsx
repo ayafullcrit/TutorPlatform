@@ -1,8 +1,13 @@
-export default function TutorRequestCard({ item, onApprove, onReject }) {
+export default function TutorRequestCard({
+  item,
+  onApprove,
+  onReject,
+  onViewInfo,
+}) {
   return (
     <article className="tutor-request tutor-card">
       <div className="tutor-request__left">
-        <img src={`anonymous.jpg`} alt="Anonymous" />
+        <img src="anonymous.jpg" alt="Anonymous" />
 
         <div>
           <div className="tutor-request__heading">
@@ -19,18 +24,17 @@ export default function TutorRequestCard({ item, onApprove, onReject }) {
       </div>
 
       <div className="tutor-request__actions">
-        <button
-          className="tutor-btn tutor-btn--primary"
-          onClick={onApprove}
-        >
+        <button className="tutor-btn tutor-btn--ghost" onClick={onViewInfo}>
+          <span className="material-symbols-outlined">visibility</span>
+          Xem thông tin
+        </button>
+
+        <button className="tutor-btn tutor-btn--primary" onClick={onApprove}>
           <span className="material-symbols-outlined">check</span>
           Chấp nhận
         </button>
 
-        <button
-          className="tutor-btn tutor-btn--ghost"
-          onClick={onReject}
-        >
+        <button className="tutor-btn tutor-btn--ghost" onClick={onReject}>
           <span className="material-symbols-outlined">close</span>
           Từ chối
         </button>

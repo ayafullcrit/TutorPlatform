@@ -629,7 +629,7 @@ namespace TutorPlatform.API.Services.Implementations
                 TutorUserId = cls.TutorId,
                 TutorName = cls.Tutor?.User?.FullName ?? "",
                 TutorAvatar = cls.Tutor?.User?.AvatarUrl ?? "",
-                City = cls.Tutor?.User?.Address ?? "",
+                Ward = cls.Tutor?.User?.Address ?? "",
                 TutorRating = Math.Round(rating, 1),
                 PricePerSession = cls.PricePerSession,
                 DurationMinutes = cls.DurationInMinutes,
@@ -642,7 +642,9 @@ namespace TutorPlatform.API.Services.Implementations
                 SessionsBookedThisWeek = sessionsThisWeek,
                 StudentUserId = e.StudentId,
                 StudentName = e.Student?.User?.FullName ?? "",
-                StudentAvatar = e.Student?.User?.AvatarUrl ?? ""
+                StudentAvatar = e.Student?.User?.AvatarUrl ?? "",
+                StudentSchool = e.Student?.School ?? "",
+                StudentGradeLevel = e.Student?.GradeLevel ?? 0
             };
         }
 
