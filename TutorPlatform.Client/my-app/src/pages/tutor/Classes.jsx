@@ -116,9 +116,10 @@ export default function Classes() {
         gradeLevel: parseInt(form.gradeLevel.value, 10),
         thumbnailUrl: "",
         pricePerSession: parseFloat(form.pricePerSession.value),
-        durationMinutes: parseInt(form.durationMinutes.value, 10),
-        totalSessions: parseInt(form.totalSessions.value, 10),
-        maxStudents: parseInt(form.maxStudents.value, 10),
+        durationMinutes: parseInt(form.durationMinutes.value),
+        sessionsPerWeek: parseInt(form.sessionsPerWeek.value),
+        maxStudents: parseInt(form.maxStudents.value),
+
       };
 
       const result = await createClass(classData);
@@ -221,7 +222,7 @@ export default function Classes() {
     subject: c.subjectName,
     status: c.status === 2 ? "active" : "inactive",
     students: `${c.currentStudents}/${c.maxStudents} học viên`,
-    time: `${c.durationMinutes} phút/buổi · ${c.totalSessions ?? "?"} buổi/tuần`,
+    time: `${c.durationMinutes} phút/buổi · ${c.sessionsPerWeek ?? 1} buổi/tuần`,
   });
 
   if (!isVerified) {
@@ -364,8 +365,9 @@ export default function Classes() {
                   <input name="durationMinutes" type="number" min="30" required placeholder="VD: 90" />
                 </div>
                 <div>
-                  <label>Tổng số buổi / tuần</label>
-                  <input name="totalSessions" type="number" min="1" max="7" required placeholder="VD: 2" />
+                  <label>Số buổi/tuần</label>
+                  <input name="sessionsPerWeek" type="number" min="1" max="7" required placeholder="VD: 3" />
+
                 </div>
                 <div>
                   <label>Học viên tối đa</label>

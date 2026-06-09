@@ -35,6 +35,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<JwtHelper>();
 
 // Services
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ISubjectService, SubjectService>();  
@@ -43,7 +44,8 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
-
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+builder.Services.AddScoped<ITutorAvailabilityService, TutorAvailabilityService>();
 
 // ============================================
 // JWT AUTHENTICATION

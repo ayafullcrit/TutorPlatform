@@ -1,0 +1,359 @@
+/* ============================================================
+   Weekly Schedule Grid – Shared Component Styles
+   Dùng chung cho học viên (chọn buổi học) và gia sư (lịch rảnh)
+   ============================================================ */
+
+/* ── Outer wrapper ─────────────────────────────────── */
+.wgrid-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Navigation bar (week prev/next) ───────────────── */
+.wgrid-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wgrid-nav__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text, #1C1C1C);
+  white-space: nowrap;
+}
+
+.wgrid-nav__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #E3DEC6);
+  background: var(--color-surface, #fff);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  color: var(--color-text, #1C1C1C);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.wgrid-nav__btn:hover {
+  background: var(--color-surface-soft, #F9F7EE);
+  border-color: var(--color-primary, #7C6E27);
+  color: var(--color-primary, #7C6E27);
+}
+
+/* ── Scrollable area ───────────────────────────────── */
+.wgrid-scroll {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 420px;
+  border: 1px solid var(--color-border, #E3DEC6);
+  border-radius: 12px;
+  background: var(--color-surface, #fff);
+}
+
+.wgrid-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.wgrid-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-border, #E3DEC6);
+  border-radius: 4px;
+}
+
+/* ── Table grid ────────────────────────────────────── */
+.wgrid-table {
+  display: grid;
+  /* time col + 7 day cols */
+  grid-template-columns: 52px repeat(7, minmax(80px, 1fr));
+  min-width: 616px;
+}
+
+/* ── Header cells (day names + date) ──────────────── */
+.wgrid-header {
+  padding: 10px 4px 8px;
+  text-align: center;
+  background: var(--color-surface-soft, #F9F7EE);
+  border-right: 1px solid var(--color-border, #E3DEC6);
+  border-bottom: 2px solid var(--color-border, #E3DEC6);
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.wgrid-header--time {
+  /* empty top-left corner */
+  background: var(--color-surface-soft, #F9F7EE);
+  border-right: 1px solid var(--color-border, #E3DEC6);
+  border-bottom: 2px solid var(--color-border, #E3DEC6);
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 4;
+}
+
+.wgrid-header__day {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-text-muted, #6B6B6B);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.wgrid-header__date {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text, #1C1C1C);
+  margin-top: 2px;
+}
+
+.wgrid-header--today .wgrid-header__day {
+  color: var(--color-primary, #7C6E27);
+}
+
+.wgrid-header--today .wgrid-header__date {
+  display: inline-block;
+  background: var(--color-primary, #7C6E27);
+  color: #fff;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+  margin-top: 3px;
+}
+
+/* ── Time label cells ──────────────────────────────── */
+.wgrid-time {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-muted, #6B6B6B);
+  border-right: 1px solid var(--color-border, #E3DEC6);
+  border-bottom: 1px solid var(--color-border, #E3DEC6);
+  background: var(--color-surface-soft, #F9F7EE);
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+/* ── Slot cells ────────────────────────────────────── */
+.wgrid-slot {
+  height: 48px;
+  border-right: 1px solid var(--color-border, #E3DEC6);
+  border-bottom: 1px solid var(--color-border, #E3DEC6);
+  box-sizing: border-box;
+  transition: background 0.12s ease, transform 0.1s ease, box-shadow 0.12s ease;
+  cursor: default;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Last column: no right border */
+.wgrid-table > .wgrid-slot:nth-child(8n) {
+  border-right: none;
+}
+
+/* ── Slot states ───────────────────────────────────── */
+
+/* Free = gia sư rảnh, học viên có thể đặt */
+.wgrid-slot--free {
+  background: rgba(70, 112, 79, 0.11);
+  cursor: pointer;
+}
+.wgrid-slot--free:hover {
+  background: rgba(70, 112, 79, 0.24);
+  box-shadow: inset 0 0 0 2px rgba(70, 112, 79, 0.5);
+}
+
+/* Busy = đã có lịch dạy */
+.wgrid-slot--busy {
+  background: rgba(158, 66, 66, 0.10);
+  cursor: not-allowed;
+}
+.wgrid-slot--busy::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  background: rgba(158, 66, 66, 0.18);
+  border-radius: 4px;
+}
+
+/* Selected = học viên đang chọn */
+.wgrid-slot--selected {
+  background: rgba(124, 110, 39, 0.18);
+  box-shadow: inset 0 0 0 2px var(--color-primary, #7C6E27);
+  cursor: pointer;
+}
+.wgrid-slot--selected::after {
+  content: "✓";
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--color-primary, #7C6E27);
+}
+
+/* Unavailable = ngoài giờ rảnh */
+.wgrid-slot--unavailable {
+  background: transparent;
+}
+
+/* Marked = gia sư đã đánh dấu rảnh */
+.wgrid-slot--marked {
+  background: rgba(70, 112, 79, 0.13);
+}
+.wgrid-slot--marked::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  background: rgba(70, 112, 79, 0.35);
+  border-radius: 4px;
+}
+
+/* Editing hover (tutor edit mode) */
+.wgrid-slot--editable {
+  cursor: pointer;
+}
+.wgrid-slot--editable:hover {
+  background: rgba(124, 110, 39, 0.12);
+}
+.wgrid-slot--marked.wgrid-slot--editable:hover {
+  background: rgba(158, 66, 66, 0.10);
+}
+.wgrid-slot--marked.wgrid-slot--editable:hover::after {
+  background: rgba(158, 66, 66, 0.2);
+}
+
+/* ── Legend ────────────────────────────────────────── */
+.wgrid-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  padding: 8px 0 2px;
+}
+
+.wgrid-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted, #6B6B6B);
+}
+
+.wgrid-legend__dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.wgrid-legend__dot--free    { background: rgba(70, 112, 79, 0.4); border: 1px solid rgba(70,112,79,0.4); }
+.wgrid-legend__dot--busy    { background: rgba(158, 66, 66, 0.4); border: 1px solid rgba(158,66,66,0.4); }
+.wgrid-legend__dot--selected{ background: rgba(124, 110, 39, 0.4); border: 2px solid var(--color-primary,#7C6E27); }
+.wgrid-legend__dot--unavail { background: transparent; border: 1px solid var(--color-border,#E3DEC6); }
+.wgrid-legend__dot--marked  { background: rgba(70, 112, 79, 0.4); border: 1px solid rgba(70,112,79,0.4); }
+
+/* ── Tutor tab styles ──────────────────────────────── */
+.wgrid-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--tutor-border, #E3DEC6);
+  margin-bottom: 20px;
+}
+
+.wgrid-tab {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--tutor-muted, #6B6B6B);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wgrid-tab:hover {
+  color: var(--tutor-primary, #7C6E27);
+}
+
+.wgrid-tab--active {
+  color: var(--tutor-primary, #7C6E27);
+  border-bottom-color: var(--tutor-primary, #7C6E27);
+}
+
+/* ── Availability section controls ────────────────── */
+.wgrid-avail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.wgrid-avail-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--tutor-text, #1C1C1C);
+  margin: 0;
+}
+
+.wgrid-avail-desc {
+  font-size: 13px;
+  color: var(--tutor-muted, #6B6B6B);
+  margin: 4px 0 0;
+}
+
+.wgrid-avail-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Saving spinner */
+@keyframes wgrid-spin {
+  to { transform: rotate(360deg); }
+}
+
+.wgrid-spinner {
+  display: inline-block;
+  animation: wgrid-spin 0.9s linear infinite;
+}
+
+/* ── Responsive ────────────────────────────────────── */
+@media (max-width: 700px) {
+  .wgrid-legend {
+    gap: 10px;
+  }
+  .wgrid-nav__title {
+    font-size: 12px;
+  }
+  .wgrid-scroll {
+    max-height: 340px;
+  }
+  .wgrid-slot {
+    height: 40px;
+  }
+  .wgrid-time {
+    height: 40px;
+    font-size: 9px;
+  }
+}

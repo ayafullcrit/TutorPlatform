@@ -6,6 +6,7 @@ import "../styles/student-layout.css";
 import "../styles/student-sidebar.css";
 import "../styles/student-dashboard.css";
 import "../styles/tutor-card.css";
+import "../styles/weekly-grid.css";
 
 export default function StudentLayout() {
   return (

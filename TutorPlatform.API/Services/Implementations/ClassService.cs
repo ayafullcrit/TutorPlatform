@@ -55,6 +55,7 @@ namespace TutorPlatform.API.Services.Implementations
                     CurrentStudents = 0,
                     Status = ClassStatus.Active,
                     GradeLevel = request.GradeLevel,
+                    SessionsPerWeek = request.SessionsPerWeek,
                     //IsOpenForBooking = true,
                     //ViewCount = 0,
                     //BookingCount = 0,
@@ -159,6 +160,7 @@ namespace TutorPlatform.API.Services.Implementations
                 classEntity.DurationInMinutes = request.DurationMinutes;
                 classEntity.TotalSessions = request.TotalSessions;
                 classEntity.MaxStudents = request.MaxStudents;
+                classEntity.SessionsPerWeek = request.SessionsPerWeek;
                 classEntity.Status = request.Status;
                 //classEntity.IsOpenForBooking = request.IsOpenForBooking;
                 //classEntity.UpdatedAt = DateTime.UtcNow;

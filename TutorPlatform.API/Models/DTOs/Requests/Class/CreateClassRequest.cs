@@ -26,10 +26,12 @@ namespace TutorPlatform.API.Models.DTOs.Requests.Class
         [Required(ErrorMessage = "Thời lượng buổi học là bắt buộc")]
         public int DurationMinutes {  get; set; }
 
-        [Range(1,100, ErrorMessage = "Số buộc học từ 1 - 100")]
-        public int TotalSessions {  get; set; }
+        public int? TotalSessions {  get; set; }
 
         [Range(1, 50, ErrorMessage = "Số học viên từ 1 - 50")]
-        public int MaxStudents{  get; set; }
+        public int MaxStudents { get; set; }
+
+        [Range(1, 7, ErrorMessage = "Số buổi/tuần từ 1 đến 7")]
+        public int SessionsPerWeek { get; set; } = 1;
     }
 }

@@ -56,3 +56,52 @@ export const cancelBookingByTutor = async (id) => {
   const response = await api.delete(`/bookings/${id}/tutor-cancel`);
   return response.data;
 };
+
+// ==================== ENROLLMENTS (NEW) ====================
+export const enrollClass = async (data) => {
+  const response = await api.post("/enrollments", data);
+  return response.data;
+};
+
+export const getMyEnrollments = async () => {
+  const response = await api.get("/enrollments/my");
+  return response.data;
+};
+
+export const leaveClass = async (id) => {
+  const response = await api.delete(`/enrollments/${id}/leave`);
+  return response.data;
+};
+
+export const scheduleSession = async (data) => {
+  const response = await api.post("/enrollments/schedule-session", data);
+  return response.data;
+};
+
+export const getAvailableSlots = async (classId, weekStart) => {
+  let url = `/enrollments/available-slots/${classId}`;
+  if (weekStart) url += `?weekStart=${weekStart}`;
+  const response = await api.get(url);
+  return response.data;
+};
+
+// ==================== TUTOR ENROLLMENTS (NEW) ====================
+export const getTutorEnrollments = async () => {
+  const response = await api.get("/enrollments/tutor");
+  return response.data;
+};
+
+export const approveEnrollment = async (id) => {
+  const response = await api.put(`/enrollments/tutor/${id}/approve`);
+  return response.data;
+};
+
+export const rejectEnrollment = async (id) => {
+  const response = await api.put(`/enrollments/tutor/${id}/reject`);
+  return response.data;
+};
+
+export const removeStudent = async (id) => {
+  const response = await api.delete(`/enrollments/tutor/${id}/remove`);
+  return response.data;
+};

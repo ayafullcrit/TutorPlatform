@@ -98,3 +98,16 @@ export const getPendingTutors = async (params = {}) => {
     throw error;
   }
 };
+
+// Get tutor's own declared availability slots
+export const getMyAvailability = async () => {
+  const response = await api.get("/tutors/availability");
+  return response.data;
+};
+
+// Set/replace tutor's availability slots (sends full list)
+// slots: [{ dayOfWeek: 0-6, startTime: "HH:mm", endTime: "HH:mm" }]
+export const setMyAvailability = async (slots) => {
+  const response = await api.post("/tutors/availability", { slots });
+  return response.data;
+};

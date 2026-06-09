@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using TutorPlatform.API.Models.Enums;
@@ -22,6 +22,7 @@ namespace TutorPlatform.API.Models.Entities
         public int DurationInMinutes { get; set; }
         public DateTime StartTime { get; set; }
         public int? TotalSessions { get; set; }
+        public int SessionsPerWeek { get; set; } = 1;
         public int CurrentStudents { get; set; } 
         public int MaxStudents { get; set; }
         public ClassStatus Status { get; set; }

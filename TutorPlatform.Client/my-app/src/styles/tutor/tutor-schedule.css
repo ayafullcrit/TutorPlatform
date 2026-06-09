@@ -111,7 +111,7 @@
 
 .tutor-schedule__weekdays {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   background: var(--tutor-surface-soft);
   border-bottom: 1px solid var(--tutor-border);
 }
@@ -126,11 +126,14 @@
 
 .tutor-schedule__grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-auto-rows: 132px;
 }
 
 .tutor-schedule__day {
-  min-height: 120px;
+  min-height: 0;
+  height: 132px;
+  box-sizing: border-box;
   padding: 10px;
   border-right: 1px solid var(--tutor-border);
   border-bottom: 1px solid var(--tutor-border);
@@ -177,7 +180,8 @@
   flex-direction: column;
   gap: 6px;
   overflow-y: auto;
-  max-height: 90px;
+  min-height: 0;
+  flex: 1;
 }
 
 .tutor-schedule__event {
@@ -354,7 +358,7 @@
     font-size: 11px;
   }
   .tutor-schedule__day {
-    min-height: 80px;
+    height: 88px;
     padding: 6px;
   }
   .tutor-schedule__event {
